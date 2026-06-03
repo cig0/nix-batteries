@@ -45,7 +45,7 @@ Pasteable eval that shows the exported helper names:
 nix eval --impure --expr '
 let
   flakeRoot = builtins.toPath (builtins.getEnv "PWD");
-  flakeVersion = import (flakeRoot + "/lib/tools/flake-version") { };
+  flakeVersion = import (flakeRoot + "/toolbox/flake-version") { };
 in
   builtins.attrNames flakeVersion.flakeVersionFunc
 ' --json
@@ -56,7 +56,7 @@ Print one generated POSIX function:
 ```sh
 nix eval --impure --raw --expr '
 let
-  flakeVersion = import ./lib/tools/flake-version { };
+  flakeVersion = import ./toolbox/flake-version { };
 in
   flakeVersion.flakeVersionFunc.posix
 '
@@ -69,7 +69,7 @@ the consumer owns colors and separators:
 
 ```nix
 let
-  flakeVersion = import "${flakeRoot}/lib/tools/flake-version" { };
+  flakeVersion = _inputs.nix-ignite.lib.flakeVersion;
 in
 ''
   ${flakeVersion.flakeVersionFunc.posix}
@@ -98,7 +98,7 @@ tmp="$(mktemp)"
 expr="$(mktemp)"
 cat > "$expr" <<'NIX'
 let
-  flakeVersion = import ./lib/tools/flake-version { };
+  flakeVersion = import ./toolbox/flake-version { };
 in
   flakeVersion.flakeVersionFunc.posix
   + "\n"
@@ -137,7 +137,7 @@ cat > "$expr" <<'NIX'
 let
   flakeRoot = builtins.toPath (builtins.getEnv "PWD");
   flake = builtins.getFlake (toString flakeRoot);
-  libThemes = import (flakeRoot + "/lib/themes/palette.nix") {
+  libThemes = import (flakeRoot + "/themes/palette.nix") {
     lib = flake.inputs.nixpkgs.lib;
     inherit flakeRoot;
   };
@@ -145,7 +145,7 @@ let
     name = "nushell-inspired";
     enableAnsi = true;
   };
-  flakeVersion = import (flakeRoot + "/lib/tools/flake-version") { };
+  flakeVersion = import (flakeRoot + "/toolbox/flake-version") { };
 in
   flakeVersion.flakeVersionFunc.posix
   + "\n"

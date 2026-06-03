@@ -43,11 +43,10 @@ Before — breaks if the input is removed:
 After — degrades gracefully:
 
 ```nix
-{ _inputs, lib, ... }:
+{ _inputs, ... }:
 
 let
-  guard = import ../../../lib/guard-flake-input { inherit lib; };
-  rust = guard "rust-overlay" _inputs;
+  rust = _inputs.nix-ignite.lib.guardFlakeInput "rust-overlay" _inputs;
 in
 {
   nixpkgs.overlays = rust.apply (input: [ input.overlays.default ]) [ ];
@@ -63,8 +62,7 @@ If `rust-overlay` is missing → overlay is skipped, trace message is emitted.
 { _inputs, lib, ... }:
 
 let
-  guard = import ../../../lib/guard-flake-input { inherit lib; };
-  nixvim = guard "nixvim" _inputs;
+  nixvim = _inputs.nix-ignite.lib.guardFlakeInput "nixvim" _inputs;
 in
 {
   imports = lib.optional nixvim.has [
@@ -81,7 +79,7 @@ in
 { _inputs, lib, ... }:
 
 let
-  guard = import ../../../lib/guard-flake-input { inherit lib; };
+  guard = _inputs.nix-ignite.lib.guardFlakeInput;
   nixIndex = guard "nix-index-database" _inputs;
   nixvim = guard "nixvim" _inputs;
 in
@@ -103,8 +101,7 @@ When you don't need the input value itself, just whether it exists:
 { _inputs, lib, ... }:
 
 let
-  guard = import ../../../lib/guard-flake-input { inherit lib; };
-  disko = guard "disko" _inputs;
+  disko = _inputs.nix-ignite.lib.guardFlakeInput "disko" _inputs;
 in
 {
   # Only show disk formatting commands if disko is available
@@ -117,10 +114,10 @@ in
 ### Using `apply` for conditional overlays
 
 ```nix
-{ _inputs, lib, ... }:
+{ _inputs, ... }:
 
 let
-  guard = import ../../../lib/guard-flake-input { inherit lib; };
+  guard = _inputs.nix-ignite.lib.guardFlakeInput;
   rust = guard "rust-overlay" _inputs;
   lanzaboote = guard "lanzaboote" _inputs;
 in
@@ -138,8 +135,7 @@ To make `guard-flake-input` available as a module argument, add it to `_module.a
 ```nix
 _module.args = {
   _inputs = releaseChannel._inputs;
-  # Add guard as a convenience; modules can also import it directly
-  guard = name: (import ./lib/guard-flake-input { inherit lib; }) name releaseChannel._inputs;
+  guard = name: releaseChannel._inputs.nix-ignite.lib.guardFlakeInput name releaseChannel._inputs;
 };
 ```
 
