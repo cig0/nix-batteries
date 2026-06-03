@@ -18,7 +18,7 @@
         helpLegendDecorator = import "${flakeRoot}/decorators/help-legend" { };
         modulette = import "${flakeRoot}/modulette" { inherit lib; };
         modulon = collectorArgs: import "${flakeRoot}/modulon" { inherit lib; } collectorArgs;
-        themes = import "${flakeRoot}/themes/palette.nix" { inherit lib; };
+        themes = import "${flakeRoot}/themes/palette.nix" { inherit flakeRoot lib; };
       };
     };
 }
