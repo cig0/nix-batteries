@@ -63,6 +63,26 @@ To select a theme, set `myOptions.hm.data.theme.name` in your host config
 | `theme.*`     | Numbered slot constants (bold_zero, bold_one, …) |
 | `mode.italic` | Italic text                                      |
 | `mode.reset`  | Reset all text attributes                        |
+| `select name` | Return one selected theme with `theme` and `mode` |
+| `withoutAnsi libThemes` | Return the same theme shape with empty strings |
+| `resolve { name, enableAnsi }` | Select a theme, or select its plain-text form |
+
+## ANSI and plain rendering
+
+Most consumers want ANSI escape codes. Runtime shell text that must render
+before color support is useful, or that needs a debug-safe monochrome fallback,
+should keep the same theme API and resolve a plain theme:
+
+```nix
+libThemes.resolve {
+  name = config.myOptions.hm.data.theme.name;
+  enableAnsi = anyShellEnabled;
+}
+```
+
+When `enableAnsi = false`, every `theme.*` and `mode.*` value resolves to `""`.
+Consumers can keep using explicit slots like `theme.bold_zero` and `mode.reset`
+without branching around every decorated string.
 
 ## Usage
 
