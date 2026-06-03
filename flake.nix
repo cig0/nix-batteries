@@ -8,18 +8,17 @@
   outputs =
     { nixpkgs, self }:
     let
+      flakeRoot = self.outPath;
       lib = nixpkgs.lib;
     in
     {
       lib = {
-        guardFlakeInput = import ./guard-flake-input { inherit lib; };
-        helpLegendDecorator = import ./decorators/help-legend { };
-        modulette = import ./modulette { inherit lib; };
-        modulon = collectorArgs: import ./modulon { inherit lib; } collectorArgs;
-        themes = import ./themes/palette.nix {
-          inherit lib;
-          flakeRoot = self.outPath;
-        };
+        guardFlakeInput = import "${flakeRoot}/guard-flake-input" { inherit lib; };
+        flakeVersion = import "${flakeRoot}/toolbox/flake-version";
+        helpLegendDecorator = import "${flakeRoot}/decorators/help-legend" { };
+        modulette = import "${flakeRoot}/modulette" { inherit lib; };
+        modulon = collectorArgs: import "${flakeRoot}/modulon" { inherit lib; } collectorArgs;
+        themes = import "${flakeRoot}/themes/palette.nix" { inherit lib; };
       };
     };
 }
