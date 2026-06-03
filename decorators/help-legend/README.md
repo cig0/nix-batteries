@@ -1,4 +1,4 @@
-![A two-column command help screen renderer.](.assets/images/flake-help.pn)
+![A two-column command help screen renderer.](.assets/images/flake-help.png)
 
 <br>
 
