@@ -8,7 +8,7 @@
 
 <br>
 
-### Help Legend
+### What
 
 `help-legend` renders two-column command help screens from structured Nix data:
 
