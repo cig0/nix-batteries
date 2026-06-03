@@ -2,42 +2,34 @@
 
 <p align="center" style="font-size: 1.5em;"><strong>Introducing Modulon 🦾</strong></p>
 
-<p align="center"><em>A plug-and-play module management framework for NixOS and Nix flakes</em></p>
+<p align="center"><em>Drop in a module. Let Modulon wire the import list.</em></p>
 
 <p align="center">Works with NixOS • GNU/Linux distros & macOS via Home Manager</p>
 
 <br>
 
+## Why Modulon
+
+Nix modules scale well, but import lists usually do not. Even today, many NixOS
+and Home Manager configurations still rely on hand-maintained `imports = [ ... ]`
+lists. Every new module needs a second edit somewhere else, and stale imports
+become another piece of configuration drift.
+
+Modulon removes that pain point. Point it at one or more directories and it
+auto-discovers real Nix modules by reading file content, then returns a normal
+`{ imports = [ ... ]; }` module. Add a module file and it is loaded. Add
+`@MODULON_SKIP` when a file should stay nearby without being imported, such as a
+data module, a helper module, or a module you want to keep parked for later.
+
 ## Quick Start
 
-1. **Add the flake input:**
-
-```nix
-# flake.nix
-{
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-
-    modulon = {
-      url = "github:cig0/modulon";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-  };
-
-  outputs = { modulon, nixpkgs, self, ... }:
-    # ... rest of your flake
-}
-```
-
-2. **Use the library function:**
+1. **Use the library function:**
 
 ```nix
 let
-  system = "x86_64-linux";
-  moduleImporter = modulon.lib.${system};
+  moduleImporter = inputs.nix-ignite.lib.modulon;
 in {
   nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
-    inherit system;
     modules = [
       ./configuration.nix
       (moduleImporter { dirs = [ ./modules ]; })
@@ -46,18 +38,19 @@ in {
 }
 ```
 
-That's it! Modulon will automatically discover and import all valid NixOS and Nix modules from `./modules`
+That's it. Modulon automatically discovers and imports valid NixOS, Home
+Manager, and shared Nix modules from `./modules`.
 
 <br>
 
 ## Table of Contents
 
-- [How It Works](.assets/docs/01-HOW-IT-WORKS.md) — Module discovery process and pattern matching
-- [Configuration](.assets/docs/02-CONFIGURATION.md) — Options reference and defaults
-- [Excluding Modules](.assets/docs/03-EXCLUDING-MODULES.md) — excludePaths, @MODULON_SKIP tag
-- [Extra Modules](.assets/docs/04-EXTRA-MODULES.md) — Including specific modules from excluded paths
-- [Testing](.assets/docs/05-TESTING.md) — Running and debugging flake checks
-- [Contributing](.assets/docs/06-CONTRIBUTING.md) — How to contribute
+- [How It Works](docs/01-HOW-IT-WORKS.md) — Module discovery process and pattern matching
+- [Configuration](docs/02-CONFIGURATION.md) — Options reference and defaults
+- [Excluding Modules](docs/03-EXCLUDING-MODULES.md) — `excludePaths` and `@MODULON_SKIP`
+- [Extra Modules](docs/04-EXTRA-MODULES.md) — Include specific modules from excluded paths
+- [Testing](docs/05-TESTING.md) — Running and debugging flake checks
+- [Contributing](docs/06-CONTRIBUTING.md) — How to contribute
 
 <br>
 

@@ -1,6 +1,13 @@
 # How Modulon Works
 
-Modulon solves a common problem in NixOS configurations: managing a growing number of module files without manually updating import lists. It automatically discovers and imports Nix modules by analyzing file content, not just file extensions.
+Modulon solves a stubborn Nix configuration problem: module trees grow, but
+`imports = [ ... ]` lists stay manual unless you build your own loader. It
+auto-discovers modules by reading file content, not just filenames, so users can
+drop a module into a scanned directory and trust that it will be loaded.
+
+When a nearby file should not be imported, add `@MODULON_SKIP`. That keeps data
+modules, helper modules, and parked work-in-progress files close to the code
+they support without letting them leak into the module graph.
 
 ## Module Discovery Flow
 
@@ -48,16 +55,19 @@ graph TD
 ## Key Benefits
 
 - **Automatic Discovery** — Add new modules without updating import lists
+- **Drop-in Scaling** — Grow a module tree by adding files, not by maintaining a second registry
 - **Content-Based Detection** — Identifies real modules by analyzing content patterns, avoiding accidental imports of non-module `.nix` files
+- **Local Skips** — Use `@MODULON_SKIP` to keep non-imported files beside related modules
 - **Flexible Configuration** — Easily specify directories to scan and paths/patterns to exclude
 - **Works Everywhere** — Compatible with NixOS, Home Manager, and other Nix module systems
 
 ## The Discovery Process
 
-The core of Modulon is a library function available via `modulon.lib.<system>`. When called, this function:
+The core of Modulon is exposed as `nix-ignite.lib.modulon`. When called, this
+function:
 
 1. Recursively scans the directories specified in the `dirs` option for files ending in `.nix`
-2. Excludes files matching patterns in `excludePaths` or default excluded filenames
+2. Excludes files matching patterns in `excludePaths`, default excluded filenames, or `@MODULON_SKIP`
 3. Reads the content of the remaining `.nix` files
 4. Checks if the file content contains at least **2 or more** common module definition patterns
 5. Returns an attribute set `{ imports = [ ... ]; }` containing the paths to the files identified as modules

@@ -9,20 +9,17 @@ As a newcomer to Nix and NixOS myself, this project was built as part of my lear
 1. **Issues** — Open an issue to discuss bugs, propose new features, or ask questions
 
 2. **Pull Requests** — Feel free to submit pull requests for fixes or improvements
-   - The core logic resides in `lib/default.nix`
-   - Tests are defined in `tests/default.nix`
-   - Please ensure `nix flake check` passes before submitting
+   - The core logic resides in `modulon/default.nix`
+   - Documentation lives in `modulon/docs/`
+   - Please run `nix flake check` before submitting
 
 ## Project Structure
 
 ```
 modulon/
-├── flake.nix          # Flake definition and dev shell
-├── lib/
-│   └── default.nix    # Core module collection logic
-├── tests/
-│   └── default.nix    # Test derivations
-└── .assets/docs/              # Documentation
+├── default.nix        # Core module collection logic
+├── docs/              # Documentation
+└── .assets/images/    # README images
 ```
 
 Thank you for considering contributing!

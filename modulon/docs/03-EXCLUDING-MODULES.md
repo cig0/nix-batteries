@@ -1,6 +1,8 @@
 # Excluding Modules
 
 You have several ways to prevent files or directories from being imported.
+Prefer the smallest exclusion that matches the intent: use `@MODULON_SKIP` for a
+single nearby file, and `excludePaths` for whole paths or recurring patterns.
 
 ## Using excludePaths
 
@@ -26,7 +28,15 @@ excludePaths = [ "path/to/tests.nix" "path/to/experimental/" ];
 
 _Added in v0.1.1_
 
-Add `@MODULON_SKIP` anywhere in your module file (recommended at the top), and Modulon will skip it without needing to modify the exclusion list.
+Add `@MODULON_SKIP` anywhere in your module file (recommended at the top), and
+Modulon will skip it without needing to modify the exclusion list.
+
+This is the easiest way to keep files close to their owning module while making
+the boundary explicit. Typical examples:
+
+- Data modules imported manually by a renderer
+- Helper modules that are not valid module-system entries
+- Logic modules you want to keep nearby while they are disabled or being reworked
 
 This is especially useful when you have a module structure like this:
 

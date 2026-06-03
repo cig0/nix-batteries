@@ -2,6 +2,10 @@
 
 Sometimes you might need to exclude certain directories but still want to import select modules within them. Use the `extraModules` option for this.
 
+Use this sparingly. In most layouts, a direct `@MODULON_SKIP` tag on individual
+support files is easier to read than excluding a whole directory and adding back
+selected modules.
+
 ## Use Cases
 
 **Workaround for helper modules:**
