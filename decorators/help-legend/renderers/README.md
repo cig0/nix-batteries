@@ -55,9 +55,12 @@ in
 The consumer module then places `${helpCheck "build"}` inside a shell-native
 function body. That placement is the only part that should change per runtime.
 
+You might also want to check [themes](../../themes/README.md) for a more robust way to handle colors and themes in the terminal.
+
 ## Where to look next
 
 - `../README.md` - shared help-legend contract
+- [`themes`](../../themes/README.md) - semantic color slots and bundled palettes
 - `README-posix.md` - POSIX usage pattern
 - `README-fish.md` - Fish usage pattern
 - `README-nushell.md` - Nushell usage pattern
