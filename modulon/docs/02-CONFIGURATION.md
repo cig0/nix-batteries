@@ -32,4 +32,4 @@ And these path patterns (infix match):
 - `.git/`
 - `/tests/`
 
-See `lib/default.nix` for the complete list.
+See `modulon/default.nix` for the complete list.

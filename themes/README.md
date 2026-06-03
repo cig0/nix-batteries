@@ -99,3 +99,9 @@ graph LR
     B --> C[merged attrset]
     C --> D[libThemes]
 ```
+
+## Where to look next
+
+- [Theme files](themes/README.md) - slot maps for each bundled theme
+- [Modulette](../modulette/README.md) - header-validated data discovery used by themes
+- [Modulon exclusions](../modulon/docs/03-EXCLUDING-MODULES.md) - when nearby `.nix` files should be skipped instead of discovered
