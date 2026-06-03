@@ -2,7 +2,7 @@
 
 <p align="center" style="font-size: 1.5em;"><strong>Ignite 🔥</strong></p>
 
-<p align="center">Flake Library Toolkit</p>
+<p align="center">Nix flake Library Toolkit</p>
 
 <p align="center"><em>scan modules -> guard inputs -> render helpers -> share themes</em></p>
 
