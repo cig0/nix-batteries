@@ -15,7 +15,7 @@
 */
 { lib, flakeRoot, ... }:
 let
-  modulette = import (flakeRoot + "/lib/modulette") { inherit lib; };
+  modulette = import (flakeRoot + "/modulette") { inherit lib; };
 
   # ----+ Shared color palette +----
   # Available to all themes via the { color }: parameter.
