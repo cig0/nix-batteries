@@ -14,7 +14,7 @@ Small reusable Nix libraries live here. They keep flake-level plumbing explicit:
 discover modules, guard optional inputs, render shell helpers, and share theme
 data without hiding the Nix module system.
 
-### Why
+### Where should I start
 
 The sharpest piece is Modulon. It removes the old Nix pain point of manually
 maintaining import lists as module trees grow. Drop a module into a scanned
