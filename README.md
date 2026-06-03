@@ -1,28 +1,27 @@
-# nix-ignite - Flake Library Toolkit
+![A Nix flake toolkit with reusable building blocks. Home of Modulon.](.assets/images/nix-ignite.png)
 
-```text
-          _           _             _ _
-  _ __   (_)_  __    (_) __ _ _ __ (_) |_ ___
- | '_ \  | \ \/ /____| |/ _` | '_ \| | __/ _ \
- | | | | | |>  <____|| | (_| | | | | | ||  __/
- |_| |_| |_/_/\_\    |_|\__, |_| |_|_|\__\___|
-                         |___/
+<p align="center" style="font-size: 1.5em;"><strong>Ignite 🔥</strong></p>
 
-      scan modules -> guard inputs -> render helpers -> share themes
-```
+<p align="center">Flake Library Toolkit</p>
+
+<p align="center"><em>scan modules -> guard inputs -> render helpers -> share themes</em></p>
+
+<br>
+
+### What
 
 Small reusable Nix libraries live here. They keep flake-level plumbing explicit:
 discover modules, guard optional inputs, render shell helpers, and share theme
 data without hiding the Nix module system.
 
-## Why this exists
+### Why
 
 The sharpest piece is Modulon. It removes the old Nix pain point of manually
 maintaining import lists as module trees grow. Drop a module into a scanned
 directory and Modulon wires it into `imports`; add `@MODULON_SKIP` when a nearby
 file should stay out of the module graph.
 
-## What belongs here
+### Building blocks available
 
 | Directory | Owns |
 |-----------|------|
