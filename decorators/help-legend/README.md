@@ -1,4 +1,14 @@
-# Help Legend
+![A two-column command help screen renderer.](.assets/images/flake-help.png)
+
+<br>
+
+<p align="center" style="font-size: 1.5em;"><strong>Help Legend 🛟</strong></p>
+
+<p align="center"><em>Help screen renderer</em></p>
+
+<br>
+
+### Help Legend
 
 `help-legend` renders two-column command help screens from structured Nix data:
 
@@ -7,9 +17,17 @@
 - theme colors supplied by the consumer
 - a renderer selected for the target runtime
 
+<br>
+  
 The shared library owns layout, padding, section rendering, centered titles, and
 one-line help checks. Consumers own command behavior, shell function names,
 aliases, section order, platform gating, and detailed command-specific help.
+
+<br>
+  
+---
+
+<br>
 
 Renderer contract:
 
