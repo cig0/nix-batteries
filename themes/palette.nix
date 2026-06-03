@@ -15,7 +15,7 @@
 */
 { lib, flakeRoot, ... }:
 let
-  modulette = import (flakeRoot + "/modulette") { inherit lib; };
+  modulette = import (flakeRoot + "/lib/modulette") { inherit lib; };
 
   # ----+ Shared color palette +----
   # Available to all themes via the { color }: parameter.
@@ -29,6 +29,10 @@ let
       red = "\\e[1;31m";
       yellow = "\\e[1;33m";
       white = "\\e[1;97m";
+    };
+    dimmed = {
+      green = "\\e[2;32m";
+      white = "\\e[2;37m";
     };
     blue = "\\e[34m";
     cyan = "\\e[36m";
@@ -53,7 +57,32 @@ let
     args = { inherit color; };
   };
 in
-{
+rec {
   theme = themes;
   inherit mode;
+
+  select = name: {
+    theme =
+      themes.${name}
+        or (throw "Unknown theme '${name}'. Available themes: ${lib.concatStringsSep ", " (builtins.attrNames themes)}");
+    inherit mode;
+  };
+
+  withoutAnsi =
+    libThemes:
+    libThemes
+    // {
+      theme = lib.mapAttrs (_: _: "") libThemes.theme;
+      mode = lib.mapAttrs (_: _: "") libThemes.mode;
+    };
+
+  resolve =
+    {
+      name,
+      enableAnsi ? true,
+    }:
+    let
+      selected = select name;
+    in
+    if enableAnsi then selected else withoutAnsi selected;
 }
