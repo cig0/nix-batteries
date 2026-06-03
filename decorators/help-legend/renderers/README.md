@@ -21,6 +21,40 @@ All renderers implement `print` and `helpCheck`. `fish.nix` checks
 `$argv[1]`; `nushell.nix` reads from `$args`; `posix.nix` checks `$1`. Same
 contract, three honest runtimes.
 
+## Pick the renderer
+
+| Renderer | Use for | Function shape | Help argument | Print primitive | Validate with |
+|----------|---------|----------------|---------------|-----------------|---------------|
+| `renderers.posix` | bash and zsh snippets | `name() { ... }` | `$1` | `printf '%b'` | `bash -n`, `zsh -n` |
+| `renderers.fish` | Fish functions | `function name ... end` | `$argv[1]` | `printf '%b'` | `fish -n` |
+| `renderers.nushell` | Nushell commands | `def name [...args: string] { ... }` | `$args` | `print --no-newline` | `nu --commands` |
+
+The Nix side should look almost identical for every renderer:
+
+```nix
+let
+  L = nix-ignite.lib.helpLegendDecorator;
+  renderer = L.renderers.posix; # or fish / nushell
+
+  layout = L.sectionLayout {
+    inherit groups descFn;
+  };
+
+  helpCheck =
+    cmd:
+    L.mkHelpCheck {
+      inherit cmd renderer layout;
+      desc = legend.${cmd};
+      cmdColor = colors.cmd;
+      reset = colors.reset;
+    };
+in
+...
+```
+
+The consumer module then places `${helpCheck "build"}` inside a shell-native
+function body. That placement is the only part that should change per runtime.
+
 ## Where to look next
 
 - `../README.md` - shared help-legend contract
