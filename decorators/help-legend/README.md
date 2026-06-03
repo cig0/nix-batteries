@@ -1,7 +1,5 @@
 ![A two-column command help screen renderer.](.assets/images/render.png)
 
-<br>
-
 <p align="center" style="font-size: 1.5em;"><strong>Help Legend 🛟</strong></p>
 
 <p align="center"><em>Help screen renderer</em></p>
