@@ -12,9 +12,16 @@
       lib = nixpkgs.lib;
     in
     {
-      lib = {
+      lib = rec {
+        inherit flakeRoot;
+
         guardFlakeInput = import "${flakeRoot}/guard-flake-input" { inherit lib; };
-        flakeVersion = import "${flakeRoot}/toolbox/flake-version" { };
+        mkGitRepoState = args: import (flakeRoot + "/toolbox/git-repo-state") args;
+        gitRepoState = mkGitRepoState { };
+        gitRepoStateRenderer = {
+          raw = import (flakeRoot + "/toolbox/git-repo-state-renderer");
+          decorated = import (flakeRoot + "/toolbox/git-repo-state-renderer/decorated.nix");
+        };
         helpLegendDecorator = import "${flakeRoot}/decorators/help-legend" { };
         modulette = import "${flakeRoot}/modulette" { inherit lib; };
         modulon = collectorArgs: import "${flakeRoot}/modulon" { inherit lib; } collectorArgs;
