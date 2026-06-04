@@ -24,7 +24,7 @@ nix eval --no-write-lock-file --json '.#lib' --apply builtins.attrNames
 Expected output includes `modulon`:
 
 ```json
-["flakeVersion","guardFlakeInput","helpLegendDecorator","modulette","modulon","themes"]
+["flakeRoot","gitRepoState","gitRepoStateRenderer","guardFlakeInput","helpLegendDecorator","mkGitRepoState","modulette","modulon","themes"]
 ```
 
 ## Parser Check
