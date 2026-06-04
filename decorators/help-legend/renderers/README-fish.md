@@ -99,7 +99,8 @@ For `build`, the renderer emits Fish code shaped like this:
 
 ```fish
 if test "$argv[1]" = "-h"; or test "$argv[1]" = "--help"
-  printf '%b' "\n  build  Build the project output\n"
+  printf '%b' "\n  build  Build the project output"
+  printf '%b' "\n"
   return 0
 end
 ```

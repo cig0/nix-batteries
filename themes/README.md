@@ -62,10 +62,11 @@ in
 ```nix
 let c = libThemes.resolve { name = "nushell-inspired"; enableAnsi = true; };
 in ''
-  printf '%b' "  ${c.theme.bold_zero}OK${c.mode.reset}   Package installed\n"
-  printf '%b' "  ${c.theme.bold_four}WARN${c.mode.reset} Version outdated\n"
-  printf '%b' "  ${c.theme.bold_five}ERR${c.mode.reset}  Build failed\n"
-  printf '%b' "  ${c.theme.bold_two}Note${c.mode.reset} ${c.mode.italic}See docs${c.mode.reset} for details\n"
+  printf '%b' "  ${c.theme.bold_zero}OK${c.mode.reset}   Package installed"
+  printf '%b' "\n  ${c.theme.bold_four}WARN${c.mode.reset} Version outdated"
+  printf '%b' "\n  ${c.theme.bold_five}ERR${c.mode.reset}  Build failed"
+  printf '%b' "\n  ${c.theme.bold_two}Note${c.mode.reset} ${c.mode.italic}See docs${c.mode.reset} for details"
+  printf '%b' "\n"
 ''
 ```
 
@@ -89,10 +90,11 @@ let
     enableAnsi = false;   # ← only change
   };
 in ''
-  printf '%b' "  ${c.theme.bold_zero}OK${c.mode.reset}   Package installed\n"
-  printf '%b' "  ${c.theme.bold_four}WARN${c.mode.reset} Version outdated\n"
-  printf '%b' "  ${c.theme.bold_five}ERR${c.mode.reset}  Build failed\n"
-  printf '%b' "  ${c.theme.bold_two}Note${c.mode.reset} ${c.mode.italic}See docs${c.mode.reset} for details\n"
+  printf '%b' "  ${c.theme.bold_zero}OK${c.mode.reset}   Package installed"
+  printf '%b' "\n  ${c.theme.bold_four}WARN${c.mode.reset} Version outdated"
+  printf '%b' "\n  ${c.theme.bold_five}ERR${c.mode.reset}  Build failed"
+  printf '%b' "\n  ${c.theme.bold_two}Note${c.mode.reset} ${c.mode.italic}See docs${c.mode.reset} for details"
+  printf '%b' "\n"
 ''
 ```
 
@@ -169,9 +171,11 @@ let
 in {
   programs.bash.initExtra = ''
     sync-brew() {
-      printf '%b' "${c.theme.bold_zero}Synchronizing${c.mode.reset} Homebrew packages...\n"
+      printf '%b' "${c.theme.bold_zero}Synchronizing${c.mode.reset} Homebrew packages..."
+      printf '%b' "\n"
       brew update
-      printf '%b' "${c.theme.bold_zero}Done${c.mode.reset}\n"
+      printf '%b' "${c.theme.bold_zero}Done${c.mode.reset}"
+      printf '%b' "\n"
     }
   '';
 }

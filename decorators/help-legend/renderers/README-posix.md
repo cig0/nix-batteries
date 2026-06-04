@@ -110,7 +110,8 @@ For `build`, the renderer emits POSIX-compatible shell code shaped like this:
 
 ```sh
 [[ "$1" == "-h" || "$1" == "--help" ]] && {
-  printf '%b' "\n  build  Build the project output\n"
+  printf '%b' "\n  build  Build the project output"
+  printf '%b' "\n"
   return 0
 }
 ```

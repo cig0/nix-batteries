@@ -85,7 +85,8 @@ in
   fi
   unset __dirty
 
-  printf '%b' "${libThemes.mode.reset}\n"
+  printf '%b' "${libThemes.mode.reset}"
+  printf '%b' "\n"
 ''
 ```
 
@@ -160,7 +161,8 @@ in
       printf "%b" "${theme.theme.bold_three}-"
       printf "%s" "$dirty"
     fi
-    printf "%b\n" "${theme.mode.reset}"
+    printf "%b" "${theme.mode.reset}"
+    printf "%b" "\n"
   ''
 NIX
 nix eval --impure --raw --file "$expr" > "$tmp"

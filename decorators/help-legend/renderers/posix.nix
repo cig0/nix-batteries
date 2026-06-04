@@ -11,5 +11,5 @@
       pad,
       reset,
     }:
-    ''[[ "$1" == "-h" || "$1" == "--help" ]] && { printf '%b' "\n  ${cmdColor}${cmd}${reset}${pad}${desc}\n"; return 0; }'';
+    ''[[ "$1" == "-h" || "$1" == "--help" ]] && { printf '%b' "\n  ${cmdColor}${cmd}${reset}${pad}${desc}"; printf '%b' "\n"; return 0; }'';
 }

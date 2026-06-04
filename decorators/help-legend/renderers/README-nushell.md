@@ -100,7 +100,8 @@ For `build`, the renderer emits Nushell code shaped like this:
 ```nu
 let __help_arg = ($args | get 0? | default "")
 if ($__help_arg == "-h" or $__help_arg == "--help") {
-  print --no-newline "\n  build  Build the project output\n"
+  print --no-newline "\n  build  Build the project output"
+  print --no-newline "\n"
   return
 }
 ```
