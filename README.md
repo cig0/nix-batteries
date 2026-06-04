@@ -10,9 +10,7 @@
 
 ### What
 
-Small reusable Nix libraries live here. They keep flake-level plumbing explicit:
-discover modules, guard optional inputs, render shell helpers, and share theme
-data without hiding the Nix module system.
+**A collection of small reusable Nix libraries.** They keep flake-level plumbing explicit without hiding the Nix module system.
 
 ### Where should I start
 
