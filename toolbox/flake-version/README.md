@@ -75,7 +75,7 @@ in
   ${flakeVersion.flakeVersionFunc.posix}
   ${flakeVersion.flakeDirtyStateFunc.posix}
 
-  printf '%b' "Flake version: ${libThemes.theme.bold_one}"
+  printf '%b' "Flake version ${libThemes.mode.reset}"
   ${flakeVersion.flakeVersionCall.posix}
 
   __dirty="$(${flakeVersion.flakeDirtyStateCall.posix})"
@@ -154,7 +154,7 @@ in
   + "\n"
   + ''
     export FLAKE_SRC_PATH="$PWD"
-    printf "%b" "Flake version: ${theme.theme.bold_one}"
+    printf "%b" "${theme.bold.zero}Flake version ${mode.reset}"
     ${flakeVersion.flakeVersionCall.posix}
     dirty="$(${flakeVersion.flakeDirtyStateCall.posix})"
     if [[ -n "$dirty" ]]; then
