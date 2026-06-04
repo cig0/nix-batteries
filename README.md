@@ -10,7 +10,7 @@
 
 ### What
 
-A collection of small reusable Nix libraries. They keep flake-level plumbing explicit without hiding the Nix module system.
+A collection of reusable Nix libraries. They keep flake-level plumbing explicit without hiding the Nix module system.
 
 ### Where should I start
 
