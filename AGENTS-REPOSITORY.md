@@ -5,25 +5,30 @@ implementation rules. Read and follow both files.
 
 ## Project Context
 
-- This repository is a cross-platform Nix orchestration flake and a single
-  source of truth for NixOS, GNU/Linux, and macOS hosts.
-- Nix is the primary implementation language. The flake also renders shell
-  behavior for POSIX-compatible shells, Fish, and Nushell.
-- Keep Nix, shell syntax, and system ownership visible. Do not add abstractions
-  whose main purpose is to hide those semantics from the author.
-- Documentation lives close to the code. Read the nearest relevant `README.md`
-  before changing an unfamiliar area.
-- Treat `config/shortcuts/` only as local navigation aids. Do not use it as a
-  configuration source of truth.
+- This repository is a reusable Nix flake library toolkit. It is commonly
+  consumed by `nix-ignition`, but library code must stay useful outside that
+  consumer.
+- Public library exports live under `self.igniteLibs` in `flake.nix`: Modulon,
+  Modulette, guard-flake-input, help-legend decorators, themes, and small
+  runtime helper generators.
+- Nix is the primary implementation language. Some library helpers generate
+  shell snippets for POSIX-compatible shells, Fish, and Nushell.
+- Keep Nix and shell semantics visible. Do not add abstractions whose main
+  purpose is to hide those semantics from the caller.
+- Documentation lives close to the component it describes. Read the relevant
+  component `README.md` before changing unfamiliar code.
 
-## Required Architecture Reading
+## Component Boundaries
 
-- Before modifying Home Manager modules, NixOS modules, shared modules, or
-  shared data modules, read `docs/HM-FIRST-NIXOS.md`.
-- Before changing evaluation lanes, module loading, or shared data flow, read
-  `docs/ARCHITECTURE.md`.
-- Treat those documents as binding repository policy for module ownership,
-  namespace boundaries, and data flow.
+- `modulon/` owns Nix module auto-discovery. Read `modulon/README.md` and the
+  focused docs under `modulon/docs/` before changing discovery behavior.
+- `modulette/` owns header-validated data-module discovery.
+- `guard-flake-input/` owns optional input handling.
+- `decorators/help-legend/` owns help-screen layout and shell renderers.
+- `themes/` owns ANSI palette/theme data and the theme option module.
+- `toolbox/` owns small reusable shell/runtime code generators.
+- `fixtures/` contains lightweight fixtures used by flake checks. Keep fixtures
+  small, deterministic, and focused on public library behavior.
 
 ## Git Workflow
 
@@ -55,10 +60,12 @@ implementation rules. Read and follow both files.
 - Use `nixfmt-rfc-style`, exposed by the flake formatter, for Nix code.
 - Use block comments (`/* ... */`) for Nix comments of four lines or more. Use
   `#` for inline comments or at most three consecutive comment lines.
-- Modules must reference normalized flake inputs through `_inputs`, not raw
-  `inputs` or channel-suffixed input names. See `flake.nix.d/README.md`.
-- Preserve the distinction between loaded modules and passive shared data. See
-  `config/shared/README.md` before moving code across that boundary.
+- Keep library functions explicit about their inputs. Prefer arguments over
+  hidden access to consumer-specific paths or option names.
+- Keep public `self.igniteLibs` names stable unless the user explicitly asks for a
+  breaking API change.
+- When adding behavior to a public helper, add or update a focused fixture under
+  `fixtures/` and wire it into `checks`.
 
 ## Terminal Output Policy
 
@@ -85,12 +92,12 @@ principle from `AGENTS.md`.
 
 ## Validation
 
-- Follow `docs/VALIDATION.md` and keep checks focused on the code touched.
 - Parse each changed `.nix` file with `nix-instantiate --parse`.
 - Check Nix formatting with `nix fmt -- --check <changed-files>`.
-- Run relevant evaluation smoke checks when wiring, modules, or flake outputs
-  change.
+- Run `nix flake check` after changing exported library behavior, fixtures, or
+  flake outputs. Use `nix flake check --all-systems --no-build` to evaluate the
+  full supported system matrix from one host.
+- Run focused `nix eval` smoke checks when changing public `self.igniteLibs` names or
+  return shapes.
 - Parse isolated generated shell snippets with their target runtime when
   practical.
-- Test changes on every affected platform when practical, and report any
-  platform that was not tested.

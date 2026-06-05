@@ -1,8 +1,7 @@
 # Testing Modulon
 
-This extracted `nix-ignite` tree currently validates Modulon through flake
-evaluation and direct parser checks. Dedicated Modulon check derivations can be
-added later if the module collector grows more behavior.
+This `nix-ignite` tree validates Modulon through focused flake checks, fixture
+evaluation, and direct parser checks.
 
 Start with the standard flake command:
 
@@ -10,15 +9,33 @@ Start with the standard flake command:
 nix flake check
 ```
 
+That builds the checks for the current host system. To evaluate the complete
+supported system matrix from one host without trying to cross-build incompatible
+derivations, use:
+
+```shell
+nix flake check --all-systems --no-build
+```
+
+Nix still reports `igniteLibs` as an unchecked flake output because custom
+library outputs are not standard buildable output types. The committed `checks`
+exercise the public library surface and focused fixtures directly.
+
 ## Understanding Output
 
-By default, Nix only shows detailed build logs if a check fails. If
-`nix flake check` runs silently and exits with status code 0, all checks passed.
+By default, Nix only shows detailed build logs if a check fails. If `nix flake
+check` exits with status code 0, all checks passed.
+
+The check set includes a Modulon fixture that verifies:
+
+- a valid module in `fixtures/modulon/modules/` is discovered
+- a module marked with `@MODULON_SKIP` is ignored
+- an explicitly supplied `extraModules` entry is preserved
 
 For a fast library-surface check:
 
 ```shell
-nix eval --no-write-lock-file --json '.#lib' --apply builtins.attrNames
+nix eval --no-write-lock-file --json '.#igniteLibs' --apply builtins.attrNames
 ```
 
 Expected output includes `modulon`:
