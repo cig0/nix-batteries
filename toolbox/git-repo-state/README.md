@@ -69,7 +69,7 @@ the consumer owns the `git-` display prefix, colors, and separators:
 
 ```nix
 let
-  gitRepoState = _inputs.nix-ignite.lib.gitRepoState;
+  gitRepoState = _inputs.nix-ignite.igniteLibs.gitRepoState;
 in
 ''
   ${gitRepoState.revisionFunction.posix}

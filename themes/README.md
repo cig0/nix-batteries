@@ -6,7 +6,7 @@ ANSI escape code constants for terminal color output. Theme files are auto-disco
 
 ### 1. Add the library to your flake
 
-Add `nix-ignite` as a flake input. `flakeRoot` is baked in at the library level, so `ignite.lib.themes` is ready to use — no manual `import` needed:
+Add `nix-ignite` as a flake input. `flakeRoot` is baked in at the library level, so `ignite.igniteLibs.themes` is ready to use — no manual `import` needed:
 
 ```nix
 # flake.nix
@@ -17,7 +17,7 @@ inputs = {
 
 outputs = { nixpkgs, ignite, ... }:
 let
-  libThemes = ignite.lib.themes;
+  libThemes = ignite.igniteLibs.themes;
 in
   # Pass libThemes to any module that needs colors
   { ... };

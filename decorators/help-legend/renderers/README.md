@@ -33,7 +33,7 @@ The Nix side should look almost identical for every renderer:
 
 ```nix
 let
-  L = nix-ignite.lib.helpLegendDecorator;
+  L = nix-ignite.igniteLibs.helpLegendDecorator;
   renderer = L.renderers.posix; # or fish / nushell
 
   layout = L.sectionLayout {
