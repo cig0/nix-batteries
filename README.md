@@ -23,9 +23,9 @@ file should stay out of the module graph.
 
 | Directory | Owns |
 |-----------|------|
-| `decorators/` | Presentation helpers, currently command help legends |
-| `guard-flake-input/` | Safely handling optional flake inputs |
-| `modulette/` | Discovering header-validated Nix files |
+| `decorators/` | Presentation helpers |
+| `guard-flake-input/` | Guardrails for the optional disabling of flake inputs |
+| `modulette/` | Discovering header-validated Nix modules |
 | `modulon/` | Plug-and-play module management framework for NixOS and Nix flakes |
-| `themes/` | Theme data and theme option module |
+| `themes/` | Theme option module and themes modules |
 | `toolbox/` | Small reusable shell/runtime code generators |
