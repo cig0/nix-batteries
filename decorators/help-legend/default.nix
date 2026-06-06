@@ -5,11 +5,11 @@
   (key -> description mapping) drives column alignment and title centering.
 
   Command data, theme values, function names, aliases, and command behavior
-  stay in the consuming module. Runtime syntax stays in renderers.
+  stay in the consuming module. Runtime syntax stays in libHelpLegendRenderer.
 */
 { ... }:
 let
-  renderers = {
+  libHelpLegendRenderer = {
     posix = import ./renderers/posix.nix { };
     fish = import ./renderers/fish.nix { };
     nushell = import ./renderers/nushell.nix { };
@@ -83,7 +83,7 @@ let
       groups,
       headerColor,
       layout ? sectionLayout { inherit groups descFn; },
-      renderer ? renderers.posix,
+      renderer ? libHelpLegendRenderer.posix,
       reset,
     }:
     let
@@ -119,7 +119,7 @@ let
     {
       color,
       leadingLines ? 1,
-      renderer ? renderers.posix,
+      renderer ? libHelpLegendRenderer.posix,
       reset,
       title,
       width,
@@ -136,7 +136,7 @@ let
       cmdColor,
       desc,
       layout,
-      renderer ? renderers.posix,
+      renderer ? libHelpLegendRenderer.posix,
       reset,
     }:
     renderer.helpCheck {
@@ -160,7 +160,7 @@ in
     mkCenteredTitle
     mkHelpCheck
     mkHelpSection
-    renderers
+    libHelpLegendRenderer
     repeat
     sectionLayout
     ;
