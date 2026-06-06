@@ -9,7 +9,7 @@
 */
 { ... }:
 let
-  libHelpLegendRenderer = {
+  rendererSet = {
     posix = import ./renderers/posix.nix { };
     fish = import ./renderers/fish.nix { };
     nushell = import ./renderers/nushell.nix { };
@@ -83,15 +83,16 @@ let
       groups,
       headerColor,
       layout ? sectionLayout { inherit groups descFn; },
-      renderer ? libHelpLegendRenderer.posix,
+      libHelpLegendRenderer ? rendererSet.posix,
       reset,
     }:
     let
       allCmds = builtins.concatLists (map (g: g.cmds) groups);
       maxDescLen = maxStringLength (map descFn allCmds);
       width = layout.descCol + maxDescLen;
-      row = cmd: renderer.print "\\n  ${cmdColor}${cmd}${reset}${layout.padCmd cmd}${descFn cmd}";
-      group = g: [ (renderer.print "\\n${headerColor}${g.name}${reset}") ] ++ map row g.cmds;
+      row =
+        cmd: libHelpLegendRenderer.print "\\n  ${cmdColor}${cmd}${reset}${layout.padCmd cmd}${descFn cmd}";
+      group = g: [ (libHelpLegendRenderer.print "\\n${headerColor}${g.name}${reset}") ] ++ map row g.cmds;
       bodyLines =
         let
           gs = map group groups;
@@ -100,7 +101,7 @@ let
           if builtins.length gs == 0 then
             [ ]
           else
-            [ (builtins.head gs) ] ++ map (g: [ (renderer.print "\\n") ] ++ g) (builtins.tail gs)
+            [ (builtins.head gs) ] ++ map (g: [ (libHelpLegendRenderer.print "\\n") ] ++ g) (builtins.tail gs)
         );
     in
     {
@@ -119,7 +120,7 @@ let
     {
       color,
       leadingLines ? 1,
-      renderer ? libHelpLegendRenderer.posix,
+      libHelpLegendRenderer ? rendererSet.posix,
       reset,
       title,
       width,
@@ -128,7 +129,7 @@ let
       pad = centerIn width title;
       leading = builtins.concatStringsSep "" (builtins.genList (_: "\\n") (leadingLines + 1));
     in
-    renderer.print "${leading}${color}${pad}${title}${reset}";
+    libHelpLegendRenderer.print "${leading}${color}${pad}${title}${reset}";
 
   mkHelpCheck =
     {
@@ -136,10 +137,10 @@ let
       cmdColor,
       desc,
       layout,
-      renderer ? libHelpLegendRenderer.posix,
+      libHelpLegendRenderer ? rendererSet.posix,
       reset,
     }:
-    renderer.helpCheck {
+    libHelpLegendRenderer.helpCheck {
       inherit
         cmd
         cmdColor
@@ -160,8 +161,8 @@ in
     mkCenteredTitle
     mkHelpCheck
     mkHelpSection
-    libHelpLegendRenderer
     repeat
     sectionLayout
     ;
+  libHelpLegendRenderer = rendererSet;
 }
