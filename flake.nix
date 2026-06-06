@@ -118,6 +118,15 @@
             legendFor = _: entry: entry.display;
           };
 
+          dynamicAliasCompatTasks = self.igniteLibs.dynamicAliases.mk {
+            names = [ "docs" ];
+            metadata = {
+              owner = "external-caller";
+            };
+            nameFor = name: _: "p-${name}";
+            valueFor = name: _: "just ${name}";
+          };
+
           dynamicAliasDuplicateCheck = builtins.tryEval (
             self.igniteLibs.dynamicAliases.mk {
               names = [
@@ -196,6 +205,7 @@
             assert dynamicAliasEntryTasks.aliases.nd-rust == "nix develop /workspace#rust";
             assert dynamicAliasEntryTasks.legend.nd-rust == "nix develop .#rust";
             assert dynamicAliasEntryTasks.group == null;
+            assert dynamicAliasCompatTasks.aliases.p-docs == "just docs";
             assert dynamicAliasDuplicateCheck.success == false;
             pass "nix-ignite-dynamic-aliases-fixture";
         }

@@ -28,6 +28,7 @@ in
       valueFor,
       legendFor ? valueFor,
       groupName ? null,
+      ...
     }:
     let
       resolvedNames =

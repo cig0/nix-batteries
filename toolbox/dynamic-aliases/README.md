@@ -27,6 +27,18 @@ Consumers own:
 - shell rendering
 - whether a returned group is shown in a help screen
 
+## `mk` Inputs
+
+`mk` accepts either `names` or `entries`:
+
+- `names`: list of names; every callback receives `null` as the entry value.
+- `entries`: attrset keyed by name; callbacks receive each keyed value.
+
+Both modes require `nameFor` and `valueFor`. `legendFor` defaults to `valueFor`,
+and `groupName` defaults to `null`. Unknown extra attributes are ignored for
+backwards compatibility with callers that carry local metadata beside the
+documented arguments.
+
 ## From Zero To Flake Shell Shortcuts
 
 This walkthrough builds the same shape of data used by `nix-ignition`: `nd-*`
@@ -219,6 +231,33 @@ Expected aliases:
   p-fmt = "just fmt";
   p-test = "just test";
   p-lint = "just lint";
+}
+```
+
+When each item needs metadata, pass `entries` instead of `names`:
+
+```nix
+let
+  devShells = dynamicAliases.mk {
+    entries = {
+      rust = {
+        command = "nix develop";
+        display = "Rust development shell";
+      };
+    };
+    nameFor = name: _: "nd-${name}";
+    valueFor = name: entry: "${entry.command} .#${name}";
+    legendFor = _: entry: entry.display;
+  };
+in
+devShells.legend
+```
+
+Expected legend:
+
+```nix
+{
+  nd-rust = "Rust development shell";
 }
 ```
 
