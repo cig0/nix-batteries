@@ -18,6 +18,7 @@
       ];
       forAllSystems = lib.genAttrs supportedSystems;
       expectedLibNames = [
+        "dynamicAliases"
         "flakeRoot"
         "gitRepoState"
         "gitRepoStateRenderer"
@@ -40,6 +41,7 @@
           raw = import (flakeRoot + "/toolbox/git-repo-state-renderer");
           decorated = import (flakeRoot + "/toolbox/git-repo-state-renderer/decorated.nix");
         };
+        dynamicAliases = import "${flakeRoot}/toolbox/dynamic-aliases" { inherit lib; };
         helpLegendDecorator = import "${flakeRoot}/decorators/help-legend" { };
         modulette = import "${flakeRoot}/modulette" { inherit lib; };
         modulon = collectorArgs: import "${flakeRoot}/modulon" { inherit lib; } collectorArgs;
@@ -86,6 +88,44 @@
           };
 
           missingInputGuard = self.igniteLibs.guardFlakeInput "missing-input" { };
+
+          dynamicAliasNames = self.igniteLibs.dynamicAliases.discoverNixFileNames {
+            directory = ./fixtures/dynamic-aliases/nix-files;
+          };
+
+          dynamicAliasProjectTasks = self.igniteLibs.dynamicAliases.mk {
+            names = [
+              "fmt"
+              "test"
+            ];
+            nameFor = name: _: "p-${name}";
+            valueFor = name: _: "just ${name}";
+            legendFor = name: _: "Run project ${name}";
+            groupName = "Project Tasks";
+          };
+
+          dynamicAliasEntryTasks = self.igniteLibs.dynamicAliases.mk {
+            entries = {
+              rust = {
+                command = "nix develop";
+                display = "nix develop .#rust";
+              };
+            };
+            nameFor = name: _: "nd-${name}";
+            valueFor = name: entry: "${entry.command} /workspace#${name}";
+            legendFor = _: entry: entry.display;
+          };
+
+          dynamicAliasDuplicateCheck = builtins.tryEval (
+            self.igniteLibs.dynamicAliases.mk {
+              names = [
+                "one"
+                "two"
+              ];
+              nameFor = _: _: "dup";
+              valueFor = name: _: name;
+            }
+          );
         in
         {
           igniteLibs-surface =
@@ -118,6 +158,40 @@
             assert missingInputGuard.has == false;
             assert missingInputGuard.input == null;
             pass "nix-ignite-guard-flake-input-fixture";
+
+          dynamic-aliases-fixture =
+            assert
+              dynamicAliasNames == [
+                "alpha"
+                "beta"
+              ];
+            assert
+              dynamicAliasProjectTasks.names == [
+                "fmt"
+                "test"
+              ];
+            assert
+              dynamicAliasProjectTasks.aliasNames == [
+                "p-fmt"
+                "p-test"
+              ];
+            assert dynamicAliasProjectTasks.aliases.p-fmt == "just fmt";
+            assert dynamicAliasProjectTasks.aliases.p-test == "just test";
+            assert dynamicAliasProjectTasks.legend.p-fmt == "Run project fmt";
+            assert dynamicAliasProjectTasks.legend.p-test == "Run project test";
+            assert
+              dynamicAliasProjectTasks.group == {
+                name = "Project Tasks";
+                cmds = [
+                  "p-fmt"
+                  "p-test"
+                ];
+              };
+            assert dynamicAliasEntryTasks.aliases.nd-rust == "nix develop /workspace#rust";
+            assert dynamicAliasEntryTasks.legend.nd-rust == "nix develop .#rust";
+            assert dynamicAliasEntryTasks.group == null;
+            assert dynamicAliasDuplicateCheck.success == false;
+            pass "nix-ignite-dynamic-aliases-fixture";
         }
       );
 

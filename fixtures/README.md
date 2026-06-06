@@ -7,6 +7,7 @@ on consumer-specific configuration from another flake.
 
 Current fixture directories:
 
+- `dynamic-aliases/` checks generic alias, legend, group, and name discovery.
 - `modulette/` checks header-validated data-module discovery.
 - `modulon/` checks Nix module auto-discovery, skip markers, and explicit extra
   modules.
@@ -30,4 +31,3 @@ Keep fixture files focused:
 ```shell
 nix flake check --all-systems --no-build
 ```
-
