@@ -93,6 +93,8 @@
             directory = ./fixtures/dynamic-aliases/nix-files;
           };
 
+          dynamicAliasMkArgs = builtins.functionArgs self.igniteLibs.dynamicAliases.mk;
+
           dynamicAliasProjectTasks = self.igniteLibs.dynamicAliases.mk {
             names = [
               "fmt"
@@ -165,6 +167,10 @@
                 "alpha"
                 "beta"
               ];
+            assert dynamicAliasMkArgs.names == true;
+            assert dynamicAliasMkArgs.entries == true;
+            assert dynamicAliasMkArgs.nameFor == false;
+            assert dynamicAliasMkArgs.valueFor == false;
             assert
               dynamicAliasProjectTasks.names == [
                 "fmt"

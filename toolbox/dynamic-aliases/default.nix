@@ -21,30 +21,30 @@ in
     map stripNixSuffix (builtins.filter isDiscoverableNixFile fileNames);
 
   mk =
-    args@{
+    rawArgs@{
+      names ? if builtins.hasAttr "entries" rawArgs then builtins.attrNames entries else null,
+      entries ? if builtins.hasAttr "names" rawArgs then lib.genAttrs names (_: null) else null,
       nameFor,
       valueFor,
       legendFor ? valueFor,
       groupName ? null,
-      ...
     }:
     let
-      names =
-        if builtins.hasAttr "names" args then
-          args.names
-        else if builtins.hasAttr "entries" args then
-          builtins.attrNames args.entries
-        else
-          throw "dynamicAliases.mk requires either `names` or `entries`.";
+      resolvedNames =
+        if names == null then throw "dynamicAliases.mk requires either `names` or `entries`." else names;
 
-      entries = if builtins.hasAttr "entries" args then args.entries else lib.genAttrs names (_: null);
+      resolvedEntries =
+        if entries == null then
+          throw "dynamicAliases.mk requires either `names` or `entries`."
+        else
+          entries;
 
       rows = map (
         name:
         let
           entry =
-            if builtins.hasAttr name entries then
-              entries.${name}
+            if builtins.hasAttr name resolvedEntries then
+              resolvedEntries.${name}
             else
               throw "dynamicAliases.mk missing entry for `${name}`.";
         in
@@ -54,7 +54,7 @@ in
           value = valueFor name entry;
           legendValue = legendFor name entry;
         }
-      ) names;
+      ) resolvedNames;
 
       aliasNames = map (row: row.aliasName) rows;
       duplicateAliasNames = lib.unique (
@@ -65,7 +65,8 @@ in
       throw "dynamicAliases.mk generated duplicate alias name(s): ${lib.concatStringsSep ", " duplicateAliasNames}"
     else
       {
-        inherit names aliasNames;
+        names = resolvedNames;
+        inherit aliasNames;
 
         # toolbox/dynamic-aliases -> consumer shell aliases
         aliases = builtins.listToAttrs (
