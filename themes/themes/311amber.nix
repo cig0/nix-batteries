@@ -27,4 +27,5 @@
   zero = color.green;
   one = color.white;
   two = color.yellow;
+  four = color.dimmed.yellow;
 }
