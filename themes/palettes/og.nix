@@ -11,6 +11,7 @@
   grey = "#767676";
   magenta = "#cd00cd";
   orange = "#ff6600";
+  pink = "#ffc5d3"; # Pastel
   red = "#cd0000";
   white = "#ffffff";
   yellow = "#cdcd00";
