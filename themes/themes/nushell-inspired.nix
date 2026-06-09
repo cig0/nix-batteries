@@ -1,11 +1,11 @@
-# ANSI theme module. Do not remove this header.
+# Theme module. Do not remove this header.
 { color }:
 /*
   Slot assignments (nushell-inspired — the canonical default theme).
 
   Slot | Color    | Role
   -----|----------|-------------------------------------------
-  0    | zero     | Primary accent (success, headers, positive)
+  0    | green    | Primary accent (success, headers, positive)
   1    | white    | Text emphasis
   2    | blue     | Tertiary accent (e.g. NixOS section)
   3    | magenta  | Callout / alternative highlight
@@ -22,7 +22,7 @@
   bold_four = color.bold.yellow;
   bold_five = color.bold.red;
   dimmed_zero = color.dimmed.green;
-  dimmed.one = color.dimmed.white;
+  dimmed_one = color.dimmed.white;
   zero = color.green;
   one = color.white;
   two = color.blue;

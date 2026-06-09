@@ -44,7 +44,7 @@ let
   /*
     Check whether a file's first line starts with the given prefix.
     More permissive than hasValidHeader — allows additional text after
-    the prefix (e.g. "# ANSI theme module. Nushell-inspired color scheme.").
+    the prefix (e.g. "# Theme module. Nushell-inspired color scheme.").
 
     Type: hasHeaderPrefix :: string -> path -> bool
   */

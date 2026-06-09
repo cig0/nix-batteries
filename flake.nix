@@ -72,9 +72,14 @@
             };
           };
 
+          enabledTheme = self.igniteLibs.themes.resolve {
+            name = "nushell-inspired";
+            enableColors = true;
+          };
+
           disabledTheme = self.igniteLibs.themes.resolve {
             name = "nushell-inspired";
-            enableAnsi = false;
+            enableColors = false;
           };
 
           helpLayout = self.igniteLibs.helpLegendDecorator.sectionLayout {
@@ -158,6 +163,8 @@
           themes-fixture =
             assert disabledTheme.theme.bold_zero == "";
             assert disabledTheme.mode.reset == "";
+            assert builtins.stringLength enabledTheme.theme.bold_zero > 0;
+            assert builtins.stringLength enabledTheme.theme.zero > 0;
             pass "nix-ignite-themes-fixture";
 
           decorator-fixture =
@@ -211,6 +218,6 @@
         }
       );
 
-      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
     };
 }
