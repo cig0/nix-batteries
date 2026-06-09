@@ -117,27 +117,31 @@ empty strings, so the terminal's own color palette flows through untouched.
 
 ## Integration
 
-In a NixOS + Home Manager setup, declare the theme name once per host and
-resolve it wherever colors are needed:
+In a NixOS + Home Manager setup, declare the theme per host in `profile.nix`:
 
 ```nix
-# hosts/my-laptop/default.nix
-myOptions.hm.data.theme.name = "311amber";
+# hosts/my-laptop/profile.nix
+myOptions.hm.data.theme = {
+  enableColors = true;
+  name = "311amber";
+};
 ```
 
+`enableColors` → `true` emits real terminal colors, `false` strips all color
+codes. `null` (the default) enables colors when at least one shell program is
+active for the host.
+
 Resolve once and pass downstream — modules don't need to know which theme is
-active or whether colors are enabled:
+active or how colors were toggled:
 
 ```nix
 let
-  anyShellEnabled =
-    config.myOptions.hm.programs.bash.enable
-    || config.myOptions.hm.programs.zsh.enable
-    || config.myOptions.hm.programs.fish.enable;
-
   c = libThemes.resolve {
     name = config.myOptions.hm.data.theme.name;
-    enableColors = anyShellEnabled;
+    # → enableColors: explicit override from profile, or auto-detect from shell enablement
+    enableColors =
+      let ec = config.myOptions.hm.data.theme.enableColors;
+      in if ec != null then ec else anyShellEnabled;
   };
 in
 # Pass `c` (or `libThemes = c`) to every module that prints colored output
@@ -201,8 +205,9 @@ To add a new palette, see [palette files](palettes/README.md).
 | nushell-inspired | og | green | white | blue | magenta | yellow | red | ANSI terminal colors |
 | steel | tailwind-inspired + overrides | blue | white | cyan | magenta | yellow | red | Muted steel blue accent |
 
-Set `myOptions.hm.data.theme.name` in your host config (e.g. `"311amber"`,
-`"steel"`). The name is the filename without `.nix`.
+Set `myOptions.hm.data.theme.name` and `myOptions.hm.data.theme.enableColors`
+in your host's `profile.nix`. The name is the filename without `.nix`;
+`enableColors` defaults to `null` (auto-detect from shell enablement).
 
 If the name doesn't match a theme file, `resolve` throws with a list of
 available themes. If a theme references a nonexistent palette, `palette.nix`
