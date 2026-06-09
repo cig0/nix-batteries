@@ -22,5 +22,6 @@
   orange = "#ffb343";
   red = "#ef4444";
   white = "#f8fafc";
-  yellow = "#ffed29";
+  # yellow = "#ffed29";
+  yellow = "#fff243";
 }
