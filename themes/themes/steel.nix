@@ -8,6 +8,7 @@
     {
       palette = "og";
       overrides = { blue = "#4488dd"; };
+      dimFactor = 0.4;   # lower = dimmer (default: 0.55)
       slots = { color }:
       {
         bold_two = color.bold.blue;  # ← uses overridden #4488dd
