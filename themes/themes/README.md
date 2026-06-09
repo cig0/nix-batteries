@@ -1,49 +1,95 @@
 # lib/themes/themes - Theme Slot Maps
 
-Each file maps semantic numbered slots to palette colors. Consumers should use
-slots, not raw colors, so changing a theme does not require editing command
-modules.
+Each file maps semantic numbered slots to palette colors. Themes declare
+which palette they consume and may override individual palette colors.
+Consumers should use slots, not raw colors, so changing a theme does not
+require editing command modules.
 
 ## What belongs here
 
 - Theme files with the required `# Theme module.` header
-- Slot-to-palette assignments using the `color` argument
+- Each theme declares its palette, optional overrides, and slot-to-color
+  assignments
 
 ## What does not belong here
 
-- Hex color definitions; those live in `../palette.nix`
-- Host theme selection; set `myOptions.hm.data.theme.name`
+- Hex color definitions; those live in `../palettes/`
+- Palette selection at the host level; set `myOptions.hm.data.theme.name`
 - Command-specific color decisions
 
-## Real example
+## Theme file format
 
-`nushell-inspired.nix` is the canonical default theme:
+Every theme file is a function that returns an attrset with `palette` and
+`slots`:
 
 ```nix
 # Theme module. Do not remove this header.
-{ color }:
+{ }:
 {
-  bold_zero  = color.bold.green;
-  bold_one   = color.bold.white;
-  bold_two   = color.bold.blue;
-  bold_three = color.bold.magenta;
-  bold_four  = color.bold.yellow;
-  bold_five  = color.bold.red;
-  dimmed_zero = color.dimmed.green;
-  dimmed_one  = color.dimmed.white;
-  zero  = color.green;
-  one   = color.white;
-  two   = color.blue;
-  three = color.magenta;
-  four  = color.yellow;
-  five  = color.red;
+  palette = "tailwind-inspired";
+  slots = { color }:
+  {
+    bold_zero  = color.bold.green;
+    bold_one   = color.bold.white;
+    bold_two   = color.bold.blue;
+    bold_three = color.bold.magenta;
+    bold_four  = color.bold.yellow;
+    bold_five  = color.bold.red;
+    dimmed_zero = color.dimmed.green;
+    dimmed_one  = color.dimmed.white;
+    zero  = color.green;
+    one   = color.white;
+    two   = color.blue;
+    three = color.magenta;
+    four  = color.yellow;
+    five  = color.red;
+  };
 }
 ```
 
-Every theme receives `{ color }` from the palette and maps slots to `color.*`
-names.
+- **`palette`** — name of the palette file in `../palettes/` (without
+  `.nix`). The palette is immutable; its hex values are the base for
+  `color.*` lookups.
+- **`overrides`** — optional `name → "#hex"` patches to the palette colors.
+  Overridden colors affect all variants (regular, bold, dimmed) for that
+  name. Omit when empty — `palette.nix` defaults to `{ }`.
+- **`slots`** — function from `{ color }` to the slot attrset. Maps
+  semantic slot names to `color.*` references.
+
+## Overrides example
+
+`steel.nix` is a bundled theme that uses overrides — Tailwind palette with a
+muted blue:
+
+```nix
+# Theme module. Do not remove this header.
+# Steel — Tailwind palette with a muted blue override
+{ }:
+{
+  palette = "tailwind-inspired";
+  overrides = { blue = "#4a6fa5"; };
+  slots = { color }:
+  {
+    bold_zero = color.bold.blue;    # ← #4a6fa5, not the palette's #3b82f6
+    bold_one  = color.bold.white;
+    # ...
+  };
+}
+```
+
+Patched hex flows into `color.*` automatically — `color.bold.blue`,
+`color.blue`, and `color.dimmed.blue` all derive from the overridden
+`#4a6fa5`.
+
+Overrides only affect the theme declaring them. Other themes using the same
+palette are unaffected — palettes are immutable.
+
+`overrides` can replace existing palette colors **or add new ones**. If a theme
+needs a color that doesn't exist in its chosen palette, add it via overrides
+rather than modifying the palette file.
 
 ## Where to look next
 
 - `../README.md` - slot assignments and available themes
-- `../palette.nix` - hex color definitions and rendering
+- `../palette.nix` - palette discovery, hex rendering, theme resolution
+- `../palettes/` - palette files (immutable hex color sets)

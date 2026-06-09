@@ -82,6 +82,11 @@
             enableColors = false;
           };
 
+          amberTheme = self.igniteLibs.themes.resolve {
+            name = "311amber";
+            enableColors = true;
+          };
+
           helpLayout = self.igniteLibs.helpLegendDecorator.sectionLayout {
             groups = [
               {
@@ -165,6 +170,10 @@
             assert disabledTheme.mode.reset == "";
             assert builtins.stringLength enabledTheme.theme.bold_zero > 0;
             assert builtins.stringLength enabledTheme.theme.zero > 0;
+            # Per-theme palette resolution: 311amber uses the CRT palette
+            # CRT orange (#ffb343) differs from Tailwind orange (#ff6600)
+            assert builtins.stringLength amberTheme.theme.bold_zero > 0;
+            assert amberTheme.theme.bold_zero != enabledTheme.theme.bold_zero;
             pass "nix-ignite-themes-fixture";
 
           decorator-fixture =
