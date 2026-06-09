@@ -40,7 +40,7 @@ ackBeforeRun =
   cmd:
   ''
     ${helpCheck cmd}
-    _ack "${libThemes.theme.bold_zero}===> ${legend.${cmd}}${libThemes.mode.reset}" "''${x}" || return
+    _ack "${libThemes.theme.zero}===> ${legend.${cmd}}${libThemes.mode.reset}" "''${x}" || return
   '';
 ```
 

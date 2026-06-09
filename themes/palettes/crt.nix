@@ -17,7 +17,7 @@
   blue = "#5b8dd9";
   cyan = "#00b8b8";
   green = "#22c55e";
-  grey = "#9ca3af";
+  grey = "#aaaaaa"
   magenta = "#cc66cc";
   orange = "#ff6600";
   red = "#ef4444";
