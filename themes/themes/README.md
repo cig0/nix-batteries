@@ -14,7 +14,7 @@ require editing command modules.
 ## What does not belong here
 
 - Hex color definitions; those live in `../palettes/`
-- Palette selection at the host level; set `myOptions.hm.data.theme.name`
+- Palette selection at the host level; set `myOptions.hm.data.theme` (name + enableColors)
 - Command-specific color decisions
 
 ## Theme file format
