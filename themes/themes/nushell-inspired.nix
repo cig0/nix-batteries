@@ -1,19 +1,5 @@
 # Theme module. Do not remove this header.
 { color }:
-/*
-  Slot assignments (nushell-inspired — the canonical default theme).
-
-  Slot | Color    | Role
-  -----|----------|-------------------------------------------
-  0    | green    | Primary accent (success, headers, positive)
-  1    | white    | Text emphasis
-  2    | blue     | Tertiary accent (e.g. NixOS section)
-  3    | magenta  | Callout / alternative highlight
-  4    | yellow   | Warning / highlight
-  5    | red      | Error / danger
-
-  Non-bold slots follow the same numbering.
-*/
 {
   bold_zero = color.bold.green;
   bold_one = color.bold.white;

@@ -17,10 +17,10 @@
   blue = "#5b8dd9";
   cyan = "#00b8b8";
   green = "#22c55e";
-  grey = "#aaaaaa"
+  grey = "#aaaaaa";
   magenta = "#cc66cc";
-  orange = "#ff6600";
+  orange = "#ffb343";
   red = "#ef4444";
   white = "#f8fafc";
-  yellow = "#f59e0b";
+  yellow = "#ffed29";
 }
