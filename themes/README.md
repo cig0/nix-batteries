@@ -379,7 +379,7 @@ No other changes needed — the palette feeds all themes.
 
 | Theme | Slot 0 | Slot 1 | Slot 2 | Slot 3 | Slot 4 | Slot 5 | Feel |
 |-------|--------|--------|--------|--------|--------|--------|------|
-| 311amber | orange | white | blue | magenta | yellow | red | Vintage phosphor CRT |
+| 311amber | yellow | white | blue | magenta | yellow | red | Vintage phosphor CRT |
 | catppuccin-mocha | magenta | white | cyan | blue | yellow | red | Soft pastels, Mauve accent |
 | dracula | cyan | white | magenta | green | yellow | red | Dark purple, cyan accents |
 | gruvbox-dark | yellow | white | cyan | green | magenta | red | Warm, retro, amber accent |

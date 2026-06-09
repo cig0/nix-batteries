@@ -5,7 +5,7 @@
 
   Slot | Color           | Role
   -----|----------------|-------------------------------------------
-  0    | bold orange    | Primary accent (success, headers, positive)
+  0    | bold yellow    | Primary accent (success, headers, positive)
   1    | bold white     | Text emphasis
   2    | bold blue      | Tertiary accent (e.g. NixOS section)
   3    | bold magenta   | Callout / alternative highlight
@@ -13,18 +13,18 @@
   5    | bold red       | Error / danger
 
   Non-bold slots follow the same numbering.
-  Dimmed slots use dimmed orange for accent, grey for muted text.
+  Dimmed slots use dimmed yellow for accent, grey for muted text.
 */
 {
-  bold_zero = color.bold.orange;
+  bold_zero = color.bold.yellow;
   bold_one = color.bold.white;
   bold_two = color.bold.blue;
   bold_three = color.bold.magenta;
   bold_four = color.bold.yellow;
   bold_five = color.bold.red;
-  dimmed_zero = color.dimmed.orange;
+  dimmed_zero = color.dimmed.yellow;
   dimmed_one = color.grey;
-  zero = color.orange;
+  zero = color.yellow;
   one = color.white;
   two = color.blue;
   three = color.magenta;
