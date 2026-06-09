@@ -230,19 +230,25 @@ different palette colors. No other files need to change.
 
 ### Slot assignments
 
+Every theme maps the same semantic slots to different palette colors. The slot
+role is fixed — only the color changes between themes.
+
 | Slot | Role |
 |------|------|
-| `bold_zero` | Primary accent (success, headers) |
+| `bold_zero` | Primary accent (success, headers, positive) |
 | `bold_one` | Text emphasis |
-| `bold_two` | Tertiary accent |
+| `bold_two` | Tertiary accent (e.g. NixOS section) |
 | `bold_three` | Callout / alternative highlight |
 | `bold_four` | Warning / highlight |
 | `bold_five` | Error / danger |
 | `dimmed_zero` | Dimmed primary accent |
 | `dimmed_one` | Dimmed text emphasis |
 | `zero` | Non-bold primary accent |
-| `two` | Non-bold callout |
+| `one` | Non-bold text emphasis |
+| `two` | Non-bold tertiary accent |
+| `three` | Non-bold callout |
 | `four` | Non-bold warning |
+| `five` | Non-bold error |
 
 ### How slots flow to the terminal
 
@@ -347,12 +353,12 @@ variants are generated automatically — you only need the hex value:
 ```nix
 hex = {
   # ...existing colors...
-  orange = "#f97316";   # ← add the hex value
+  purple = "#9333ea";   # ← add the hex value
 };
 ```
 
-This immediately makes `color.orange`, `color.bold.orange`, and
-`color.dimmed.orange` available to all themes.
+This immediately makes `color.purple`, `color.bold.purple`, and
+`color.dimmed.purple` available to all themes.
 
 ### Step 2: Use it in a theme
 
@@ -362,7 +368,7 @@ Any theme file can now reference the new color:
 # Theme module. Do not remove this header.
 { color }:
 {
-  bold_zero = color.bold.orange;   # ← uses the new color
+  bold_zero = color.bold.purple;   # ← uses the new color
   # ...
 }
 ```
@@ -373,7 +379,7 @@ No other changes needed — the palette feeds all themes.
 
 | Theme | Slot 0 | Slot 1 | Slot 2 | Slot 3 | Slot 4 | Slot 5 | Feel |
 |-------|--------|--------|--------|--------|--------|--------|------|
-| 311amber | green | white | yellow | yellow | bold yellow | red | Vintage phosphor CRT |
+| 311amber | orange | white | blue | magenta | yellow | red | Vintage phosphor CRT |
 | catppuccin-mocha | magenta | white | cyan | blue | yellow | red | Soft pastels, Mauve accent |
 | dracula | cyan | white | magenta | green | yellow | red | Dark purple, cyan accents |
 | gruvbox-dark | yellow | white | cyan | green | magenta | red | Warm, retro, amber accent |
@@ -395,6 +401,7 @@ Each hex definition generates three foreground variants:
 | green | `#22c55e` | `\e[1;38;2;34;197;94m` | `\e[38;2;34;197;94m` | computed |
 | grey | `#6b7280` | `\e[1;38;2;107;114;128m` | `\e[38;2;107;114;128m` | computed |
 | magenta | `#d946ef` | `\e[1;38;2;217;70;239m` | `\e[38;2;217;70;239m` | computed |
+| orange | `#ff6600` | `\e[1;38;2;255;102;0m` | `\e[38;2;255;102;0m` | computed |
 | red | `#ef4444` | `\e[1;38;2;239;68;68m` | `\e[38;2;239;68;68m` | computed |
 | white | `#f8fafc` | `\e[1;38;2;248;250;252m` | `\e[38;2;248;250;252m` | computed |
 | yellow | `#f59e0b` | `\e[1;38;2;245;158;11m` | `\e[38;2;245;158;11m` | computed |

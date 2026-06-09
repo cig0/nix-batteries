@@ -33,6 +33,7 @@ let
     green = "#22c55e";
     grey = "#6b7280";
     magenta = "#d946ef";
+    orange = "#ff6600";
     red = "#ef4444";
     white = "#f8fafc";
     yellow = "#f59e0b";
