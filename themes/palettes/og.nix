@@ -1,3 +1,9 @@
+/*
+  Original color palette.
+
+  To create a new palette: copy this file, adjust the hex values,
+  and reference it from a theme file's palette field.
+*/
 {
   blue = "#0000ee";
   cyan = "#00cdcd";
