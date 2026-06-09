@@ -1,8 +1,9 @@
 /*
   === Theme palette ===
 
-  Source of truth: hex color definitions, rendered as true-color
-  escape codes. Auto-discovers theme files via Modulette.
+  Source of truth: hex color definitions loaded from palette files in
+  palettes/. Rendered as true-color escape codes. Auto-discovers
+  theme files via Modulette.
 
   Color definitions start as hex values (#RRGGBB) and are converted
   to 24-bit true-color codes (\e[38;2;R;G;Bm) by the rendering layer.
@@ -16,28 +17,23 @@
   to these palette names. Consuming code uses only the numbered slots
   so that switching themes requires no other changes.
 
-  To add a new color: add the hex definition to the `hex` attrset
-  below, then reference it in theme files as color.bold.<name>,
+  To add a new color: add the hex definition to the active palette file
+  in palettes/, then reference it in theme files as color.bold.<name>,
   color.dimmed.<name>, or color.<name>.
 */
-{ lib, flakeRoot, ... }:
+{
+  lib,
+  flakeRoot,
+  paletteFile ? ./palettes/tailwind-inspired.nix,
+  ...
+}:
 let
   modulette = import (flakeRoot + "/modulette") { inherit lib; };
 
-  # ----+ Hex color definitions (source of truth) +----
-  # New colors should be added here to make them available to all themes.
-  # Each entry generates bold, dimmed, and regular foreground variants.
-  hex = {
-    blue = "#3b82f6";
-    cyan = "#06b6d4";
-    green = "#22c55e";
-    grey = "#9ca3af";
-    magenta = "#d946ef";
-    orange = "#ff6600";
-    red = "#ef4444";
-    white = "#f8fafc";
-    yellow = "#f59e0b";
-  };
+  # ----+ Hex color definitions (loaded from palettes/) +----
+  # New colors should be added to the active palette file in palettes/,
+  # not here. Each entry generates bold, dimmed, and regular foreground variants.
+  hex = import paletteFile;
 
   # ----+ Hex → RGB conversion +----
   hexDigitToInt =
