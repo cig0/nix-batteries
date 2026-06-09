@@ -9,7 +9,7 @@
   1    | bold white   | Text emphasis (copyright, notices)
   2    | bold yellow  | Strong highlight (lookups, call-to-action)
   3    | yellow       | Informational body text (descriptions)
-  4    | dimmed yellow| Warning / subtle markers (amber tint)
+  4    | yellow       | Warning / subtle markers (amber tint)
   5    | bold red     | Error / danger
 
   Non-bold slots follow the same numbering.
@@ -20,12 +20,12 @@
   bold_one = color.bold.white;
   bold_two = color.bold.yellow;
   bold_three = color.yellow;
-  bold_four = color.dimmed.yellow;
+  bold_four = color.yellow;
   bold_five = color.bold.red;
   dimmed_zero = color.dimmed.green;
   dimmed_one = color.grey;
   zero = color.green;
   one = color.white;
   two = color.yellow;
-  four = color.dimmed.yellow;
+  four = color.yellow;
 }
