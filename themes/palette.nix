@@ -31,12 +31,17 @@
   palette field.
 */
 {
-  lib,
   flakeRoot,
+  lib,
   ...
 }:
 let
   modulette = import (flakeRoot + "/modulette") { inherit lib; };
+
+  # ----+ Configuration +----
+  # Used when a theme does not declare the field.
+  defaultPalette = "tailwind-inspired";
+  defaultDimFactor = 0.55;
 
   # ----+ Palette discovery +----
   # Load all palette .nix files from palettes/ as name → hex attrsets.
@@ -108,28 +113,27 @@ let
   fg = rgb: "\\e[38;2;${toString rgb.r};${toString rgb.g};${toString rgb.b}m";
   boldFg = rgb: "\\e[1;38;2;${toString rgb.r};${toString rgb.g};${toString rgb.b}m";
 
-  # Dim factor: multiply each RGB channel by this value.
-  # 0.55 produces a clearly dimmed but still readable color.
-  dimFactor = 0.55;
-
-  dimmedRgb = rgb: {
-    r = builtins.floor (builtins.mul rgb.r dimFactor);
-    g = builtins.floor (builtins.mul rgb.g dimFactor);
-    b = builtins.floor (builtins.mul rgb.b dimFactor);
-  };
-
-  dimmedFg = rgb: fg (dimmedRgb rgb);
-
   # ----+ Build color attrset from hex definitions +----
-  # Given a hex attrset (name → "#RRGGBB"), produce the color attrset
-  # with regular, bold, and dimmed variants. Palettes are immutable —
-  # themes override at the hex level before this function is called.
+  # Given a hex attrset (name → "#RRGGBB") and a dim factor, produce
+  # the color attrset with regular, bold, and dimmed variants.
+  # Palettes are immutable — themes override at the hex level before
+  # this function is called.
   makeColor =
-    hex:
+    {
+      hex,
+      dimFactor ? defaultDimFactor,
+    }:
+    let
+      dimmedRgb = rgb: {
+        r = builtins.floor (builtins.mul rgb.r dimFactor);
+        g = builtins.floor (builtins.mul rgb.g dimFactor);
+        b = builtins.floor (builtins.mul rgb.b dimFactor);
+      };
+    in
     (lib.mapAttrs (_: h: fg (fromHex h)) hex)
     // {
       bold = lib.mapAttrs (_: h: boldFg (fromHex h)) hex;
-      dimmed = lib.mapAttrs (_: h: dimmedFg (fromHex h)) hex;
+      dimmed = lib.mapAttrs (_: h: fg (dimmedRgb (fromHex h))) hex;
     };
 
   # ----+ Text attributes +----
@@ -138,10 +142,6 @@ let
     italic = "\\e[3m";
     reset = "\\e[0m";
   };
-
-  # ----+ Default palette +----
-  # Used when a theme does not declare a palette field.
-  defaultPalette = "tailwind-inspired";
 
   # ----+ Auto-discover and resolve themes +----
   # Theme files declare their palette and optional overrides, then
@@ -162,7 +162,10 @@ let
         palettes.${paletteName}
           or (throw "Unknown palette '${paletteName}' for theme '${name}'. Available palettes: ${lib.concatStringsSep ", " (builtins.attrNames palettes)}");
       hex = basePalette // (rawTheme.overrides or { });
-      color = makeColor hex;
+      color = makeColor {
+        inherit hex;
+        dimFactor = rawTheme.dimFactor or defaultDimFactor;
+      };
     in
     rawTheme.slots { inherit color; }
   ) rawThemes;

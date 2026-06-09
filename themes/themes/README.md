@@ -53,6 +53,9 @@ Every theme file is a function that returns an attrset with `palette` and
 - **`overrides`** — optional `name → "#hex"` patches to the palette colors.
   Overridden colors affect all variants (regular, bold, dimmed) for that
   name. Omit when empty — `palette.nix` defaults to `{ }`.
+- **`dimFactor`** — optional dimming intensity for `color.dimmed.*`
+  (default: `0.55`). Multiply each RGB channel by this value. Lower =
+  dimmer. Omit when you want the default.
 - **`slots`** — function from `{ color }` to the slot attrset. Maps
   semantic slot names to `color.*` references.
 
@@ -81,12 +84,29 @@ Patched hex flows into `color.*` automatically — `color.bold.blue`,
 `color.blue`, and `color.dimmed.blue` all derive from the overridden
 `#4a6fa5`.
 
-Overrides only affect the theme declaring them. Other themes using the same
-palette are unaffected — palettes are immutable.
+`dimFactor` controls how much `color.dimmed.*` is dimmed. The default
+is `0.55` — lower values produce dimmer colors. A theme on a dark
+background might use `dimFactor = 0.4` for deeper dimming:
 
-`overrides` can replace existing palette colors **or add new ones**. If a theme
+```nix
+{ }:
+{
+  palette = "crt";
+  dimFactor = 0.4;
+  slots = { color }:
+  {
+    dimmed_zero = color.dimmed.orange;  # dimmed at 40% instead of 55%
+    # ...
+  };
+}
+```
+
+Overrides can replace existing palette colors **or add new ones**. If a theme
 needs a color that doesn't exist in its chosen palette, add it via overrides
 rather than modifying the palette file.
+
+Overrides only affect the theme declaring them. Other themes using the same
+palette are unaffected — palettes are immutable.
 
 ## Where to look next
 
