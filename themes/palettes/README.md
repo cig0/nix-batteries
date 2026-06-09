@@ -36,6 +36,27 @@ consume these color names — they never reference hex values directly.
 3. Existing themes automatically pick up the new colors by name. New color
    names become available in all theme files.
 
+## Slots assignment
+
+  Slot | Color           | Role
+  -----|----------------|-------------------------------------------
+  0    | bold_zero      | Primary accent (success, headers, positive)
+  1    | bold_one       | Text emphasis
+  2    | bold_two       | Tertiary accent (e.g. NixOS section)
+  3    | bold_three     | Callout / alternative highlight
+  4    | bold_four      | Warning / highlight
+  5    | bold_five      | Error / danger
+
+  Non-bold slots follow the same numbering.
+  Dimmed slots use dimmed yellow for accent, grey for muted text.
+
+  Mode codes are theme-independent text attributes (defined in `palette.nix`):
+
+  Attribute     | Code      | Role
+  -------------|-----------|--------------------------------
+  mode.reset   | `\e[0m`   | Reset all text attributes
+  mode.italic  | `\e[3m`   | Italic text
+
 ## Where to look next
 
 - `../palette.nix` — hex → RGB conversion, escape code rendering, theme discovery
