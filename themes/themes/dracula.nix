@@ -26,8 +26,15 @@
       bold_three = color.bold.green;
       bold_four = color.bold.yellow;
       bold_five = color.bold.red;
+      bold_six = "";
+      bold_seven = "";
+      dimmed_zero = color.dimmed.cyan;
+      dimmed_one = color.dimmed.white;
       zero = color.cyan;
+      one = color.white;
       two = color.magenta;
+      three = color.green;
       four = color.yellow;
+      five = color.red;
     };
 }

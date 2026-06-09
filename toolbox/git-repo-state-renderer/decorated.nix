@@ -18,7 +18,7 @@ let
       ''
         set -l __git_dirty_state (${gitRepoState.dirtyStateCall.fish})
         if test -n "$__git_dirty_state"
-          printf '%b' "${libThemes.theme.bold_three}-"
+          printf '%b' "${libThemes.theme.bold_seven}-"
           printf '%s' "$__git_dirty_state"
         end
       ''
@@ -26,7 +26,7 @@ let
       ''
         let __git_dirty_state = (${gitRepoState.dirtyStateFunctionName})
         if ($__git_dirty_state != "") {
-          print --no-newline "${libThemes.theme.bold_three}-"
+          print --no-newline "${libThemes.theme.bold_seven}-"
           print --no-newline $__git_dirty_state
         }
       ''
@@ -34,7 +34,7 @@ let
       ''
         __git_dirty_state="$(${gitRepoState.dirtyStateCall.posix})"
         if [[ -n "$__git_dirty_state" ]]; then
-          printf '%b' "${libThemes.theme.bold_three}-"
+          printf '%b' "${libThemes.theme.bold_seven}-"
           printf '%s' "$__git_dirty_state"
         fi
         unset __git_dirty_state
