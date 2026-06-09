@@ -18,6 +18,9 @@
 { }:
 {
   palette = "crt";
+  overrides = {
+    yellow = "#ffde21";
+  };
   slots =
     { color }:
     {
@@ -25,7 +28,7 @@
       bold_one = color.bold.white;
       bold_two = color.bold.blue;
       bold_three = color.bold.magenta;
-      bold_four = color.bold.yellow;
+      bold_four = color.bold.blue;
       bold_five = color.bold.red;
       dimmed_zero = color.dimmed.orange;
       dimmed_one = color.grey;
