@@ -17,9 +17,11 @@
 */
 { }:
 {
-  palette = "crt";
+  palette = "crt-amber";
   overrides = {
-    yellow = "#ffde21";
+    pinkCarnation = "#ffa6c9";
+    pinkFlamingo = "#eb7e8d";
+    pinkPastel = "#ffc5d3";
   };
   slots =
     { color }:
@@ -30,6 +32,7 @@
       bold_three = color.bold.magenta;
       bold_four = color.bold.yellow;
       bold_five = color.bold.red;
+      bold_six = color.bold.pinkCarnation;
       dimmed_zero = color.dimmed.orange;
       dimmed_one = color.grey;
       zero = color.orange;

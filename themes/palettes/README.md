@@ -6,6 +6,8 @@ immutable — they define base colors that themes consume. Themes that need
 different values use the `overrides` field to patch individual colors
 without modifying the palette file.
 
+Ref: https://www.figma.com/colors/
+
 ## What belongs here
 
 - Palette `.nix` files that export a `name → "#hex"` attrset
