@@ -390,14 +390,18 @@ Each hex definition generates three foreground variants:
 
 | Name | Hex | Bold | Regular | Dimmed |
 |------|-----|------|---------|--------|
-| blue | `#3b82f6` | `\e[1;38;2;59;130;246m` | `\e[38;2;59;130;246m` | `\e[2;38;2;59;130;246m` |
-| cyan | `#06b6d4` | `\e[1;38;2;6;182;212m` | `\e[38;2;6;182;212m` | `\e[2;38;2;6;182;212m` |
-| green | `#22c55e` | `\e[1;38;2;34;197;94m` | `\e[38;2;34;197;94m` | `\e[2;38;2;34;197;94m` |
-| grey | `#6b7280` | `\e[1;38;2;107;114;128m` | `\e[38;2;107;114;128m` | `\e[2;38;2;107;114;128m` |
-| magenta | `#d946ef` | `\e[1;38;2;217;70;239m` | `\e[38;2;217;70;239m` | `\e[2;38;2;217;70;239m` |
-| red | `#ef4444` | `\e[1;38;2;239;68;68m` | `\e[38;2;239;68;68m` | `\e[2;38;2;239;68;68m` |
-| white | `#f8fafc` | `\e[1;38;2;248;250;252m` | `\e[38;2;248;250;252m` | `\e[2;38;2;248;250;252m` |
-| yellow | `#f59e0b` | `\e[1;38;2;245;158;11m` | `\e[38;2;245;158;11m` | `\e[2;38;2;245;158;11m` |
+| blue | `#3b82f6` | `\e[1;38;2;59;130;246m` | `\e[38;2;59;130;246m` | computed |
+| cyan | `#06b6d4` | `\e[1;38;2;6;182;212m` | `\e[38;2;6;182;212m` | computed |
+| green | `#22c55e` | `\e[1;38;2;34;197;94m` | `\e[38;2;34;197;94m` | computed |
+| grey | `#6b7280` | `\e[1;38;2;107;114;128m` | `\e[38;2;107;114;128m` | computed |
+| magenta | `#d946ef` | `\e[1;38;2;217;70;239m` | `\e[38;2;217;70;239m` | computed |
+| red | `#ef4444` | `\e[1;38;2;239;68;68m` | `\e[38;2;239;68;68m` | computed |
+| white | `#f8fafc` | `\e[1;38;2;248;250;252m` | `\e[38;2;248;250;252m` | computed |
+| yellow | `#f59e0b` | `\e[1;38;2;245;158;11m` | `\e[38;2;245;158;11m` | computed |
+
+Dimmed variants use computed reduced-brightness RGB (`dimFactor = 0.55`)
+instead of the faint SGR attribute (`\e[2`), which renders inconsistently
+across terminals when combined with 24-bit color.
 
 ## Shared exports
 
