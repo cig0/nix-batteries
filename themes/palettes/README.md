@@ -1,40 +1,53 @@
 # lib/themes/palettes - Color Palette Data
 
 Hex color definitions organized as named palette files. Each palette is a
-Nix attrset mapping color names to `#RRGGBB` hex strings.
+Nix attrset mapping color names to `#RRGGBB` hex strings. Palettes are
+immutable — they define base colors that themes consume. Themes that need
+different values use the `overrides` field to patch individual colors
+without modifying the palette file.
 
 ## What belongs here
 
 - Palette `.nix` files that export a `name → "#hex"` attrset
-- Each file is a self-contained color set that `palette.nix` loads and
-  converts into true-color escape codes
+- Each file is a self-contained immutable color set that `palette.nix`
+  loads and converts into true-color escape codes
 
 ## What does not belong here
 
 - Theme slot maps (those live in `../themes/`)
 - Rendering logic or escape code generation (that lives in `../palette.nix`)
 - Mode codes like reset or italic
+- Color overrides (those live in theme files' `overrides` field)
 
 ## How palettes feed themes
 
 ```mermaid
 graph LR
-    A["palettes/tailwind-inspired.nix"] --> B["palette.nix"]
-    B -->|"color.bold.green"| C["themes/*.nix"]
-    C -->|"bold_zero = …"| D["libThemes.theme"]
+    A["palettes/crt.nix"] -->|"+ overrides"| B["makeColor"]
+    C["palettes/tailwind-inspired.nix"] -->|"+ overrides"| B
+    D["palettes/og.nix"] -->|"+ overrides"| B
+    B -->|"color.bold.green"| E["theme slots"]
+    E -->|"bold_zero = …"| F["libThemes.theme"]
 ```
 
-`palette.nix` imports a palette file, converts hex to RGB, and generates
-`color.*`, `color.bold.*`, and `color.dimmed.*` escape codes. Theme files
-consume these color names — they never reference hex values directly.
+Each theme declares which palette it uses (e.g. `palette = "crt"`) and
+optionally overrides individual colors (e.g. `overrides = { blue = "#4488dd"; }`).
+`palette.nix` loads the base palette, merges overrides, builds the `color`
+attrset, and passes it to the theme's `slots` function.
 
 ## Adding a new palette
 
 1. Create a `.nix` file here with a `name → "#hex"` attrset.
-2. Update `palette.nix` to point `paletteFile` at the new file (or add a
-   palette selection mechanism).
-3. Existing themes automatically pick up the new colors by name. New color
-   names become available in all theme files.
+2. Reference it from a theme file's `palette` field (e.g. `palette = "my-palette"`).
+3. Existing themes are unaffected — each theme declares its own palette.
+
+## Available palettes
+
+| Palette | Feel |
+|---------|------|
+| `crt` | Warm amber phosphor monitor aesthetic |
+| `og` | Standard ANSI terminal colors (xterm-256color) |
+| `tailwind-inspired` | Tailwind CSS default palette, neutral and readable |
 
 ## Slots assignment
 

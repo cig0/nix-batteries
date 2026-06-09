@@ -11,7 +11,7 @@
   the amber/yellow primary.
 
   To create a new palette: copy this file, adjust the hex values,
-  and pass it to palette.nix as the `paletteFile` argument.
+  and reference it from a theme file's palette field.
 */
 {
   blue = "#5b8dd9";

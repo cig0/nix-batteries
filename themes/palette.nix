@@ -2,8 +2,17 @@
   === Theme palette ===
 
   Source of truth: hex color definitions loaded from palette files in
-  palettes/. Rendered as true-color escape codes. Auto-discovers
+  palettes/. Each theme declares which palette it uses and may override
+  individual colors. Rendered as true-color escape codes. Auto-discovers
   theme files via Modulette.
+
+  Architecture:
+    1. Palette files (palettes/*.nix) define immutable hex color sets.
+    2. Theme files (themes/*.nix) declare their palette and optional
+       overrides, then map semantic slots to color names.
+    3. palette.nix resolves each theme: loads its declared palette,
+       applies overrides, builds the color attrset, and calls the
+       theme's slots function.
 
   Color definitions start as hex values (#RRGGBB) and are converted
   to 24-bit true-color codes (\e[38;2;R;G;Bm) by the rendering layer.
@@ -13,27 +22,34 @@
   terminals when combined with 24-bit color — shifting hues
   (amber → brown, green → muddy).
 
-  Theme modules map numbered semantic slots (bold_zero, bold_one, …)
-  to these palette names. Consuming code uses only the numbered slots
-  so that switching themes requires no other changes.
+  To add a new color: add the hex definition to one or more palette
+  files in palettes/, then reference it in theme files as
+  color.bold.<name>, color.dimmed.<name>, or color.<name>.
 
-  To add a new color: add the hex definition to the active palette file
-  in palettes/, then reference it in theme files as color.bold.<name>,
-  color.dimmed.<name>, or color.<name>.
+  To add a new palette: create a .nix file in palettes/ with a
+  name → "#hex" attrset, then reference it from a theme file's
+  palette field.
 */
 {
   lib,
   flakeRoot,
-  paletteFile ? ./palettes/tailwind-inspired.nix,
   ...
 }:
 let
   modulette = import (flakeRoot + "/modulette") { inherit lib; };
 
-  # ----+ Hex color definitions (loaded from palettes/) +----
-  # New colors should be added to the active palette file in palettes/,
-  # not here. Each entry generates bold, dimmed, and regular foreground variants.
-  hex = import paletteFile;
+  # ----+ Palette discovery +----
+  # Load all palette .nix files from palettes/ as name → hex attrsets.
+  # Palettes are plain data files — no Modulette header validation needed.
+  palettes =
+    let
+      entries = builtins.attrNames (builtins.readDir ./palettes);
+      nixFiles = builtins.filter (lib.hasSuffix ".nix") entries;
+      keyFromName = name: builtins.substring 0 (builtins.stringLength name - 4) name;
+    in
+    builtins.listToAttrs (
+      map (name: lib.nameValuePair (keyFromName name) (import (./palettes/${name}))) nixFiles
+    );
 
   # ----+ Hex → RGB conversion +----
   hexDigitToInt =
@@ -104,13 +120,17 @@ let
 
   dimmedFg = rgb: fg (dimmedRgb rgb);
 
-  # ----+ Derived color palette +----
-  # Bold, dimmed, and regular variants generated from hex definitions.
-  # Themes consume color.bold.green, color.dimmed.green, color.green, etc.
-  color = (lib.mapAttrs (_: h: fg (fromHex h)) hex) // {
-    bold = lib.mapAttrs (_: h: boldFg (fromHex h)) hex;
-    dimmed = lib.mapAttrs (_: h: dimmedFg (fromHex h)) hex;
-  };
+  # ----+ Build color attrset from hex definitions +----
+  # Given a hex attrset (name → "#RRGGBB"), produce the color attrset
+  # with regular, bold, and dimmed variants. Palettes are immutable —
+  # themes override at the hex level before this function is called.
+  makeColor =
+    hex:
+    (lib.mapAttrs (_: h: fg (fromHex h)) hex)
+    // {
+      bold = lib.mapAttrs (_: h: boldFg (fromHex h)) hex;
+      dimmed = lib.mapAttrs (_: h: dimmedFg (fromHex h)) hex;
+    };
 
   # ----+ Text attributes +----
   # Mode codes are theme-independent — reset, italic, etc.
@@ -119,12 +139,33 @@ let
     reset = "\\e[0m";
   };
 
-  # ----+ Auto-discover themes +----
-  themes = modulette.discoverModules {
+  # ----+ Default palette +----
+  # Used when a theme does not declare a palette field.
+  defaultPalette = "tailwind-inspired";
+
+  # ----+ Auto-discover and resolve themes +----
+  # Theme files declare their palette and optional overrides, then
+  # provide a slots function that maps color names to semantic slots.
+  # palette.nix resolves each theme by: loading its declared palette,
+  # applying overrides, building the color attrset, and calling slots.
+  rawThemes = modulette.discoverModules {
     directory = ./themes;
     headerPrefix = "# Theme module.";
-    args = { inherit color; };
+    args = { };
   };
+
+  themes = lib.mapAttrs (
+    name: rawTheme:
+    let
+      paletteName = rawTheme.palette or defaultPalette;
+      basePalette =
+        palettes.${paletteName}
+          or (throw "Unknown palette '${paletteName}' for theme '${name}'. Available palettes: ${lib.concatStringsSep ", " (builtins.attrNames palettes)}");
+      hex = basePalette // (rawTheme.overrides or { });
+      color = makeColor hex;
+    in
+    rawTheme.slots { inherit color; }
+  ) rawThemes;
 in
 rec {
   theme = themes;
