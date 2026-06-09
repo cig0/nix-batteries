@@ -6,8 +6,11 @@
 
   Color definitions start as hex values (#RRGGBB) and are converted
   to 24-bit true-color codes (\e[38;2;R;G;Bm) by the rendering layer.
-  Bold and dimmed variants are derived automatically — add a hex entry
-  and all three variants become available.
+  Bold variants use \e[1;38;2;R;G;Bm.
+  Dimmed variants use computed reduced-brightness RGB rather than the
+  faint SGR attribute (\e[2), which renders inconsistently across
+  terminals when combined with 24-bit color — shifting hues
+  (amber → brown, green → muddy).
 
   Theme modules map numbered semantic slots (bold_zero, bold_one, …)
   to these palette names. Consuming code uses only the numbered slots
@@ -83,10 +86,26 @@ let
   # ----+ True-color rendering +----
   # \e[38;2;R;G;Bm       — 24-bit foreground
   # \e[1;38;2;R;G;Bm     — bold + 24-bit foreground
-  # \e[2;38;2;R;G;Bm     — dimmed + 24-bit foreground
+  #
+  # Dimmed colors use computed reduced-brightness RGB instead of the
+  # faint SGR attribute (\e[2). The faint attribute renders
+  # inconsistently across terminals when combined with 24-bit color —
+  # shifting hues (amber → brown, green → muddy). Computing dimmed as
+  # a lower-brightness true-color code produces predictable results.
   fg = rgb: "\\e[38;2;${toString rgb.r};${toString rgb.g};${toString rgb.b}m";
   boldFg = rgb: "\\e[1;38;2;${toString rgb.r};${toString rgb.g};${toString rgb.b}m";
-  dimmedFg = rgb: "\\e[2;38;2;${toString rgb.r};${toString rgb.g};${toString rgb.b}m";
+
+  # Dim factor: multiply each RGB channel by this value.
+  # 0.55 produces a clearly dimmed but still readable color.
+  dimFactor = 0.55;
+
+  dimmedRgb = rgb: {
+    r = builtins.floor (builtins.mul rgb.r dimFactor);
+    g = builtins.floor (builtins.mul rgb.g dimFactor);
+    b = builtins.floor (builtins.mul rgb.b dimFactor);
+  };
+
+  dimmedFg = rgb: fg (dimmedRgb rgb);
 
   # ----+ Derived color palette +----
   # Bold, dimmed, and regular variants generated from hex definitions.
