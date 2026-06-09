@@ -26,6 +26,8 @@
       bold_three = color.bold.magenta;
       bold_four = color.bold.yellow;
       bold_five = color.bold.red;
+      bold_six = "";
+      bold_seven = "";
       dimmed_zero = color.dimmed.green;
       dimmed_one = color.dimmed.white;
       zero = color.green;
