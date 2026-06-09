@@ -31,7 +31,7 @@ let
     blue = "#3b82f6";
     cyan = "#06b6d4";
     green = "#22c55e";
-    grey = "#6b7280";
+    grey = "#9ca3af";
     magenta = "#d946ef";
     orange = "#ff6600";
     red = "#ef4444";
