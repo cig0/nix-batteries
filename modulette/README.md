@@ -54,8 +54,8 @@ modulette.hasValidHeader [ "# POSIX module." "# Fish module." ] ./some-file.nix
 Checks whether a file's first line starts with the given prefix. More permissive than `hasValidHeader` — allows additional text after the prefix.
 
 ```nix
-modulette.hasHeaderPrefix "# ANSI theme module." ./themes/nushell-inspired.nix
-# Matches: "# ANSI theme module. Nushell-inspired color scheme."
+modulette.hasHeaderPrefix "# Theme module." ./themes/nushell-inspired.nix
+# Matches: "# Theme module. Nushell-inspired color scheme."
 ```
 
 ## Layout Model
@@ -84,8 +84,8 @@ let
 in
 modulette.discoverModules {
   directory = ./themes;
-  headerPrefix = "# ANSI theme module.";
-  args = { inherit lib; };
+  headerPrefix = "# Theme module.";
+  args = { inherit lib };
 }
 # Returns: { nushell-inspired = <imported>; dracula = <imported>; ... }
 ```
@@ -186,17 +186,17 @@ commands/
 Use `hasHeaderPrefix` when modules share a common prefix but have varying suffixes (e.g., theme-specific descriptions):
 
 ```nix
-# Accepts any file whose first line starts with "# ANSI theme module."
+# Accepts any file whose first line starts with "# Theme module."
 modulette.discoverModules {
   directory = ./themes;
-  headerPrefix = "# ANSI theme module.";
+  headerPrefix = "# Theme module.";
   args = { inherit lib; };
 }
 ```
 
 Matches:
-- `# ANSI theme module.` ✅
-- `# ANSI theme module. Nushell-inspired color scheme.` ✅
+- `# Theme module.` ✅
+- `# Theme module. Nushell-inspired color scheme.` ✅
 - `# Some other header` ❌
 
 ### Multiple valid headers

@@ -6,23 +6,44 @@ modules.
 
 ## What belongs here
 
-- Theme files with the required `# ANSI theme module...` header
+- Theme files with the required `# Theme module.` header
 - Slot-to-palette assignments using the `color` argument
 
 ## What does not belong here
 
-- Raw ANSI escape definitions; those live in `../palette.nix`
+- Hex color definitions; those live in `../palette.nix`
 - Host theme selection; set `myOptions.hm.data.theme.name`
 - Command-specific color decisions
 
 ## Real example
 
-`nushell-inspired.nix` is the default theme. It maps `bold_zero` to green for
-primary accents, `bold_four` to yellow for warnings, and `bold_five` to red for
-errors. New themes should keep the same slot names and change only the color
-assignment.
+`nushell-inspired.nix` is the canonical default theme:
+
+```nix
+# Theme module. Do not remove this header.
+{ color }:
+{
+  bold_zero  = color.bold.green;
+  bold_one   = color.bold.white;
+  bold_two   = color.bold.blue;
+  bold_three = color.bold.magenta;
+  bold_four  = color.bold.yellow;
+  bold_five  = color.bold.red;
+  dimmed_zero = color.dimmed.green;
+  dimmed_one  = color.dimmed.white;
+  zero  = color.green;
+  one   = color.white;
+  two   = color.blue;
+  three = color.magenta;
+  four  = color.yellow;
+  five  = color.red;
+}
+```
+
+Every theme receives `{ color }` from the palette and maps slots to `color.*`
+names.
 
 ## Where to look next
 
 - `../README.md` - slot assignments and available themes
-- `../palette.nix` - raw ANSI color constants
+- `../palette.nix` - hex color definitions and rendering

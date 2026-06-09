@@ -25,7 +25,7 @@ implementation rules. Read and follow both files.
 - `modulette/` owns header-validated data-module discovery.
 - `guard-flake-input/` owns optional input handling.
 - `decorators/help-legend/` owns help-screen layout and shell renderers.
-- `themes/` owns ANSI palette/theme data and the theme option module.
+- `themes/` owns true-color palette/theme data and the theme option module.
 - `toolbox/` owns small reusable shell/runtime code generators.
 - `fixtures/` contains lightweight fixtures used by flake checks. Keep fixtures
   small, deterministic, and focused on public library behavior.

@@ -1,4 +1,4 @@
-# ANSI theme module. Do not remove this header.
+# Theme module. Do not remove this header.
 { color }:
 /*
   Slot assignments (Nord — cold, icy blues).

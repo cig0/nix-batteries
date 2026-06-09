@@ -1,4 +1,4 @@
-# ANSI theme module. Do not remove this header.
+# Theme module. Do not remove this header.
 { color }:
 /*
   Slot assignments (Catppuccin Mocha — soft pastels, Mauve accent).
