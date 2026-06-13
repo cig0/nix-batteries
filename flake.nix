@@ -43,8 +43,8 @@
         };
         dynamicAliases = import "${flakeRoot}/toolbox/dynamic-aliases" { inherit lib; };
         helpLegendDecorator = import "${flakeRoot}/decorators/help-legend" { };
-        modulette = import "${flakeRoot}/modulette" { inherit lib; };
-        modulon = collectorArgs: import "${flakeRoot}/modulon" { inherit lib; } collectorArgs;
+        modulette = import "${flakeRoot}/auto-discover/modulette" { inherit lib; };
+        modulon = collectorArgs: import "${flakeRoot}/auto-discover/modulon" { inherit lib; } collectorArgs;
         themes = import "${flakeRoot}/themes/palette.nix" { inherit flakeRoot lib; };
       };
 
