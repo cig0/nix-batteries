@@ -36,7 +36,7 @@
   ...
 }:
 let
-  modulette = import (flakeRoot + "/modulette") { inherit lib; };
+  modulette = import (flakeRoot + "/auto-discover/modulette") { inherit lib; };
 
   # ----+ Configuration +----
   # Used when a theme does not declare the field.
