@@ -65,7 +65,18 @@
           modulonImports = map toString modulonFixture.imports;
 
           moduletteFixture = self.igniteLibs.modulette.discoverModules {
+            mode = "flat";
             directory = ./fixtures/modulette/modules;
+            headerText = "# Modulette fixture module. Do not remove this header.";
+            args = {
+              value = "loaded";
+            };
+          };
+
+          moduletteDirectoryFixture = self.igniteLibs.modulette.discoverModules {
+            mode = "directory";
+            directory = ./fixtures/modulette/hosts;
+            targetFile = "host.nix";
             headerText = "# Modulette fixture module. Do not remove this header.";
             args = {
               value = "loaded";
@@ -164,6 +175,18 @@
             assert builtins.attrNames moduletteFixture == [ "alpha" ];
             assert moduletteFixture.alpha.value == "loaded";
             pass "nix-ignite-modulette-fixture";
+
+          modulette-directory-fixture =
+            assert
+              builtins.attrNames moduletteDirectoryFixture == [
+                "alpha"
+                "beta"
+              ];
+            assert moduletteDirectoryFixture.alpha.value == "loaded";
+            assert moduletteDirectoryFixture.alpha.id == "alpha";
+            assert moduletteDirectoryFixture.beta.value == "loaded";
+            assert moduletteDirectoryFixture.beta.id == "beta";
+            pass "nix-ignite-modulette-directory-fixture";
 
           themes-fixture =
             assert disabledTheme.theme.bold_zero == "";

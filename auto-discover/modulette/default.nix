@@ -14,14 +14,34 @@
     hasHeaderPrefix   — prefix match (allows comments after the header)
     discoverModules   — scan directory, filter by header, import, collect
 
-  Usage:
+  Modes:
+
+    "flat"       — scan .nix files directly inside the directory (original
+                   behavior). Keys by filename without extension.
+    "directory"  — scan subdirectories inside the directory. Each
+                   subdirectory is treated as a named entry; the file
+                   specified by targetFile (default: "host.nix") inside
+                   each subdirectory is imported. Keys by directory name.
+
+  Usage — flat mode:
 
     let modulette = import ./path/to/modulette { inherit lib; };
     in modulette.discoverModules {
+      mode = "flat";
       directory = ./my-data-modules;
       headerPrefix = "# My data module.";
       args = { inherit color; };
-      excludeFiles = [ "default.nix" ];
+      exclude = [ "default.nix" ];
+    }
+
+  Usage — directory mode:
+
+    let modulette = import ./path/to/modulette { inherit lib; };
+    in modulette.discoverModules {
+      mode = "directory";
+      directory = ./hosts;
+      targetFile = "host.nix";
+      args = { inherit inputs; };
     }
 */
 { lib }:
@@ -56,58 +76,130 @@ let
     builtins.substring 0 (builtins.stringLength prefix) firstLine == prefix;
 
   /*
-    Scan a directory for .nix files whose first line matches a header
-    convention, import them with the given args, and collect results into
-    an attrset keyed by filename (without .nix extension).
+    Validate a file's first line against headerText or headerPrefix.
+    Returns true when no header validation is requested (both null).
+    Resolves the file path differently depending on isDirectory:
+      flat mode       — directory + "/" + entryName
+      directory mode  — directory + "/" + entryName + "/" + targetFile
+  */
+  isValidHeader =
+    {
+      directory,
+      entryName,
+      headerText ? null,
+      headerPrefix ? null,
+      isDirectory ? false,
+      targetFile ? "host.nix",
+    }:
+    let
+      filePath =
+        if isDirectory then directory + "/${entryName}/${targetFile}" else directory + "/${entryName}";
+    in
+    if headerText != null then
+      hasValidHeader headerText filePath
+    else if headerPrefix != null then
+      hasHeaderPrefix headerPrefix filePath
+    else
+      true;
 
-    Supports both exact header matching (headerText) and prefix matching
-    (headerPrefix). Use headerText for strict validation, headerPrefix
-    for permissive matching.
+  /*
+    Scan a directory and collect modules into an attrset.
+
+    Flat mode (mode = "flat"):
+      Scans for .nix files directly inside the directory, validates
+      optional headers, imports matching files with args, and returns
+      an attrset keyed by filename (without .nix extension).
+
+    Directory mode (mode = "directory"):
+      Scans for subdirectories inside the directory, validates
+      optional headers on the target file inside each subdirectory,
+      imports matching files with args, and returns an attrset
+      keyed by directory name.
 
     Parameters:
-      args         — attrset passed to each imported module (default: { })
-      directory    — path to scan for .nix files
-      excludeFiles — list of filenames to skip (default: [ ])
-      headerPrefix — prefix that the first line must start with
-      headerText   — exact first-line string (or list of strings) to match
+      mode          — "flat" or "directory" (required, no default)
+      directory     — path to scan (required)
+      args          — attrset passed to each imported module (default: { })
+      exclude       — names to skip: filenames in flat mode, directory
+                      names in directory mode (default: [ ])
+      headerPrefix  — prefix that the first line must start with
+      headerText    — exact first-line string (or list of strings) to match
+      targetFile    — filename to import inside each subdirectory in
+                      directory mode (default: "host.nix")
 
     Type: discoverModules ::
-      { directory :: path
+      { mode :: "flat" | "directory"
+      , directory :: path
       , args ? {}
-      , excludeFiles ? [string]
+      , exclude ? [string]
       , headerPrefix ? null
       , headerText ? null
+      , targetFile ? string
       } -> attrset
   */
   discoverModules =
     {
       args ? { },
       directory,
-      excludeFiles ? [ ],
+      exclude ? [ ],
       headerPrefix ? null,
       headerText ? null,
+      mode,
+      targetFile ? "host.nix",
     }:
     let
-      candidateFiles = builtins.filter (name: !(builtins.elem name excludeFiles)) nixFiles;
       entries = builtins.attrNames (builtins.readDir directory);
-      nixFiles = builtins.filter (lib.hasSuffix ".nix") entries;
 
-      isValid =
-        if headerText != null then
-          name: hasValidHeader headerText (directory + "/${name}")
-        else if headerPrefix != null then
-          name: hasHeaderPrefix headerPrefix (directory + "/${name}")
+      result =
+        if mode == "flat" then
+          let
+            nixFiles = builtins.filter (lib.hasSuffix ".nix") entries;
+            candidateFiles = builtins.filter (name: !(builtins.elem name exclude)) nixFiles;
+            validFiles = builtins.filter (
+              name:
+              isValidHeader {
+                inherit directory headerText headerPrefix;
+                entryName = name;
+              }
+            ) candidateFiles;
+            keyFromName = name: builtins.substring 0 (builtins.stringLength name - 4) name;
+          in
+          builtins.foldl' (a: b: a // b) { } (
+            map (name: {
+              ${keyFromName name} = import (directory + "/${name}") args;
+            }) validFiles
+          )
+
+        else if mode == "directory" then
+          let
+            dirEntries = builtins.attrNames (
+              builtins.filterAttrs (_: type: type == "directory") (builtins.readDir directory)
+            );
+            candidateDirs = builtins.filter (name: !(builtins.elem name exclude)) dirEntries;
+            validDirs = builtins.filter (
+              name:
+              isValidHeader {
+                inherit
+                  directory
+                  headerText
+                  headerPrefix
+                  targetFile
+                  ;
+                entryName = name;
+                isDirectory = true;
+              }
+            ) candidateDirs;
+          in
+          builtins.foldl' (a: b: a // b) { } (
+            map (name: {
+              ${name} = import (directory + "/${name}/${targetFile}") args;
+            }) validDirs
+          )
+
         else
-          _: true;
-
-      validFiles = builtins.filter (name: isValid name) candidateFiles;
-      keyFromName = name: builtins.substring 0 (builtins.stringLength name - 4) name;
-
-      loadModule = name: {
-        ${keyFromName name} = import (directory + "/${name}") args;
-      };
+          throw "Modulette: mode must be \"flat\" or \"directory\", got \"${mode}\"";
     in
-    builtins.foldl' (a: b: a // b) { } (map loadModule validFiles);
+    result;
 in
 {
   inherit

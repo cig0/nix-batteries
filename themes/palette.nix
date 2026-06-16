@@ -149,6 +149,7 @@ let
   # palette.nix resolves each theme by: loading its declared palette,
   # applying overrides, building the color attrset, and calling slots.
   rawThemes = modulette.discoverModules {
+    mode = "flat";
     directory = ./themes;
     headerPrefix = "# Theme module.";
     args = { };

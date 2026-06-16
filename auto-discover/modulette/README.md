@@ -1,6 +1,15 @@
 # Modulette
 
-Lightweight Nix module discovery — scans directories, validates optional headers, and imports `.nix` files into an attrset keyed by filename.
+Lightweight Nix module discovery — scans directories, validates optional headers, and imports `.nix` files into an attrset.
+
+## Modes
+
+Modulette operates in two modes, selected by the required `mode` parameter:
+
+| Mode | Scans | Keys by | Imports |
+|---|---|---|---|
+| `"flat"` | `.nix` files in a directory | Filename without extension | Each matching file |
+| `"directory"` | Subdirectories in a directory | Directory name | `targetFile` inside each subdirectory |
 
 ## Exports
 
@@ -14,28 +23,60 @@ Lightweight Nix module discovery — scans directories, validates optional heade
 
 ### `discoverModules`
 
-Scans a directory for `.nix` files whose first line matches a header convention, imports them with the given args, and collects results into an attrset keyed by filename (without `.nix` extension).
+Scans a directory in flat or directory mode, validates optional headers, imports matching entries with the given args, and collects results into an attrset.
+
+#### Flat mode
+
+Scans for `.nix` files directly inside the directory. Keys by filename without `.nix` extension.
 
 ```nix
 modulette.discoverModules {
+  mode = "flat";
   directory = ./my-data-modules;
-  args = { inherit color; };                  # passed to each import
-  headerText = "# My data module.";            # exact first-line match
-  excludeFiles = [ "default.nix" ];            # skip these filenames
+  headerPrefix = "# My data module.";
+  args = { inherit color; };
+  exclude = [ "default.nix" ];
 }
 ```
 
-Parameters:
+#### Directory mode
+
+Scans for subdirectories inside the directory. Each subdirectory is treated as a named entry; the file specified by `targetFile` (default: `"host.nix"`) inside each subdirectory is imported. Keys by directory name.
+
+```nix
+modulette.discoverModules {
+  mode = "directory";
+  directory = ./hosts;
+  targetFile = "host.nix";
+  args = { inherit inputs; };
+}
+```
+
+Given this layout:
+
+```
+hosts/
+  maru/
+    host.nix
+  tenten/
+    host.nix
+```
+
+Directory mode returns `{ maru = <imported>; tenten = <imported>; }`.
+
+#### Parameters
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `directory` | path | (required) | Path to scan for `.nix` files |
+| `mode` | `"flat"` or `"directory"` | (required) | Scanning mode |
+| `directory` | path | (required) | Path to scan |
 | `args` | attrset | `{ }` | Attrset passed to each imported module |
-| `headerText` | string or list of strings | `null` | Exact first-line string(s) to match |
+| `exclude` | list of strings | `[ ]` | Names to skip (filenames in flat mode, directory names in directory mode) |
 | `headerPrefix` | string | `null` | Prefix that the first line must start with |
-| `excludeFiles` | list of strings | `[ ]` | Filenames to skip |
+| `headerText` | string or list of strings | `null` | Exact first-line string(s) to match |
+| `targetFile` | string | `"host.nix"` | Filename to import inside each subdirectory (directory mode only) |
 
-When both `headerText` and `headerPrefix` are `null`, all `.nix` files are accepted.
+When both `headerText` and `headerPrefix` are `null`, all entries are accepted.
 
 ### `hasValidHeader`
 
@@ -60,6 +101,8 @@ modulette.hasHeaderPrefix "# Theme module." ./themes/nushell-inspired.nix
 
 ## Layout Model
 
+### Flat mode
+
 ```mermaid
 graph LR
     A[directory] --> B[readDir]
@@ -70,6 +113,20 @@ graph LR
     E --> G[import with args]
     F --> G
     G --> H[attrset keyed by filename]
+```
+
+### Directory mode
+
+```mermaid
+graph LR
+    A[directory] --> B[readDir]
+    B --> C[filter subdirectories]
+    C --> D{header?}
+    D -->|yes| E[validate header on targetFile]
+    D -->|no| F[accept all]
+    E --> G[import targetFile with args]
+    F --> G
+    G --> H[attrset keyed by directory name]
 ```
 
 ## Implementation Examples
@@ -83,11 +140,29 @@ let
   modulette = import ./modulette { inherit lib; };
 in
 modulette.discoverModules {
+  mode = "flat";
   directory = ./themes;
   headerPrefix = "# Theme module.";
   args = { inherit lib };
 }
 # Returns: { nushell-inspired = <imported>; dracula = <imported>; ... }
+```
+
+### Directory mode: host registry
+
+A directory of host definitions, each in its own subdirectory:
+
+```nix
+let
+  modulette = import ./modulette { inherit lib; };
+in
+modulette.discoverModules {
+  mode = "directory";
+  directory = ./config/hosts;
+  targetFile = "host.nix";
+  args = { inherit inputs; };
+}
+# Returns: { maru = <imported>; tenten = <imported>; ... }
 ```
 
 ### Shell-specific importer with key validation
@@ -188,6 +263,7 @@ Use `hasHeaderPrefix` when modules share a common prefix but have varying suffix
 ```nix
 # Accepts any file whose first line starts with "# Theme module."
 modulette.discoverModules {
+  mode = "flat";
   directory = ./themes;
   headerPrefix = "# Theme module.";
   args = { inherit lib; };
@@ -205,6 +281,7 @@ When a directory contains modules with different but known headers, pass a list 
 
 ```nix
 modulette.discoverModules {
+  mode = "flat";
   directory = ./mixed-modules;
   headerText = [ "# POSIX module." "# Bash-only module." ];
   args = { inherit lib; };
@@ -230,7 +307,7 @@ let
          filters out non-module files (e.g., prompts.nix, default.nix).
   */
   importCommandModulesByShell =
-    { args, directory, expectedKeys, headerText }:
+    { args, directory, expectedKeys, filePrefix ? null, headerText }:
     let
       entries = builtins.attrNames (builtins.readDir directory);
       # 1. Top-level .nix files (e.g., posix-git.nix, fish-git.nix)
