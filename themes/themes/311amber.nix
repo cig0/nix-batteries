@@ -26,6 +26,7 @@
       bold_zero = color.bold.orange;
       bold_one = color.bold.white;
       bold_two = color.bold.blue;
+      bold_two_light = color.bold.blue_light;
       bold_three = color.bold.magenta;
       bold_four = color.bold.yellow;
       bold_five = color.bold.red;
