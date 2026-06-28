@@ -1,5 +1,5 @@
 {
-  description = "Ignite - A Nix flake toolkit with reusable building blocks";
+  description = "Fuel - A Nix flake toolkit with reusable building blocks";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -31,7 +31,7 @@
       ];
     in
     {
-      igniteLibs = rec {
+      fuelLibs = rec {
         inherit flakeRoot;
 
         guardFlakeInput = import "${flakeRoot}/guard-flake-input" { inherit lib; };
@@ -54,17 +54,17 @@
           pkgs = nixpkgs.legacyPackages.${system};
           pass = name: pkgs.runCommand name { } "touch $out";
 
-          igniteLibNames = builtins.attrNames self.igniteLibs;
-          missingLibNames = builtins.filter (name: !(builtins.elem name igniteLibNames)) expectedLibNames;
-          unexpectedLibNames = builtins.filter (name: !(builtins.elem name expectedLibNames)) igniteLibNames;
+          fuelLibNames = builtins.attrNames self.fuelLibs;
+          missingLibNames = builtins.filter (name: !(builtins.elem name fuelLibNames)) expectedLibNames;
+          unexpectedLibNames = builtins.filter (name: !(builtins.elem name expectedLibNames)) fuelLibNames;
 
-          modulonFixture = self.igniteLibs.modulon {
+          modulonFixture = self.fuelLibs.modulon {
             dirs = [ ./fixtures/modulon/modules ];
             extraModules = [ ./fixtures/modulon/extra-module.nix ];
           };
           modulonImports = map toString modulonFixture.imports;
 
-          moduletteFixture = self.igniteLibs.modulette.discoverModules {
+          moduletteFixture = self.fuelLibs.modulette.discoverModules {
             mode = "flat";
             directory = ./fixtures/modulette/modules;
             headerText = "# Modulette fixture module. Do not remove this header.";
@@ -73,7 +73,7 @@
             };
           };
 
-          moduletteDirectoryFixture = self.igniteLibs.modulette.discoverModules {
+          moduletteDirectoryFixture = self.fuelLibs.modulette.discoverModules {
             mode = "directory";
             directory = ./fixtures/modulette/hosts;
             targetFile = "host.nix";
@@ -83,22 +83,22 @@
             };
           };
 
-          enabledTheme = self.igniteLibs.themes.resolve {
+          enabledTheme = self.fuelLibs.themes.resolve {
             name = "nushell-inspired";
             enableColors = true;
           };
 
-          disabledTheme = self.igniteLibs.themes.resolve {
+          disabledTheme = self.fuelLibs.themes.resolve {
             name = "nushell-inspired";
             enableColors = false;
           };
 
-          amberTheme = self.igniteLibs.themes.resolve {
+          amberTheme = self.fuelLibs.themes.resolve {
             name = "311amber";
             enableColors = true;
           };
 
-          helpLayout = self.igniteLibs.helpLegendDecorator.sectionLayout {
+          helpLayout = self.fuelLibs.helpLegendDecorator.sectionLayout {
             groups = [
               {
                 name = "Fixture";
@@ -108,15 +108,15 @@
             descFn = _: "Run fixture check";
           };
 
-          missingInputGuard = self.igniteLibs.guardFlakeInput "missing-input" { };
+          missingInputGuard = self.fuelLibs.guardFlakeInput "missing-input" { };
 
-          dynamicAliasNames = self.igniteLibs.dynamicAliases.discoverNixFileNames {
+          dynamicAliasNames = self.fuelLibs.dynamicAliases.discoverNixFileNames {
             directory = ./fixtures/dynamic-aliases/nix-files;
           };
 
-          dynamicAliasMkArgs = builtins.functionArgs self.igniteLibs.dynamicAliases.mk;
+          dynamicAliasMkArgs = builtins.functionArgs self.fuelLibs.dynamicAliases.mk;
 
-          dynamicAliasProjectTasks = self.igniteLibs.dynamicAliases.mk {
+          dynamicAliasProjectTasks = self.fuelLibs.dynamicAliases.mk {
             names = [
               "fmt"
               "test"
@@ -127,7 +127,7 @@
             groupName = "Project Tasks";
           };
 
-          dynamicAliasEntryTasks = self.igniteLibs.dynamicAliases.mk {
+          dynamicAliasEntryTasks = self.fuelLibs.dynamicAliases.mk {
             entries = {
               rust = {
                 command = "nix develop";
@@ -139,7 +139,7 @@
             legendFor = _: entry: entry.display;
           };
 
-          dynamicAliasCompatTasks = self.igniteLibs.dynamicAliases.mk {
+          dynamicAliasCompatTasks = self.fuelLibs.dynamicAliases.mk {
             names = [ "docs" ];
             metadata = {
               owner = "external-caller";
@@ -149,7 +149,7 @@
           };
 
           dynamicAliasDuplicateCheck = builtins.tryEval (
-            self.igniteLibs.dynamicAliases.mk {
+            self.fuelLibs.dynamicAliases.mk {
               names = [
                 "one"
                 "two"
@@ -160,21 +160,21 @@
           );
         in
         {
-          igniteLibs-surface =
+          fuelLibs-surface =
             assert missingLibNames == [ ];
             assert unexpectedLibNames == [ ];
-            pass "nix-ignite-igniteLibs-surface";
+            pass "nix-fuel-fuelLibs-surface";
 
           modulon-fixture =
             assert builtins.elem (toString ./fixtures/modulon/modules/valid.nix) modulonImports;
             assert builtins.elem (toString ./fixtures/modulon/extra-module.nix) modulonImports;
             assert !(builtins.elem (toString ./fixtures/modulon/modules/skipped.nix) modulonImports);
-            pass "nix-ignite-modulon-fixture";
+            pass "nix-fuel-modulon-fixture";
 
           modulette-fixture =
             assert builtins.attrNames moduletteFixture == [ "alpha" ];
             assert moduletteFixture.alpha.value == "loaded";
-            pass "nix-ignite-modulette-fixture";
+            pass "nix-fuel-modulette-fixture";
 
           modulette-directory-fixture =
             assert
@@ -186,7 +186,7 @@
             assert moduletteDirectoryFixture.alpha.id == "alpha";
             assert moduletteDirectoryFixture.beta.value == "loaded";
             assert moduletteDirectoryFixture.beta.id == "beta";
-            pass "nix-ignite-modulette-directory-fixture";
+            pass "nix-fuel-modulette-directory-fixture";
 
           themes-fixture =
             assert disabledTheme.theme.bold_zero == "";
@@ -197,17 +197,17 @@
             # CRT orange (#ffb343) differs from Tailwind orange (#ff6600)
             assert builtins.stringLength amberTheme.theme.bold_zero > 0;
             assert amberTheme.theme.bold_zero != enabledTheme.theme.bold_zero;
-            pass "nix-ignite-themes-fixture";
+            pass "nix-fuel-themes-fixture";
 
           decorator-fixture =
             assert helpLayout.descCol == 9;
             assert helpLayout.maxDescLen == 17;
-            pass "nix-ignite-decorator-fixture";
+            pass "nix-fuel-decorator-fixture";
 
           guard-flake-input-fixture =
             assert missingInputGuard.has == false;
             assert missingInputGuard.input == null;
-            pass "nix-ignite-guard-flake-input-fixture";
+            pass "nix-fuel-guard-flake-input-fixture";
 
           dynamic-aliases-fixture =
             assert
@@ -246,7 +246,7 @@
             assert dynamicAliasEntryTasks.group == null;
             assert dynamicAliasCompatTasks.aliases.p-docs == "just docs";
             assert dynamicAliasDuplicateCheck.success == false;
-            pass "nix-ignite-dynamic-aliases-fixture";
+            pass "nix-fuel-dynamic-aliases-fixture";
         }
       );
 
