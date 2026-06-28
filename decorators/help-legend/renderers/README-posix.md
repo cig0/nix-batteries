@@ -55,7 +55,7 @@ Use this when a Nix module generates shell functions for bash or zsh.
 
 ```nix
 let
-  L = nix-ignite.igniteLibs.helpLegendDecorator;
+  L = nix-fuel.fuelLibs.helpLegendDecorator;
   renderer = L.renderers.posix;
 in
 ...

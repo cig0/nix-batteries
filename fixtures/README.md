@@ -1,7 +1,7 @@
 # Fixtures
 
 This directory contains lightweight fixture trees used by `flake.nix` checks.
-They are intentionally small, deterministic examples of public `igniteLibs`
+They are intentionally small, deterministic examples of public `fuelLibs`
 behavior. A fixture should prove one narrow library contract without depending
 on consumer-specific configuration from another flake.
 
@@ -24,7 +24,7 @@ Keep fixture files focused:
 2. Prefer obvious names such as `valid.nix`, `skipped.nix`, or `ignored.nix`.
 3. Avoid generated data, host paths, network access, timestamps, and other
    non-deterministic inputs.
-4. Keep fixtures tied to public `self.igniteLibs` behavior, not private
+4. Keep fixtures tied to public `self.fuelLibs` behavior, not private
    implementation details.
 5. Run the focused flake check after changes:
 

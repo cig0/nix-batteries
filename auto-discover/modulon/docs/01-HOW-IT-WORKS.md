@@ -63,7 +63,7 @@ graph TD
 
 ## The Discovery Process
 
-The core of Modulon is exposed as `nix-ignite.igniteLibs.modulon`. When called, this
+The core of Modulon is exposed as `nix-fuel.fuelLibs.modulon`. When called, this
 function:
 
 1. Recursively scans the directories specified in the `dirs` option for files ending in `.nix`

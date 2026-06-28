@@ -44,7 +44,7 @@ Use this when a Nix module generates Nushell commands.
 
 ```nix
 let
-  L = nix-ignite.igniteLibs.helpLegendDecorator;
+  L = nix-fuel.fuelLibs.helpLegendDecorator;
   renderer = L.renderers.nushell;
 in
 ...

@@ -76,17 +76,17 @@ Mode codes are theme-independent text attributes (defined in `palette.nix`):
 # flake.nix
 inputs = {
   nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  ignite.url = "github:your-org/nix-ignite";
+  fuel.url = "github:your-org/nix-fuel";
 };
 
-outputs = { nixpkgs, ignite, ... }:
+outputs = { nixpkgs, fuel, ... }:
 let
-  libThemes = ignite.igniteLibs.themes;
+  libThemes = fuel.fuelLibs.themes;
 in
   { ... };
 ```
 
-`flakeRoot` is baked in — `ignite.igniteLibs.themes` is ready to use.
+`flakeRoot` is baked in — `fuel.fuelLibs.themes` is ready to use.
 
 ### Resolve a theme for your host
 
