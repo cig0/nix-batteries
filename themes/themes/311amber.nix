@@ -19,10 +19,6 @@
 {
   palette = "crt-amber";
   overrides = {
-    greenSpring = "#00ff7f";
-    pinkCarnation = "#ffa6c9";
-    pinkFlamingo = "#eb7e8d";
-    pinkPastel = "#ffc5d3";
   };
   slots =
     { color }:
@@ -30,10 +26,11 @@
       bold_zero = color.bold.orange;
       bold_one = color.bold.white;
       bold_two = color.bold.blue;
+      bold_two_light = color.bold.blue_light;
       bold_three = color.bold.magenta;
       bold_four = color.bold.yellow;
       bold_five = color.bold.red;
-      bold_six = color.bold.pinkCarnation;
+      bold_six = color.bold.pink;
       bold_seven = color.bold.greenSpring;
       dimmed_zero = color.dimmed.orange;
       dimmed_one = color.dimmed.white;
