@@ -1,13 +1,13 @@
 # Modulon Fixture
 
-This fixture proves that `igniteLibs.modulon` builds an `imports` list from a
+This fixture proves that `fuelLibs.modulon` builds an `imports` list from a
 module directory, ignores files marked with `@MODULON_SKIP`, and preserves
 modules passed through `extraModules`.
 
 The root `flake.nix` check builds the fixture with:
 
 ```nix
-self.igniteLibs.modulon {
+self.fuelLibs.modulon {
   dirs = [ ./fixtures/modulon/modules ];
   extraModules = [ ./fixtures/modulon/extra-module.nix ];
 }
@@ -50,4 +50,3 @@ nix flake check --all-systems --no-build
 
 For the public API contract and discovery rules, see `../../modulon/README.md`
 and `../../modulon/docs/`.
-

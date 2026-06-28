@@ -1,6 +1,6 @@
-![A Nix flake toolkit with reusable building blocks. Home of Modulon.](assets/images/nix-ignite.png)
+![A Nix flake toolkit with reusable building blocks. Home of Modulon.](assets/images/nix-fuel.png)
 
-<p align="center" style="font-size: 1.5em;"><strong>Ignite ❤️‍🔥</strong></p>
+<p align="center" style="font-size: 1.5em;"><strong>fuel ❤️‍🔥</strong></p>
 
 <p align="center"><strong>Nix flake Library Toolkit</strong></p>
 

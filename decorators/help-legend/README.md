@@ -50,7 +50,7 @@ for generated shell functions.
 
 ```nix
 let
-  L = nix-ignite.igniteLibs.helpLegendDecorator;
+  L = nix-fuel.fuelLibs.helpLegendDecorator;
   renderer = L.renderers.posix;
 in
 ...

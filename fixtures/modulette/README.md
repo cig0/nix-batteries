@@ -1,6 +1,6 @@
 # Modulette Fixtures
 
-This directory contains focused fixtures for both scanning modes of `igniteLibs.modulette.discoverModules`.
+This directory contains focused fixtures for both scanning modes of `fuelLibs.modulette.discoverModules`.
 
 ## Flat mode fixture
 
@@ -9,7 +9,7 @@ The `modules/` fixture proves that discovery imports only files whose first line
 The root `flake.nix` check scans `modules/` with:
 
 ```nix
-self.igniteLibs.modulette.discoverModules {
+self.fuelLibs.modulette.discoverModules {
   mode = "flat";
   directory = ./fixtures/modulette/modules;
   headerText = "# Modulette fixture module. Do not remove this header.";
@@ -33,7 +33,7 @@ The `hosts/` fixture proves that discovery can scan subdirectories, import a tar
 The root `flake.nix` check scans `hosts/` with:
 
 ```nix
-self.igniteLibs.modulette.discoverModules {
+self.fuelLibs.modulette.discoverModules {
   mode = "directory";
   directory = ./fixtures/modulette/hosts;
   targetFile = "host.nix";

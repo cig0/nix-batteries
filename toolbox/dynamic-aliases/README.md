@@ -63,7 +63,7 @@ Inside your flake or module:
 
 ```nix
 let
-  dynamicAliases = inputs.nix-ignite.igniteLibs.dynamicAliases;
+  dynamicAliases = inputs.nix-fuel.fuelLibs.dynamicAliases;
   flakeSrcPath = "/home/me/work/my-flake";
 in
 ...
