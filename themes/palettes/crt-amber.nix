@@ -15,7 +15,7 @@
 */
 {
   blue = "#5b8dd9";
-  blue_light = "#95b2ec";
+  blue_light = "#b1dafb";
   cyan = "#00b8b8";
   green = "#00ff7f";
   grey = "#aaaaaa";
