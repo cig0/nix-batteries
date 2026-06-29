@@ -21,7 +21,7 @@
   grey = "#aaaaaa";
   magenta = "#cc66cc";
   orange = "#ffb343";
-  pink = "ffa6c9";
+  pink = "#ffa6c9";
   red = "#ef4444";
   white = "#f8fafc";
   yellow = "#ffde21";
