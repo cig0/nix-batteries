@@ -1,4 +1,4 @@
-![A two-column command help screen renderer.](.assets/images/help-legend.png)
+![A two-column command help screen renderer.](./assets/images/help-legend.png)
 
 <p align="center" style="font-size: 1.5em;"><strong>Help Legend 🛟</strong></p>
 
