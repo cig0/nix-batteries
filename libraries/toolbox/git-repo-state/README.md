@@ -45,7 +45,7 @@ Pasteable eval that shows the exported helper names:
 nix eval --impure --expr '
 let
   flakeRoot = builtins.toPath (builtins.getEnv "PWD");
-  gitRepoState = import (flakeRoot + "/toolbox/git-repo-state") { };
+  gitRepoState = import (flakeRoot + "/libraries/toolbox/git-repo-state") { };
 in
   builtins.attrNames gitRepoState.revisionFunction
 ' --json

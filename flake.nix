@@ -8,7 +8,6 @@
   outputs =
     { nixpkgs, self }:
     let
-      flakeRoot = self.outPath;
       lib = nixpkgs.lib;
       supportedSystems = [
         "x86_64-linux"
@@ -32,20 +31,25 @@
     in
     {
       fuelLibs = rec {
-        inherit flakeRoot;
+        flakeRoot = self.outPath;
 
-        guardFlakeInput = import "${flakeRoot}/guard-flake-input" { inherit lib; };
-        mkGitRepoState = args: import (flakeRoot + "/toolbox/git-repo-state") args;
+        guardFlakeInput = import "${self.outPath}/libraries/guard-flake-input" { inherit lib; };
+        mkGitRepoState = args: import (self.outPath + "/libraries/toolbox/git-repo-state") args;
         gitRepoState = mkGitRepoState { };
         gitRepoStateRenderer = {
-          raw = import (flakeRoot + "/toolbox/git-repo-state-renderer");
-          decorated = import (flakeRoot + "/toolbox/git-repo-state-renderer/decorated.nix");
+          raw = import (self.outPath + "/libraries/toolbox/git-repo-state-renderer");
+          decorated = import (self.outPath + "/libraries/toolbox/git-repo-state-renderer/decorated.nix");
         };
-        dynamicAliases = import "${flakeRoot}/toolbox/dynamic-aliases" { inherit lib; };
-        helpLegendDecorator = import "${flakeRoot}/decorators/help-legend" { };
-        modulette = import "${flakeRoot}/auto-discover/modulette" { inherit lib; };
-        modulon = collectorArgs: import "${flakeRoot}/auto-discover/modulon" { inherit lib; } collectorArgs;
-        themes = import "${flakeRoot}/themes/palette.nix" { inherit flakeRoot lib; };
+        dynamicAliases = import "${self.outPath}/libraries/toolbox/dynamic-aliases" { inherit lib; };
+        helpLegendDecorator = import "${self.outPath}/libraries/decorators/help-legend" { };
+        modulette = import "${self.outPath}/libraries/auto-discover/modulette" { inherit lib; };
+        modulon =
+          collectorArgs:
+          import "${self.outPath}/libraries/auto-discover/modulon" { inherit lib; } collectorArgs;
+        themes = import "${self.outPath}/libraries/themes/palette.nix" {
+          flakeRoot = self.outPath;
+          inherit lib;
+        };
       };
 
       checks = forAllSystems (

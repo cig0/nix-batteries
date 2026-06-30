@@ -22,7 +22,7 @@
   Usage:
 
     let
-      guard = import ./guard-flake-input { inherit lib; };
+      guard = import ./libraries/guard-flake-input { inherit lib; };
       rust  = guard "rust-overlay" _inputs;
     in
     {

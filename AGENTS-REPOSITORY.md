@@ -8,9 +8,9 @@ implementation rules. Read and follow both files.
 - This repository is a reusable Nix flake library toolkit. It is commonly
   consumed by `nix-ignition`, but library code must stay useful outside that
   consumer.
-- Public library exports live under `self.fuelLibs` in `flake.nix`: Modulon,
-  Modulette, guard-flake-input, help-legend decorators, themes, and small
-  runtime helper generators.
+- Public library exports live under `self.fuelLibs` in `flake.nix`. Library
+  source lives under `libraries/` and includes Modulon, Modulette, guard-flake-input,
+  help-legend decorators, themes, and small runtime helper generators.
 - Nix is the primary implementation language. Some library helpers generate
   shell snippets for POSIX-compatible shells, Fish, and Nushell.
 - Keep Nix and shell semantics visible. Do not add abstractions whose main
@@ -20,13 +20,13 @@ implementation rules. Read and follow both files.
 
 ## Component Boundaries
 
-- `modulon/` owns Nix module auto-discovery. Read `modulon/README.md` and the
-  focused docs under `modulon/docs/` before changing discovery behavior.
-- `modulette/` owns header-validated data-module discovery.
-- `guard-flake-input/` owns optional input handling.
-- `decorators/help-legend/` owns help-screen layout and shell renderers.
-- `themes/` owns true-color palette/theme data and the theme option module.
-- `toolbox/` owns small reusable shell/runtime code generators.
+- `libraries/auto-discover/modulon/` owns Nix module auto-discovery. Read `libraries/auto-discover/modulon/README.md` and the
+  focused docs under `libraries/auto-discover/modulon/docs/` before changing discovery behavior.
+- `libraries/auto-discover/modulette/` owns header-validated data-module discovery.
+- `libraries/guard-flake-input/` owns optional input handling.
+- `libraries/decorators/help-legend/` owns help-screen layout and shell renderers.
+- `libraries/themes/` owns true-color palette/theme data and the theme option module.
+- `libraries/toolbox/` owns small reusable shell/runtime code generators.
 - `fixtures/` contains lightweight fixtures used by flake checks. Keep fixtures
   small, deterministic, and focused on public library behavior.
 

@@ -295,6 +295,6 @@ with 24-bit color.
 
 - [Palette files](palettes/README.md) — hex color definitions, how palettes feed themes, adding palettes
 - [Theme files](themes/README.md) — slot maps, overrides, dimFactor, creating themes
-- [Modulette](../modulette/README.md) — header-validated data discovery used by themes
-- [Modulon exclusions](../modulon/docs/03-EXCLUDING-MODULES.md) — when nearby `.nix` files should be skipped
+- [Modulette](../auto-discover/modulette/README.md) — header-validated data discovery used by themes
+- [Modulon exclusions](../auto-discover/modulon/docs/03-EXCLUDING-MODULES.md) — when nearby `.nix` files should be skipped
 - [help-legend renderers](../decorators/help-legend/renderers/README.md) — shell-native output that pairs well with themed colors

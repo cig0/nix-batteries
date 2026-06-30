@@ -67,4 +67,4 @@ Use this path when changing Modulette discovery behavior:
 nix flake check --all-systems --no-build
 ```
 
-For the public API contract and broader examples, see `../../modulette/README.md`.
+For the public API contract and broader examples, see `../../libraries/auto-discover/modulette/README.md`.

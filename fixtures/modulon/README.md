@@ -48,5 +48,5 @@ Use this path when changing Modulon discovery behavior:
 nix flake check --all-systems --no-build
 ```
 
-For the public API contract and discovery rules, see `../../modulon/README.md`
-and `../../modulon/docs/`.
+For the public API contract and discovery rules, see `../../libraries/auto-discover/modulon/README.md`
+and `../../libraries/auto-discover/modulon/docs/`.
