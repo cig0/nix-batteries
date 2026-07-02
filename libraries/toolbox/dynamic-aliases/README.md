@@ -53,20 +53,20 @@ need to be consistent within one directory:
 # Directory layout: one subdirectory per shell, with default.nix inside.
 shells/devShell/rust/default.nix
 shells/devShell/python/default.nix
-shells/packages/security.nix
-shells/packages/cloud-infra-tools.nix
+shells/package/security/default.nix
+shells/package/cloud-infra-tools/default.nix
 
 # Flat layout: one .nix file per shell, all at the top level.
-shells/devShells/rust.nix
-shells/devShells/python.nix
-shells/packages/security.nix
-shells/packages/cloud-infra-tools.nix
+shells/devShell/rust.nix
+shells/devShell/python.nix
+shells/package/security.nix
+shells/package/cloud-infra-tools.nix
 ```
 
 Each file is a self-contained `mkShell` or `buildEnv`. The walkthrough below
-uses the directory layout for development shells and the flat layout for
-packages — a common real-world split, since dev shells often need a README
-beside the entry point and packages usually do not.
+uses the directory layout for both development shells and packages — the same
+shape nix-ignition uses, since each shell gets an adjacent `README.md` and a
+stable entry point.
 
 ### 2. Create a shell file
 
@@ -85,7 +85,7 @@ pkgs.mkShell {
 For the flat layout, drop the wrapping directory:
 
 ```nix
-# shells/devShells/rust.nix
+# shells/devShell/rust.nix
 { pkgs }:
 pkgs.mkShell {
   name = "rust";
@@ -127,15 +127,24 @@ devShellNames =
   in
   builtins.filter isDir (builtins.attrNames entries);
 
-# Flat layout: top-level .nix files under shells/devShells/.
+# Flat layout: top-level .nix files under shells/devShell/.
 # Use discoverNixFileNames for this shape.
 devShellNames = dynamicAliases.discoverNixFileNames {
-  directory = ./shells/devShells;
+  directory = ./shells/devShell;
 };
 
-# Packages are usually flat, so discoverNixFileNames is the right tool.
+# Directory layout: enumerate subdirectory basenames under shells/package/.
+packageNames =
+  let
+    entries = builtins.readDir (self.outPath + "/shells/package");
+    isDir = name: entries.${name} == "directory";
+  in
+  builtins.filter isDir (builtins.attrNames entries);
+
+# Flat layout: top-level .nix files under shells/package/.
+# Use discoverNixFileNames for this shape.
 packageNames = dynamicAliases.discoverNixFileNames {
-  directory = ./shells/packages;
+  directory = ./shells/package;
 };
 ```
 
