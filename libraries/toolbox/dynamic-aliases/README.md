@@ -44,20 +44,60 @@ documented arguments.
 This walkthrough builds the same shape of data used by `nix-ignition`: `nd-*`
 shortcuts for development shells and `ns-*` shortcuts for package-only shells.
 
-### 1. Create flake shell files
+### 1. Pick a layout
 
-Start with two files in your flake:
+Pick whichever layout your flake already uses — both are supported. You only
+need to be consistent within one directory:
 
 ```text
-shells/devShells/rust.nix
+# Directory layout: one subdirectory per shell, with default.nix inside.
+shells/devShell/rust/default.nix
+shells/devShell/python/default.nix
 shells/packages/security.nix
+shells/packages/cloud-infra-tools.nix
+
+# Flat layout: one .nix file per shell, all at the top level.
+shells/devShells/rust.nix
+shells/devShells/python.nix
+shells/packages/security.nix
+shells/packages/cloud-infra-tools.nix
 ```
 
-The files can be discovered by whatever mechanism your project already uses.
-For example, `nix-ignition` uses Modulette for flake outputs, but alias
-generation only needs the file names.
+Each file is a self-contained `mkShell` or `buildEnv`. The walkthrough below
+uses the directory layout for development shells and the flat layout for
+packages — a common real-world split, since dev shells often need a README
+beside the entry point and packages usually do not.
 
-### 2. Import the library
+### 2. Create a shell file
+
+For the directory layout, put a `default.nix` inside each subdirectory. The
+filename does not matter for discovery — only the directory basename does:
+
+```nix
+# shells/devShell/rust/default.nix
+{ pkgs }:
+pkgs.mkShell {
+  name = "rust";
+  packages = [ pkgs.cargo pkgs.rustc ];
+}
+```
+
+For the flat layout, drop the wrapping directory:
+
+```nix
+# shells/devShells/rust.nix
+{ pkgs }:
+pkgs.mkShell {
+  name = "rust";
+  packages = [ pkgs.cargo pkgs.rustc ];
+}
+```
+
+Alias generation only needs the file or directory names, so how your flake
+discovers shells for `nix develop` (Modulette, hand-maintained lists, or
+something else) does not affect the rest of this walkthrough.
+
+### 3. Import the library
 
 Inside your flake or module:
 
@@ -72,29 +112,40 @@ in
 Use a real source path when aliases should work outside the flake directory.
 Use `"."` when the aliases should be relative to the current directory.
 
-### 3. Discover the names
+### 4. Discover the names
+
+Use the helper that matches your layout. `discoverNixFileNames` reads top-level
+`.nix` files in a directory; for the directory layout, read the directory and
+filter to subdirectory basenames.
 
 ```nix
-let
-  devShellNames = dynamicAliases.discoverNixFileNames {
-    directory = ./shells/devShells;
-  };
+# Directory layout: enumerate subdirectory basenames under shells/devShell/.
+devShellNames =
+  let
+    entries = builtins.readDir (self.outPath + "/shells/devShell");
+    isDir = name: entries.${name} == "directory";
+  in
+  builtins.filter isDir (builtins.attrNames entries);
 
-  packageNames = dynamicAliases.discoverNixFileNames {
-    directory = ./shells/packages;
-  };
-in
-...
+# Flat layout: top-level .nix files under shells/devShells/.
+# Use discoverNixFileNames for this shape.
+devShellNames = dynamicAliases.discoverNixFileNames {
+  directory = ./shells/devShells;
+};
+
+# Packages are usually flat, so discoverNixFileNames is the right tool.
+packageNames = dynamicAliases.discoverNixFileNames {
+  directory = ./shells/packages;
+};
 ```
 
-For the two files above, the values are:
+For the directory-layout example in step 1, `devShellNames` evaluates to
+`[ "python" "rust" ]` and `packageNames` evaluates to
+`[ "cloud-infra-tools" "security" ]`. For the flat-layout example, the same
+two `devShellNames` and `packageNames` calls produce the same list of strings,
+just from a different on-disk shape.
 
-```nix
-devShellNames = [ "rust" ];
-packageNames = [ "security" ];
-```
-
-### 4. Generate development-shell aliases
+### 5. Generate development-shell aliases
 
 ```nix
 let
@@ -113,20 +164,25 @@ Expected data:
 
 ```nix
 devShellDynamicAliases.aliases = {
+  nd-python = "nix develop /home/me/work/my-flake#python";
   nd-rust = "nix develop /home/me/work/my-flake#rust";
 };
 
 devShellDynamicAliases.legend = {
+  nd-python = "nix develop .#python";
   nd-rust = "nix develop .#rust";
 };
 
 devShellDynamicAliases.group = {
   name = "Development Shells";
-  cmds = [ "nd-rust" ];
+  cmds = [
+    "nd-python"
+    "nd-rust"
+  ];
 };
 ```
 
-### 5. Generate package-shell aliases
+### 6. Generate package-shell aliases
 
 ```nix
 let
@@ -145,20 +201,25 @@ Expected data:
 
 ```nix
 packageDynamicAliases.aliases = {
+  ns-cloud-infra-tools = "nix shell /home/me/work/my-flake#cloud-infra-tools";
   ns-security = "nix shell /home/me/work/my-flake#security";
 };
 
 packageDynamicAliases.legend = {
+  ns-cloud-infra-tools = "nix shell .#cloud-infra-tools";
   ns-security = "nix shell .#security";
 };
 
 packageDynamicAliases.group = {
   name = "Ephemeral Packages";
-  cmds = [ "ns-security" ];
+  cmds = [
+    "ns-cloud-infra-tools"
+    "ns-security"
+  ];
 };
 ```
 
-### 6. Feed aliases into shell config
+### 7. Feed aliases into shell config
 
 For POSIX shells or Nushell-style alias attrsets:
 
@@ -179,7 +240,7 @@ abbrs =
 The library does not render `alias nd-rust=...`, `abbr nd-rust ...`, or any
 other shell syntax. That belongs to the consumer.
 
-### 7. Feed legend and group data into help
+### 8. Feed legend and group data into help
 
 ```nix
 let
