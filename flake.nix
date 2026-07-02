@@ -24,6 +24,7 @@
         "guardFlakeInput"
         "helpLegendDecorator"
         "mkGitRepoState"
+        "nixOptionsToMd"
         "modulette"
         "modulon"
         "themes"
@@ -43,6 +44,7 @@
         dynamicAliases = import "${self.outPath}/libraries/toolbox/dynamic-aliases" { inherit lib; };
         helpLegendDecorator = import "${self.outPath}/libraries/decorators/help-legend" { };
         modulette = import "${self.outPath}/libraries/auto-discover/modulette" { inherit lib; };
+        nixOptionsToMd = import "${self.outPath}/libraries/toolbox/nix-options-to-md";
         modulon =
           collectorArgs:
           import "${self.outPath}/libraries/auto-discover/modulon" { inherit lib; } collectorArgs;
@@ -162,6 +164,11 @@
               valueFor = name: _: name;
             }
           );
+
+          nixOptionsToMdFixtureResult = import ./fixtures/nix-options-to-md {
+            inherit lib;
+            nixOptionsToMd = self.fuelLibs.nixOptionsToMd;
+          };
         in
         {
           fuelLibs-surface =
@@ -251,6 +258,15 @@
             assert dynamicAliasCompatTasks.aliases.p-docs == "just docs";
             assert dynamicAliasDuplicateCheck.success == false;
             pass "nix-fuel-dynamic-aliases-fixture";
+
+          nix-options-to-md-fixture =
+            assert nixOptionsToMdFixtureResult.hasHeader;
+            assert nixOptionsToMdFixtureResult.hasEnableRow;
+            assert nixOptionsToMdFixtureResult.hasPortRow;
+            assert nixOptionsToMdFixtureResult.hasNestedRow;
+            assert nixOptionsToMdFixtureResult.customNamespace;
+            assert nixOptionsToMdFixtureResult.customExcludesNested;
+            pass "nix-fuel-nix-options-to-md-fixture";
         }
       );
 
