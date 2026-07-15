@@ -1,154 +1,67 @@
 # Nushell Help Legend Renderer
 
-Use `renderers.nushell` for Nushell command modules.
+`libHelpLegendRenderer.nushell` maps shared help-legend sections and titles to
+Nushell `print --no-newline` statements.
 
-The renderer maps the common help-legend contract to Nushell snippets:
+## Runtime boundary
 
-- `print text` emits `print --no-newline "text"`.
-- `helpCheck` reads the first item from `$args`, checks for `-h` or `--help`,
-  prints one aligned legend row, and returns.
+Nushell provides `-h` and `--help` for custom commands before their bodies run.
+The renderer therefore leaves `helpCheck` as an explanatory generated comment;
+it does not inspect `$args` or replace Nushell's native command help.
 
-Expected function shape:
-
-```nu
-def build [...args] {
-  # generated helpCheck goes here
-  nix build
-}
-```
-
-Nix module pattern:
-
-```nix
-renderer = L.renderers.nushell;
-
-helpCheck =
-  cmd:
-  L.mkHelpCheck {
-    inherit cmd renderer layout;
-    desc = legend.${cmd};
-    cmdColor = libThemes.theme.bold_zero;
-    reset = libThemes.mode.reset;
-  };
-```
-
-This renderer assumes generated functions expose runtime arguments as `args`,
-for example `def name [...args] { ... }`. Treat this implementation as the
-initial Nushell backend and validate it against the first real Nushell consumer.
-
-## Step-by-step implementation
-
-Use this when a Nix module generates Nushell commands.
-
-### 1. Select the renderer
+Explicit project help screens still use the shared layout functions:
 
 ```nix
 let
   L = nix-fuel.fuelLibs.helpLegendDecorator;
-  renderer = L.renderers.nushell;
-in
-...
-```
-
-### 2. Define shared command data
-
-```nix
-let
-  colors = {
-    cmd = "\\033[1;36m";
-    header = "\\033[1;33m";
-    reset = "\\033[0m";
-  };
+  libHelpLegendRenderer = L.libHelpLegendRenderer.nushell;
 
   legend = {
     build = "Build the project output";
     test = "Run the test suite";
-    lint = "Run formatting and lint checks";
   };
-
   groups = [
     {
       name = "Project";
-      cmds = [ "build" "test" "lint" ];
+      cmds = [ "build" "test" ];
     }
   ];
-
   descFn = cmd: legend.${cmd};
   layout = L.sectionLayout { inherit groups descFn; };
+
+  projectSection = L.mkHelpSection {
+    inherit libHelpLegendRenderer groups descFn layout;
+    cmdColor = "\\e[1;36m";
+    headerColor = "\\e[1;33m";
+    reset = "\\e[0m";
+  };
 in
-...
+''
+  def project-help [] {
+    ${projectSection.text}
+  }
+''
 ```
 
-### 3. Build the reusable help guard
+Theme values enter the shared API as textual `\e[...]` escapes. The Nushell
+renderer converts them to Nushell-native `\u{1b}[...]` escapes in generated
+source. Nushell does not interpret `\e` or octal-looking `\033` strings as ESC.
 
-```nix
-let
-  helpCheck =
-    cmd:
-    L.mkHelpCheck {
-      inherit cmd renderer layout;
-      desc = legend.${cmd};
-      cmdColor = colors.cmd;
-      reset = colors.reset;
-    };
-in
-...
-```
+## Generated shape
 
-For `build`, the renderer emits Nushell code shaped like this:
+The section above produces statements shaped like:
 
 ```nu
-let __help_arg = ($args | get 0? | default "")
-if ($__help_arg == "-h" or $__help_arg == "--help") {
-  print --no-newline "\n  build  Build the project output"
-  print --no-newline "\n"
-  return
-}
+print --no-newline "\n\u{1b}[1;33mProject\u{1b}[0m"
+print --no-newline "\n  \u{1b}[1;36mbuild\u{1b}[0m  Build the project output"
 ```
 
-### 4. Put the guard inside real commands
+Validate generated files with `nu-check`, then execute decorated fixtures when
+runtime escape behavior matters. Source checks should find textual `\u{1b}`;
+runtime checks should find byte `0x1B`.
 
-```nix
-functions = ''
-  def build [...args: string] {
-    ${helpCheck "build"}
-    nix build
-  }
+## Where to look next
 
-  def test [...args: string] {
-    ${helpCheck "test"}
-    nix flake check
-  }
-
-  def lint [...args: string] {
-    ${helpCheck "lint"}
-    nix fmt
-  }
-'';
-```
-
-Now `build --help` prints the one-line legend entry and returns before running
-`nix build`.
-
-### 5. Add a full help screen
-
-```nix
-let
-  projectSection = L.mkHelpSection {
-    inherit renderer groups descFn layout;
-    cmdColor = colors.cmd;
-    headerColor = colors.header;
-    reset = colors.reset;
-  };
-
-  helpFunction = ''
-    def project-help [] {
-      ${projectSection.text}
-    }
-  '';
-in
-helpFunction
-```
-
-Validate the generated command text with the same Nushell parse check used by
-your project, for example `nu --commands`.
+- `../README.md` - shared layout and renderer API
+- `README.md` - runtime adapter boundary
+- `../../../themes/README.md` - semantic color slots and escape generation

@@ -41,7 +41,7 @@ nix eval --no-write-lock-file --json '.#fuelLibs' --apply builtins.attrNames
 Expected output includes `modulon`:
 
 ```json
-["flakeRoot","gitRepoState","gitRepoStateRenderer","guardFlakeInput","helpLegendDecorator","mkGitRepoState","modulette","modulon","themes"]
+["dynamicAliases","flakeRoot","gitRepoState","guardFlakeInput","helpLegendDecorator","mkGitRepoState","modulette","modulon","nixOptionsToMd","themes"]
 ```
 
 ## Parser Check

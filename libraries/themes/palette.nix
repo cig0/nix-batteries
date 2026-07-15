@@ -33,6 +33,9 @@
 {
   flakeRoot,
   lib,
+  # Caller args → fixture source trees; public fuelLibs uses both defaults.
+  palettesDirectory ? ./palettes,
+  themesDirectory ? ./themes,
   ...
 }:
 let
@@ -44,16 +47,40 @@ let
   defaultDimFactor = 0.55;
 
   # ----+ Palette discovery +----
-  # Load all palette .nix files from palettes/ as name → hex attrsets.
+  # Load all regular palette .nix files as name → validated hex attrsets.
   # Palettes are plain data files — no Modulette header validation needed.
+  validateHexSet =
+    context:
+    lib.mapAttrs (
+      name: value:
+      if builtins.isString value && builtins.match "^#[0-9a-fA-F]{6}$" value != null then
+        value
+      else
+        let
+          actual = if builtins.isString value then builtins.toJSON value else builtins.typeOf value;
+        in
+        throw "Invalid ${context} color '${name}': expected #RRGGBB, got ${actual}"
+    );
+
   palettes =
     let
-      entries = builtins.attrNames (builtins.readDir ./palettes);
-      nixFiles = builtins.filter (lib.hasSuffix ".nix") entries;
+      entryTypes = builtins.readDir palettesDirectory;
+      entries = builtins.attrNames entryTypes;
+      nixFiles = builtins.filter (
+        name: entryTypes.${name} == "regular" && lib.hasSuffix ".nix" name
+      ) entries;
       keyFromName = name: builtins.substring 0 (builtins.stringLength name - 4) name;
     in
     builtins.listToAttrs (
-      map (name: lib.nameValuePair (keyFromName name) (import (./palettes/${name}))) nixFiles
+      map (
+        name:
+        let
+          paletteName = keyFromName name;
+        in
+        lib.nameValuePair paletteName (
+          validateHexSet "palette '${paletteName}'" (import (palettesDirectory + "/${name}"))
+        )
+      ) nixFiles
     );
 
   # ----+ Hex → RGB conversion +----
@@ -150,7 +177,7 @@ let
   # applying overrides, building the color attrset, and calling slots.
   rawThemes = modulette.discoverModules {
     mode = "flat";
-    directory = ./themes;
+    directory = themesDirectory;
     headerPrefix = "# Theme module.";
     args = { };
   };
@@ -162,17 +189,18 @@ let
       basePalette =
         palettes.${paletteName}
           or (throw "Unknown palette '${paletteName}' for theme '${name}'. Available palettes: ${lib.concatStringsSep ", " (builtins.attrNames palettes)}");
-      hex = basePalette // (rawTheme.overrides or { });
-      color = makeColor {
+      overrides = validateHexSet "theme '${name}' override" (rawTheme.overrides or { });
+      hex = basePalette // overrides;
+      color = builtins.deepSeq hex (makeColor {
         inherit hex;
         dimFactor = rawTheme.dimFactor or defaultDimFactor;
-      };
+      });
     in
     rawTheme.slots { inherit color; }
   ) rawThemes;
 in
 rec {
-  theme = themes;
+  theme = builtins.deepSeq palettes themes;
   inherit mode;
 
   select = name: {

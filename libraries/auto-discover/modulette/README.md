@@ -27,7 +27,8 @@ Scans a directory in flat or directory mode, validates optional headers, imports
 
 #### Flat mode
 
-Scans for `.nix` files directly inside the directory. Keys by filename without `.nix` extension.
+Scans for regular `.nix` files directly inside the directory. Directories whose
+names end in `.nix` are ignored. Keys by filename without `.nix` extension.
 
 ```nix
 modulette.discoverModules {
@@ -177,8 +178,11 @@ let
     { args, directory }:
     let
       # 1. Discover all .nix files in the directory
-      entries = builtins.attrNames (builtins.readDir directory);
-      nixFiles = builtins.filter (lib.hasSuffix ".nix") entries;
+      entryTypes = builtins.readDir directory;
+      entries = builtins.attrNames entryTypes;
+      nixFiles = builtins.filter
+        (name: entryTypes.${name} == "regular" && lib.hasSuffix ".nix" name)
+        entries;
 
       # 2. Filter by POSIX header
       fullPaths = map (f: directory + "/${f}") nixFiles;
@@ -224,9 +228,14 @@ let
       name:
       let
         subDir = directory + "/${name}";
-        subEntries = builtins.attrNames (builtins.readDir subDir);
+        subEntryTypes = builtins.readDir subDir;
+        subEntries = builtins.attrNames subEntryTypes;
       in
-      map (f: subDir + "/${f}") (builtins.filter (lib.hasSuffix ".nix") subEntries)
+      map (f: subDir + "/${f}") (
+        builtins.filter
+          (name: subEntryTypes.${name} == "regular" && lib.hasSuffix ".nix" name)
+          subEntries
+      )
     ) allSubdirs
   );
 
@@ -309,20 +318,28 @@ let
   importCommandModulesByShell =
     { args, directory, expectedKeys, filePrefix ? null, headerText }:
     let
-      entries = builtins.attrNames (builtins.readDir directory);
+      entryTypes = builtins.readDir directory;
+      entries = builtins.attrNames entryTypes;
       # 1. Top-level .nix files (e.g., posix-git.nix, fish-git.nix)
-      nixFiles = builtins.filter (lib.hasSuffix ".nix") entries;
+      nixFiles = builtins.filter
+        (name: entryTypes.${name} == "regular" && lib.hasSuffix ".nix" name)
+        entries;
       # All subdirectories in the directory
-      allSubdirs = builtins.filter (name: (builtins.readDir directory).${name} == "directory") entries;
+      allSubdirs = builtins.filter (name: entryTypes.${name} == "directory") entries;
       # 2. Collect all .nix files from all subdirectories
       subNixFiles = builtins.concatLists (
         map (
           name:
           let
             subDir = directory + "/${name}";
-            subEntries = builtins.attrNames (builtins.readDir subDir);
+            subEntryTypes = builtins.readDir subDir;
+            subEntries = builtins.attrNames subEntryTypes;
           in
-          map (f: subDir + "/${f}") (builtins.filter (lib.hasSuffix ".nix") subEntries)
+          map (f: subDir + "/${f}") (
+            builtins.filter
+              (entry: subEntryTypes.${entry} == "regular" && lib.hasSuffix ".nix" entry)
+              subEntries
+          )
         ) allSubdirs
       );
       # All candidate paths

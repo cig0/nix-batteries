@@ -148,12 +148,15 @@ let
       targetFile ? "host.nix",
     }:
     let
-      entries = builtins.attrNames (builtins.readDir directory);
+      entryTypes = builtins.readDir directory;
+      entries = builtins.attrNames entryTypes;
 
       result =
         if mode == "flat" then
           let
-            nixFiles = builtins.filter (lib.hasSuffix ".nix") entries;
+            nixFiles = builtins.filter (
+              name: entryTypes.${name} == "regular" && lib.hasSuffix ".nix" name
+            ) entries;
             candidateFiles = builtins.filter (name: !(builtins.elem name exclude)) nixFiles;
             validFiles = builtins.filter (
               name:
@@ -172,9 +175,7 @@ let
 
         else if mode == "directory" then
           let
-            dirEntries = builtins.attrNames (
-              builtins.filterAttrs (_: type: type == "directory") (builtins.readDir directory)
-            );
+            dirEntries = builtins.attrNames (builtins.filterAttrs (_: type: type == "directory") entryTypes);
             candidateDirs = builtins.filter (name: !(builtins.elem name exclude)) dirEntries;
             validDirs = builtins.filter (
               name:

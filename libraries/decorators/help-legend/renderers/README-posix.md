@@ -1,6 +1,6 @@
 # POSIX Help Legend Renderer
 
-Use `renderers.posix` for bash/zsh-compatible command modules.
+Use `libHelpLegendRenderer.posix` for bash/zsh-compatible command modules.
 
 The renderer maps the common help-legend contract to POSIX shell snippets:
 
@@ -20,12 +20,12 @@ build() {
 Nix module pattern:
 
 ```nix
-renderer = L.renderers.posix;
+libHelpLegendRenderer = L.libHelpLegendRenderer.posix;
 
 helpCheck =
   cmd:
   L.mkHelpCheck {
-    inherit cmd renderer layout;
+    inherit cmd layout libHelpLegendRenderer;
     desc = legend.${cmd};
     cmdColor = libThemes.theme.bold_zero;
     reset = libThemes.mode.reset;
@@ -56,7 +56,7 @@ Use this when a Nix module generates shell functions for bash or zsh.
 ```nix
 let
   L = nix-fuel.fuelLibs.helpLegendDecorator;
-  renderer = L.renderers.posix;
+  libHelpLegendRenderer = L.libHelpLegendRenderer.posix;
 in
 ...
 ```
@@ -66,9 +66,9 @@ in
 ```nix
 let
   colors = {
-    cmd = "\\033[1;36m";
-    header = "\\033[1;33m";
-    reset = "\\033[0m";
+    cmd = "\\e[1;36m";
+    header = "\\e[1;33m";
+    reset = "\\e[0m";
   };
 
   legend = {
@@ -97,7 +97,7 @@ let
   helpCheck =
     cmd:
     L.mkHelpCheck {
-      inherit cmd renderer layout;
+      inherit cmd layout libHelpLegendRenderer;
       desc = legend.${cmd};
       cmdColor = colors.cmd;
       reset = colors.reset;
@@ -145,7 +145,7 @@ Now `build --help` prints the one-line legend entry and returns before running
 ```nix
 let
   projectSection = L.mkHelpSection {
-    inherit renderer groups descFn layout;
+    inherit libHelpLegendRenderer groups descFn layout;
     cmdColor = colors.cmd;
     headerColor = colors.header;
     reset = colors.reset;

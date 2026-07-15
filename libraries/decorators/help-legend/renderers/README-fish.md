@@ -1,6 +1,6 @@
 # Fish Help Legend Renderer
 
-Use `renderers.fish` for fish command modules.
+Use `libHelpLegendRenderer.fish` for fish command modules.
 
 The renderer maps the common help-legend contract to fish snippets:
 
@@ -20,12 +20,12 @@ end
 Nix module pattern:
 
 ```nix
-renderer = L.renderers.fish;
+libHelpLegendRenderer = L.libHelpLegendRenderer.fish;
 
 helpCheck =
   cmd:
   L.mkHelpCheck {
-    inherit cmd renderer layout;
+    inherit cmd layout libHelpLegendRenderer;
     desc = legend.${cmd};
     cmdColor = libThemes.theme.bold_zero;
     reset = libThemes.mode.reset;
@@ -45,7 +45,7 @@ Use this when a Nix module generates Fish functions.
 ```nix
 let
   L = nix-fuel.fuelLibs.helpLegendDecorator;
-  renderer = L.renderers.fish;
+  libHelpLegendRenderer = L.libHelpLegendRenderer.fish;
 in
 ...
 ```
@@ -55,9 +55,9 @@ in
 ```nix
 let
   colors = {
-    cmd = "\\033[1;36m";
-    header = "\\033[1;33m";
-    reset = "\\033[0m";
+    cmd = "\\e[1;36m";
+    header = "\\e[1;33m";
+    reset = "\\e[0m";
   };
 
   legend = {
@@ -86,7 +86,7 @@ let
   helpCheck =
     cmd:
     L.mkHelpCheck {
-      inherit cmd renderer layout;
+      inherit cmd layout libHelpLegendRenderer;
       desc = legend.${cmd};
       cmdColor = colors.cmd;
       reset = colors.reset;
@@ -134,7 +134,7 @@ Now `build --help` prints the one-line legend entry and returns before running
 ```nix
 let
   projectSection = L.mkHelpSection {
-    inherit renderer groups descFn layout;
+    inherit libHelpLegendRenderer groups descFn layout;
     cmdColor = colors.cmd;
     headerColor = colors.header;
     reset = colors.reset;
