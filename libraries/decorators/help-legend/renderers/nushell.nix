@@ -1,22 +1,13 @@
 { ... }:
 {
   shell = "nushell";
-  print = text: ''print --no-newline "${text}"'';
+  print =
+    text:
+    let
+      nushellText = builtins.replaceStrings [ "\\e" ] [ "\\u{1b}" ] text;
+    in
+    ''print --no-newline "${nushellText}"'';
 
-  helpCheck =
-    {
-      cmd,
-      cmdColor,
-      desc,
-      pad,
-      reset,
-    }:
-    ''
-      let __help_arg = ($args | get 0? | default "")
-      if ($__help_arg == "-h" or $__help_arg == "--help") {
-        print --no-newline "\n  ${cmdColor}${cmd}${reset}${pad}${desc}"
-        print --no-newline "\n"
-        return
-      }
-    '';
+  # Nushell reserves -h/--help for native custom-command help before the body runs.
+  helpCheck = _: "# Nushell provides native -h/--help handling for custom commands.";
 }

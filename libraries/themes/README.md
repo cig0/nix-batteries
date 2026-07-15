@@ -222,7 +222,9 @@ throws with a list of available palettes.
 | `tailwind-inspired` | Tailwind CSS default palette, neutral and readable |
 
 Each palette is a `name → "#RRGGBB"` attrset. Themes consume palettes via the
-`palette` field and may override individual colors via `overrides`.
+`palette` field and may override individual colors via `overrides`. Palette and
+override values are validated as the exact `#RRGGBB` form before rendering;
+invalid values identify their palette or theme and color key in the error.
 
 ## Palette colors
 

@@ -4,7 +4,10 @@ This directory contains focused fixtures for both scanning modes of `fuelLibs.mo
 
 ## Flat mode fixture
 
-The `modules/` fixture proves that discovery imports only files whose first line matches the requested header, passes `args` through to the imported module, and returns an attrset keyed by filename without `.nix`.
+The `modules/` fixture proves that discovery imports only regular files whose
+first line matches the requested header, ignores directories with `.nix`
+suffixes, passes `args` through to the imported module, and returns an attrset
+keyed by filename without `.nix`.
 
 The root `flake.nix` check scans `modules/` with:
 
@@ -25,6 +28,8 @@ It then asserts that the discovered attrset contains only `alpha` and that `alph
 
 - `modules/alpha.nix` has the expected first-line header and should be loaded.
 - `modules/ignored.nix` has a different first-line header and should be ignored.
+- `modules/not-a-file.nix/` is a directory and should be ignored before header
+  validation or import.
 
 ## Directory mode fixture
 

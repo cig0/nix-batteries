@@ -16,7 +16,7 @@
 - a renderer selected for the target runtime
 
 <br>
-  
+
 The shared library owns layout, padding, section rendering, centered titles, and
 one-line help checks. Consumers own command behavior, shell function names,
 aliases, section order, platform gating, and detailed command-specific help.
@@ -33,8 +33,9 @@ Build command help in three layers:
 
 1. **Project data**: command names, descriptions, sections, and theme colors.
 2. **Shared layout**: column width, padding, section rendering, centered titles.
-3. **Runtime renderer**: POSIX, Fish, or Nushell syntax for printing and
-   `-h` / `--help` checks.
+3. **Runtime renderer**: POSIX, Fish, or Nushell syntax for printing. POSIX and
+   Fish also provide explicit `-h` / `--help` checks; Nushell provides native
+   custom-command help.
 
 The renderer changes shell syntax only. The command data and layout calls stay
 the same.
@@ -51,13 +52,13 @@ for generated shell functions.
 ```nix
 let
   L = nix-fuel.fuelLibs.helpLegendDecorator;
-  renderer = L.renderers.posix;
+  libHelpLegendRenderer = L.libHelpLegendRenderer.posix;
 in
 ...
 ```
 
-Use `L.renderers.fish` or `L.renderers.nushell` when the generated functions
-target those shells.
+Use `L.libHelpLegendRenderer.fish` or `L.libHelpLegendRenderer.nushell` when
+the generated functions target those shells.
 
 #### 2. Define command descriptions and groups
 
@@ -107,16 +108,16 @@ Sharing one layout keeps descriptions aligned across every section.
 ```nix
 let
   colors = {
-    cmd = "\\033[1;36m";
-    header = "\\033[1;33m";
-    title = "\\033[1;32m";
-    reset = "\\033[0m";
+    cmd = "\\e[1;36m";
+    header = "\\e[1;33m";
+    title = "\\e[1;32m";
+    reset = "\\e[0m";
   };
 
   helpCheck =
     cmd:
     L.mkHelpCheck {
-      inherit cmd renderer layout;
+      inherit cmd layout libHelpLegendRenderer;
       desc = legend.${cmd};
       cmdColor = colors.cmd;
       reset = colors.reset;
@@ -125,16 +126,17 @@ in
 ...
 ```
 
-Insert `${helpCheck "build"}` at the top of the generated `build` function. If
-the user runs `build --help`, the function prints one aligned row and exits
-before running the command body.
+For POSIX and Fish, insert `${helpCheck "build"}` at the top of the generated
+`build` function. If the user runs `build --help`, the function prints one
+aligned row and exits before running the command body. Nushell reserves those
+flags for native custom-command help.
 
 #### 5. Render the full help screen
 
 ```nix
 let
   section = L.mkHelpSection {
-    inherit renderer groups descFn;
+    inherit libHelpLegendRenderer groups descFn;
     layout = layout;
     cmdColor = colors.cmd;
     headerColor = colors.header;
@@ -144,7 +146,7 @@ let
   dailyToolsHelp = ''
     daily-tools-help() {
       ${L.mkCenteredTitle {
-        inherit renderer;
+        inherit libHelpLegendRenderer;
         color = colors.title;
         reset = colors.reset;
         title = "Daily Tools";
@@ -181,18 +183,19 @@ functions = ''
 ```
 
 For Fish or Nushell, keep the same Nix data and switch only the renderer plus
-the shell function wrapper syntax.
+the shell function wrapper syntax. Nushell commands omit the explicit help
+check because its parser owns `-h` and `--help`.
 
 <br>
 
 ### Multi-shell project shape
 
 For a real project, keep the data and layout in one shared Nix file that accepts
-`renderer` as an argument:
+`libHelpLegendRenderer` as an argument:
 
 ```nix
 # daily-tools-help.nix
-{ libHelpLegendDecorator, renderer }:
+{ libHelpLegendDecorator, libHelpLegendRenderer }:
 let
   L = libHelpLegendDecorator;
 
@@ -212,15 +215,15 @@ let
   layout = L.sectionLayout { inherit groups descFn; };
 
   colors = {
-    cmd = "\\033[1;36m";
-    header = "\\033[1;33m";
-    reset = "\\033[0m";
+    cmd = "\\e[1;36m";
+    header = "\\e[1;33m";
+    reset = "\\e[0m";
   };
 
   helpCheck =
     cmd:
     L.mkHelpCheck {
-      inherit cmd renderer layout;
+      inherit cmd layout libHelpLegendRenderer;
       desc = legend.${cmd};
       cmdColor = colors.cmd;
       reset = colors.reset;
@@ -238,7 +241,7 @@ Then each shell module imports that file with its own renderer:
 let
   shared = import ./daily-tools-help.nix {
     inherit libHelpLegendDecorator;
-    renderer = libHelpLegendDecorator.renderers.posix;
+    libHelpLegendRenderer = libHelpLegendDecorator.libHelpLegendRenderer.posix;
   };
 in
 ''
@@ -249,9 +252,9 @@ in
 ''
 ```
 
-Fish and Nushell use the same shared import and change only the renderer plus
-the function wrapper syntax. This is the pattern to use when one command family
-is exposed in several shells.
+Fish uses the same shared import and changes only the renderer plus the function
+wrapper syntax. Nushell uses the same shared layout and section rendering but
+leaves `-h` and `--help` to native custom-command help.
 
 <br>
 
@@ -259,16 +262,17 @@ is exposed in several shells.
 
 - `sectionLayout { groups, descFn, indent ? 2, minGap ? 2 }` computes shared
   alignment data.
-- `mkHelpCheck { cmd, desc, layout, renderer, cmdColor, reset }` renders the
+- `mkHelpCheck { cmd, desc, layout, libHelpLegendRenderer, cmdColor, reset }` renders the
   per-command `-h` / `--help` guard.
-- `mkHelpSection { groups, descFn, layout, renderer, cmdColor, headerColor,
+- `mkHelpSection { groups, descFn, layout, libHelpLegendRenderer, cmdColor, headerColor,
   reset, closing ? [ ] }` renders grouped rows.
-- `mkCenteredTitle { title, width, renderer, color, reset, leadingLines ? 1 }`
+- `mkCenteredTitle { title, width, libHelpLegendRenderer, color, reset, leadingLines ? 1 }`
   renders a centered heading.
 - `enabledWidth sections` returns the widest enabled section width when a help
   screen is assembled conditionally.
-- `renderers.posix`, `renderers.fish`, and `renderers.nushell` adapt the shared
-  contract to shell-native output.
+- `libHelpLegendRenderer.posix`, `libHelpLegendRenderer.fish`, and
+  `libHelpLegendRenderer.nushell` adapt the shared contract to shell-native
+  output.
 
 Renderer contract:
 

@@ -4,7 +4,8 @@ Hex color definitions organized as named palette files. Each palette is a
 Nix attrset mapping color names to `#RRGGBB` hex strings. Palettes are
 immutable — they define base colors that themes consume. Themes that need
 different values use the `overrides` field to patch individual colors
-without modifying the palette file.
+without modifying the palette file. Discovery accepts regular `.nix` files
+only, and every value must match the exact `#RRGGBB` form.
 
 Ref: https://www.figma.com/colors/
 

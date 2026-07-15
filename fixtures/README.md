@@ -11,17 +11,23 @@ Current fixture directories:
 - `modulette/` checks header-validated data-module discovery.
 - `modulon/` checks Nix module auto-discovery, skip markers, and explicit extra
   modules.
+- `nix-options-to-md/` checks option declarations rendered as Markdown rows.
+- `renderers/` checks generic Git-state helpers and help-legend output for
+  POSIX, Fish, and Nushell.
+- `themes/` checks palette entry filtering, strict `#RRGGBB` validation, and
+  theme resolution through fixture-specific source trees.
 
-The check wiring lives in the repository root `flake.nix` under `checks`. When
-you add or change a fixture, update the matching check assertions at the same
-time so the fixture continues to document a real behavior boundary.
+`fixtures/default.nix` aggregates the checks returned by focused fixture
+modules. The repository root `flake.nix` only passes `fuelLibs`, `lib`, and the
+system package set into that aggregator.
 
 ## Fixture Guidelines
 
 Keep fixture files focused:
 
 1. Use the smallest file tree that proves the behavior.
-2. Prefer obvious names such as `valid.nix`, `skipped.nix`, or `ignored.nix`.
+2. Prefer obvious names such as `valid.nix`, `skipped.nix`, or
+   `not-a-file.nix`.
 3. Avoid generated data, host paths, network access, timestamps, and other
    non-deterministic inputs.
 4. Keep fixtures tied to public `self.fuelLibs` behavior, not private

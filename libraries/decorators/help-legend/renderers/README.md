@@ -7,7 +7,8 @@ The layout stays shared; the syntax does not.
 
 - `posix.nix` for bash/zsh-compatible snippets
 - `fish.nix` for Fish conditionals and argument handling
-- `nushell.nix` for Nushell `let`, `$args`, and block syntax
+- `nushell.nix` for Nushell printing; native custom-command help owns
+  `-h` and `--help`
 
 ## What does not belong here
 
@@ -17,24 +18,24 @@ The layout stays shared; the syntax does not.
 
 ## Real example
 
-All renderers implement `print` and `helpCheck`. `fish.nix` checks
-`$argv[1]`; `nushell.nix` reads from `$args`; `posix.nix` checks `$1`. Same
-contract, three honest runtimes.
+All renderers implement `print` and `helpCheck`. `fish.nix` checks `$argv[1]`,
+`posix.nix` checks `$1`, and `nushell.nix` emits a comment because Nushell
+handles native help before a custom-command body runs.
 
 ## Pick the renderer
 
 | Renderer | Use for | Function shape | Help argument | Print primitive | Validate with |
 |----------|---------|----------------|---------------|-----------------|---------------|
-| `renderers.posix` | bash and zsh snippets | `name() { ... }` | `$1` | `printf '%b'` | `bash -n`, `zsh -n` |
-| `renderers.fish` | Fish functions | `function name ... end` | `$argv[1]` | `printf '%b'` | `fish -n` |
-| `renderers.nushell` | Nushell commands | `def name [...args: string] { ... }` | `$args` | `print --no-newline` | `nu --commands` |
+| `libHelpLegendRenderer.posix` | bash and zsh snippets | `name() { ... }` | `$1` | `printf '%b'` | `bash -n`, `zsh -n` |
+| `libHelpLegendRenderer.fish` | Fish functions | `function name ... end` | `$argv[1]` | `printf '%b'` | `fish --no-execute` |
+| `libHelpLegendRenderer.nushell` | Nushell commands | `def name [] { ... }` | native `-h` / `--help` | `print --no-newline` | `nu-check` |
 
 The Nix side should look almost identical for every renderer:
 
 ```nix
 let
   L = nix-fuel.fuelLibs.helpLegendDecorator;
-  renderer = L.renderers.posix; # or fish / nushell
+  libHelpLegendRenderer = L.libHelpLegendRenderer.posix; # or fish / nushell
 
   layout = L.sectionLayout {
     inherit groups descFn;
@@ -43,7 +44,7 @@ let
   helpCheck =
     cmd:
     L.mkHelpCheck {
-      inherit cmd renderer layout;
+      inherit cmd layout libHelpLegendRenderer;
       desc = legend.${cmd};
       cmdColor = colors.cmd;
       reset = colors.reset;
@@ -52,15 +53,17 @@ in
 ...
 ```
 
-The consumer module then places `${helpCheck "build"}` inside a shell-native
-function body. That placement is the only part that should change per runtime.
+POSIX and Fish consumers place `${helpCheck "build"}` inside a shell-native
+function body. Nushell uses its native custom-command help and uses the renderer
+only for explicitly rendered titles and sections.
 
-You might also want to check [themes](../../themes/README.md) for a more robust way to handle colors and themes in the terminal.
+You might also want to check [themes](../../../themes/README.md) for semantic
+color slots and terminal escape generation.
 
 ## Where to look next
 
 - `../README.md` - shared help-legend contract
-- [`themes`](../../themes/README.md) - semantic color slots and bundled palettes
+- [`themes`](../../../themes/README.md) - semantic color slots and bundled palettes
 - `README-posix.md` - POSIX usage pattern
 - `README-fish.md` - Fish usage pattern
 - `README-nushell.md` - Nushell usage pattern
