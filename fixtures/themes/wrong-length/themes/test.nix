@@ -1,6 +1,11 @@
 # Theme module. Fixture theme.
 { }:
-{
-  palette = "base";
-  slots = { color }: { zero = color.blue; };
+let
+  validTheme = (import ../../valid/themes/test.nix) { };
+in
+validTheme
+// {
+  slots = validTheme.slots // {
+    zero = "#20406";
+  };
 }

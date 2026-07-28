@@ -1,40 +1,30 @@
 # Theme module. Do not remove this header.
-/*
-  Override palette colors per-theme. Patched hex flows into
-  color.* automatically:
-
-    { }:
-    {
-      palette = "fuel";
-      overrides = { blue = "#4488dd"; };
-      dimFactor = 0.4;   # lower = dimmer (default: 0.55)
-      slots = { color }:
-      {
-        bold_two = color.bold.blue;  # ← uses overridden #4488dd
-      };
-    }
-*/
+# Dracula — high-contrast dark theme with cyan and pink accents
 { }:
 {
-  palette = "fuel";
-  slots =
-    { color }:
-    {
-      bold_zero = color.bold.cyan;
-      bold_one = color.bold.white;
-      bold_two = color.bold.magenta;
-      bold_three = color.bold.green;
-      bold_four = color.bold.yellow;
-      bold_five = color.bold.red;
-      bold_six = "";
-      bold_seven = "";
-      dimmed_zero = color.dimmed.cyan;
-      dimmed_one = color.dimmed.white;
-      zero = color.cyan;
-      one = color.white;
-      two = color.magenta;
-      three = color.green;
-      four = color.yellow;
-      five = color.red;
-    };
+  boldFactor = 1.0;
+  dimFactor = 0.55;
+
+  slots = rec {
+    zero = "#8be9fd"; # Cyan
+    one = "#f8f8f2"; # Foreground
+    two = "#ff79c6"; # Pink
+    three = "#50fa7b"; # Green
+    four = "#f1fa8c"; # Yellow
+    five = "#ff5555"; # Red
+    six = "#ffb86c"; # Orange
+    seven = "#bd93f9"; # Purple
+
+    bold_zero = zero;
+    bold_one = one;
+    bold_two = two;
+    bold_three = three;
+    bold_four = four;
+    bold_five = five;
+    bold_six = six;
+    bold_seven = seven;
+
+    dimmed_zero = zero;
+    dimmed_one = one;
+  };
 }

@@ -1,302 +1,211 @@
 # Themes
 
-True-color palette and slot-based theme system for terminal output. Colors are
-defined as hex values in palette files, rendered as 24-bit true-color escape
-codes, and mapped to semantic slots by theme files. Each theme declares which
-palette it consumes and may override individual colors. Theme files are
-auto-discovered via Modulette — drop a `.nix` file with the required header
-and it becomes available.
+Self-contained true-color themes for terminal output. Each theme owns the
+`#RRGGBB` values assigned to semantic numbered slots. The resolver validates
+the theme, applies its bold and dim factors, and renders 24-bit foreground
+escape codes.
+
+Theme files are auto-discovered via Modulette. Add a `.nix` file with the
+required header and it becomes available through `fuelLibs.themes`.
 
 ## Architecture
 
-Colors are decoupled from usage through three layers:
+The system has two ownership layers:
 
-1. **Palette** (`palettes/*.nix`) — immutable hex color definitions (#RRGGBB).
-   Palettes define base colors that themes consume.
-2. **Theme** (`themes/*.nix`) — declares which palette to consume, optional
-   color overrides and `dimFactor`, and maps numbered slots to palette colors.
-3. **Consuming code** — references only numbered slots (`bold_zero`,
-   `bold_one`, …).
+1. **Theme** (`themes/*.nix`) — owns slot colors, `boldFactor`, and
+   `dimFactor`.
+2. **Consumer** — references only rendered semantic slots such as
+   `bold_zero`, `dimmed_one`, or `five`.
 
 ```mermaid
 graph LR
-    A["palettes/*.nix<br/>(immutable hex)"] -->|"+ overrides"| B["makeColor"]
-    B -->|"color.bold.yellow"| C["theme slots"]
-    C -->|"bold_zero = …"| D["libThemes.theme"]
-    D -->|resolve| E["shell printf"]
+    A["themes/*.nix<br/>(slot hex values + factors)"] --> B["resolver.nix"]
+    B -->|"render true-color codes"| C["fuelLibs.themes"]
+    C -->|resolve| D["shell output"]
 ```
 
-Your code only references `theme.bold_zero`. Swap the theme file and the same
-slot produces a different color — no consumer edits.
+There is no shared palette or fallback color source. A theme is complete and
+readable in isolation.
 
-### Palette resolution per theme
+## Rendering rules
 
-Each theme resolves its palette independently:
+Slot names declare their rendering behavior:
 
-1. Theme declares `palette = "crt"` (or `"tailwind-inspired"`, `"fuel"`, etc.)
-2. `palette.nix` loads the palette hex values from `palettes/<name>.nix`
-3. Theme's `overrides` (if any) are merged: `hex = basePalette // overrides`
-4. The merged hex is converted to `color.*` escape codes
-5. The `color` attrset is passed to the theme's `slots` function
+| Name pattern | Rendering                                                                 |
+| ------------ | ------------------------------------------------------------------------- |
+| `zero`       | Original RGB rendered as a regular 24-bit foreground                      |
+| `bold_zero`  | RGB multiplied by `boldFactor`, clamped to 255, and rendered with SGR bold |
+| `dimmed_zero`| RGB multiplied by `dimFactor` and rendered as a regular 24-bit foreground |
 
-### Slot assignments
+Both factors are non-negative numbers. Their defaults are:
 
-Every theme maps the same semantic slots to different palette colors. The slot
-role is fixed — only the color changes between themes.
+```nix
+boldFactor = 1.0;
+dimFactor = 0.55;
+```
 
-| Slot          | Role                                        |
-| ------------- | ------------------------------------------- |
-| `bold_zero`   | Primary accent (success, headers, positive) |
-| `bold_one`    | Text emphasis                               |
-| `bold_two`    | Tertiary accent (e.g. NixOS section)        |
-| `bold_three`  | Callout / alternative highlight             |
-| `bold_four`   | Warning / highlight                         |
-| `bold_five`   | Error / danger                              |
-| `dimmed_zero` | Dimmed primary accent                       |
-| `dimmed_one`  | Dimmed text emphasis                        |
-| `zero`        | Non-bold primary accent                     |
-| `one`         | Non-bold text emphasis                      |
-| `two`         | Non-bold tertiary accent                    |
-| `three`       | Non-bold callout                            |
-| `four`        | Non-bold warning                            |
-| `five`        | Non-bold error                              |
+The scaling formula for each RGB channel is
+`min 255 (floor (channel * factor))`.
 
-Mode codes are theme-independent text attributes (defined in `palette.nix`):
+Dimmed slots use scaled RGB instead of the SGR faint attribute. Faint rendering
+varies across terminals and can shift 24-bit colors unpredictably.
+
+## Slot contract
+
+Every bundled theme defines the regular and bold forms of slots zero through
+seven, plus the two common dimmed slots:
+
+| Slot family | Role                                          |
+| ----------- | --------------------------------------------- |
+| `zero`      | Primary accent, success, headers, positive    |
+| `one`       | Text emphasis                                 |
+| `two`       | Tertiary accent, section highlight            |
+| `three`     | Callout or alternative highlight              |
+| `four`      | Warning or important highlight                |
+| `five`      | Error or danger                               |
+| `six`       | State change, dirty state, or secondary alert |
+| `seven`     | Location, host, path, or contextual accent    |
+
+Required rendered keys are:
+
+- `zero` through `seven`
+- `bold_zero` through `bold_seven`
+- `dimmed_zero` and `dimmed_one`
+
+Themes may add specialized slots. `311amber`, for example, also provides
+`two_light` and `bold_two_light`.
+
+Mode codes remain theme-independent:
 
 | Attribute     | Code    | Role                      |
 | ------------- | ------- | ------------------------- |
 | `mode.reset`  | `\e[0m` | Reset all text attributes |
 | `mode.italic` | `\e[3m` | Italic text               |
 
-## Quick start
+## Theme format
 
-### Add the library to your flake
+Theme values are flat and use the same names exported to consumers. A
+recursive slot attrset lets variants reuse a prime color without repeating its
+hex value:
 
 ```nix
-# flake.nix
-inputs = {
-  nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  fuel.url = "github:your-org/nix-fuel";
-};
+# Theme module. Do not remove this header.
+{ }:
+{
+  boldFactor = 1.0;
+  dimFactor = 0.55;
 
-outputs = { nixpkgs, fuel, ... }:
+  slots = rec {
+    zero = "#4a6fa5";
+    one = "#f8fafc";
+    two = "#06b6d4";
+    three = "#d946ef";
+    four = "#f59e0b";
+    five = "#ef4444";
+    six = "#ff6600";
+    seven = "#22c55e";
+
+    bold_zero = zero;
+    bold_one = one;
+    bold_two = two;
+    bold_three = three;
+    bold_four = four;
+    bold_five = five;
+    bold_six = six;
+    bold_seven = seven;
+
+    dimmed_zero = zero;
+    dimmed_one = one;
+  };
+}
+```
+
+Every slot value must use the exact `#RRGGBB` form. Factors and slot values are
+validated before rendering. Missing required slots report the theme name and
+the complete missing-slot list.
+
+## Quick start
+
+Add the flake and obtain the public theme library:
+
+```nix
+inputs.fuel.url = "github:your-org/nix-fuel";
+
+outputs = { fuel, ... }:
 let
   libThemes = fuel.fuelLibs.themes;
 in
-  { ... };
+{
+  # ...
+};
 ```
 
-`flakeRoot` is baked in — `fuel.fuelLibs.themes` is ready to use.
-
-### Resolve a theme for your host
-
-`libThemes.theme` is a nested attrset (one entry per theme). Most of the time
-you want **one** theme resolved for the current host. `resolve` flattens it
-into a single slot set and optionally strips color codes:
+Resolve one theme before passing it to consumers:
 
 ```nix
 let
-  c = libThemes.resolve {
-    name = "nushell-inspired";
+  colors = libThemes.resolve {
+    name = "311amber";
     enableColors = true;
   };
-in ''
-  printf '%b' "  ${c.theme.bold_zero}OK${c.mode.reset}   Package installed"
-  printf '%b' "\n  ${c.theme.bold_four}WARN${c.mode.reset} Version outdated"
-  printf '%b' "\n  ${c.theme.bold_five}ERR${c.mode.reset}  Build failed"
-  printf '%b' "\n"
+in
+''
+  printf '%b' "${colors.theme.bold_zero}OK${colors.mode.reset}"
+  printf '%b' "\n${colors.theme.bold_four}WARN${colors.mode.reset}"
+  printf '%b' "\n${colors.theme.bold_five}ERROR${colors.mode.reset}"
 ''
 ```
 
-When `enableColors = false`, every slot resolves to `""` — same `printf`
-calls, plain output, no branching. `mode.reset` and `mode.italic` also become
-empty strings, so the terminal's own color palette flows through untouched.
+When `enableColors = false`, all theme slots and mode codes resolve to empty
+strings. Output structure remains unchanged without conditional rendering in
+each consumer.
 
-> **Don't skip `resolve`.** Using `libThemes.theme.bold_zero` directly returns an
-> attrset of theme maps — not a string. Always `resolve` first.
+## Home Manager integration
 
-## Integration
-
-In a NixOS + Home Manager setup, declare the theme per host in `profile.nix`:
+Select the theme through the host profile:
 
 ```nix
-# hosts/my-laptop/profile.nix
 myOptions.hm.data.theme = {
   enableColors = true;
   name = "311amber";
 };
 ```
 
-`enableColors` → `true` emits real terminal colors, `false` strips all color
-codes. `null` (the default) enables colors when at least one shell program is
-active for the host.
+`enableColors = null` is the module default and lets the consuming
+configuration decide whether active shells should enable colors.
 
-Resolve once and pass downstream — modules don't need to know which theme is
-active or how colors were toggled:
+Resolve once and pass the selected `{ theme, mode }` value downstream through
+`extraSpecialArgs` or `_module.args`. Consumers should not select themes or
+interpret factors themselves.
 
-```nix
-let
-  c = libThemes.resolve {
-    name = config.myOptions.hm.data.theme.name;
-    # → enableColors: explicit override from profile, or auto-detect from shell enablement
-    enableColors =
-      let ec = config.myOptions.hm.data.theme.enableColors;
-      in if ec != null then ec else anyShellEnabled;
-  };
-in
-# Pass `c` (or `libThemes = c`) to every module that prints colored output
-```
+## Bundled themes
 
-Wire `libThemes` through `extraSpecialArgs` (NixOS) or `_module.args` (standalone
-HM). Downstream modules receive it as a function argument:
+| Theme            | Source or intent                                  |
+| ---------------- | ------------------------------------------------- |
+| 311amber         | Custom vintage amber phosphor CRT                 |
+| catppuccin-mocha | Official Catppuccin Mocha colors                  |
+| dracula          | Official Dracula OSS colors                       |
+| gruvbox-dark     | Official Gruvbox dark bright colors               |
+| nord             | Official Nord Frost, Snow Storm, and Aurora colors|
+| nushell-inspired | Nushell default terminal color roles              |
+| steel            | Custom muted blue with Tailwind-inspired accents  |
 
-```nix
-# NixOS — config/home-manager/home.nix
-home-manager.extraSpecialArgs = { inherit libThemes; };
-
-# Standalone HM — flake.nix.d/builders.nix
-_module.args = { inherit libThemes; };
-```
-
-## Theme format
-
-Every theme file declares four fields:
-
-| Field       | Required | Description                                                              |
-| ----------- | -------- | ------------------------------------------------------------------------ |
-| `palette`   | yes      | Palette file name in `palettes/` (without `.nix`)                        |
-| `overrides` | no       | `{ name = "#hex"; }` patches to palette colors (default: `{ }`)          |
-| `dimFactor` | no       | Dimming intensity for `color.dimmed.*` (default: `0.55`, lower = dimmer) |
-| `slots`     | yes      | Function from `{ color }` to the slot attrset                            |
-
-Overrides replace or add palette colors for a single theme — all variants
-(`color.bold.<name>`, `color.<name>`, `color.dimmed.<name>`) derive from the
-patched hex. Other themes using the same palette are unaffected.
-
-```nix
-# Theme module. Do not remove this header.
-# Steel — Tailwind palette with a muted blue override
-{ }:
-{
-  palette = "tailwind-inspired";
-  overrides = { blue = "#4a6fa5"; };
-  dimFactor = 0.4;   # lower = dimmer (default: 0.55)
-  slots = { color }:
-  {
-    bold_zero = color.bold.blue;    # ← #4a6fa5, not the palette's #3b82f6
-    bold_one  = color.bold.white;
-    # ...
-  };
-}
-```
-
-See [theme files](themes/README.md) for the full format and override examples.
-To add a new palette, see [palette files](palettes/README.md).
-
-## Available themes
-
-| Theme            | Palette                       | Slot 0  | Slot 1 | Slot 2  | Slot 3  | Slot 4  | Slot 5 | Feel                       |
-| ---------------- | ----------------------------- | ------- | ------ | ------- | ------- | ------- | ------ | -------------------------- |
-| 311amber         | crt                           | orange  | white  | blue    | magenta | yellow  | red    | Vintage phosphor CRT       |
-| catppuccin-mocha | fuel                          | magenta | white  | cyan    | blue    | yellow  | red    | Soft pastels, Mauve accent |
-| dracula          | fuel                          | cyan    | white  | magenta | green   | yellow  | red    | Dark purple, cyan accents  |
-| gruvbox-dark     | fuel                          | yellow  | white  | cyan    | green   | magenta | red    | Warm, retro, amber accent  |
-| nord             | fuel                          | blue    | white  | cyan    | magenta | yellow  | red    | Cold, icy blues            |
-| nushell-inspired | fuel                          | green   | white  | blue    | magenta | yellow  | red    | ANSI terminal colors       |
-| steel            | tailwind-inspired + overrides | blue    | white  | cyan    | magenta | yellow  | red    | Muted steel blue accent    |
-
-Set `myOptions.hm.data.theme.name` and `myOptions.hm.data.theme.enableColors`
-in your host's `profile.nix`. The name is the filename without `.nix`;
-`enableColors` defaults to `null` (auto-detect from shell enablement).
-
-If the name doesn't match a theme file, `resolve` throws with a list of
-available themes. If a theme references a nonexistent palette, `palette.nix`
-throws with a list of available palettes.
-
-## Available palettes
-
-| Palette             | Feel                                                           |
-| ------------------- | -------------------------------------------------------------- |
-| `crt`               | Warm amber phosphor monitor aesthetic — shifted blues/magentas |
-| `fuel`              | Standard ANSI terminal colors (xterm-256color)                 |
-| `tailwind-inspired` | Tailwind CSS default palette, neutral and readable             |
-
-Each palette is a `name → "#RRGGBB"` attrset. Themes consume palettes via the
-`palette` field and may override individual colors via `overrides`. Palette and
-override values are validated as the exact `#RRGGBB` form before rendering;
-invalid values identify their palette or theme and color key in the error.
-
-## Palette colors
-
-### crt
-
-| Name    | Hex       | Description                      |
-| ------- | --------- | -------------------------------- |
-| blue    | `#5b8dd9` | Warmer blue for dark backgrounds |
-| cyan    | `#00b8b8` | Teal-shifted cyan                |
-| green   | `#22c55e` | Standard green                   |
-| grey    | `#aaaaaa` | Light grey for dimmed text       |
-| magenta | `#cc66cc` | Warmer magenta                   |
-| orange  | `#ffb343` | Amber orange                     |
-| red     | `#ef4444` | Standard red                     |
-| white   | `#f8fafc` | Near-white                       |
-| yellow  | `#ffed29` | Bright yolk yellow               |
-
-### fuel
-
-| Name    | Hex       | ANSI code | Description           |
-| ------- | --------- | --------- | --------------------- |
-| blue    | `#0000ee` | 34        | Standard ANSI blue    |
-| cyan    | `#00cdcd` | 36        | Standard ANSI cyan    |
-| green   | `#00cd00` | 32        | Standard ANSI green   |
-| grey    | `#767676` | —         | Terminal grey         |
-| magenta | `#cd00cd` | 35        | Standard ANSI magenta |
-| orange  | `#ff6600` | —         | Vivid orange (compat) |
-| red     | `#cd0000` | 31        | Standard ANSI red     |
-| white   | `#ffffff` | 97        | Bright white          |
-| yellow  | `#cdcd00` | 33        | Standard ANSI yellow  |
-
-### tailwind-inspired
-
-| Name    | Hex       | Description          |
-| ------- | --------- | -------------------- |
-| blue    | `#3b82f6` | Tailwind blue-500    |
-| cyan    | `#06b6d4` | Tailwind cyan-500    |
-| green   | `#22c55e` | Tailwind green-500   |
-| grey    | `#9ca3af` | Tailwind gray-400    |
-| magenta | `#d946ef` | Tailwind fuchsia-500 |
-| orange  | `#ff6600` | Vivid orange         |
-| red     | `#ef4444` | Tailwind red-500     |
-| white   | `#f8fafc` | Tailwind slate-50    |
-| yellow  | `#f59e0b` | Tailwind amber-500   |
-
-Each hex definition generates three foreground variants:
-
-| Variant | Format                          | Example (green `#22c55e`) |
-| ------- | ------------------------------- | ------------------------- |
-| Regular | `\e[38;2;R;G;Bm`                | `\e[38;2;34;197;94m`      |
-| Bold    | `\e[1;38;2;R;G;Bm`              | `\e[1;38;2;34;197;94m`    |
-| Dimmed  | computed RGB (dimFactor = 0.55) | `\e[38;2;18;108;51m`      |
-
-Dimmed variants use computed reduced-brightness RGB instead of the faint SGR
-attribute (`\e[2`), which renders inconsistently across terminals when combined
-with 24-bit color.
+The selected theme name is the filename without `.nix`. An unknown name throws
+with the list of available themes.
 
 ## API
 
 | Attribute                        | Description                                                                                         |
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `theme.*`                        | Numbered slot constants per theme (bold_zero, bold_one, …)                                          |
+| `theme.*`                        | Rendered flat slot constants for every bundled theme                                                |
 | `mode.italic`                    | Italic text                                                                                         |
 | `mode.reset`                     | Reset all text attributes                                                                           |
-| `select name`                    | Return one theme as `{ theme, mode }` — use when you need a specific theme without the color toggle |
-| `withoutColors libThemes`        | Replace every slot with `""` — used internally by `resolve`, rarely called directly                 |
-| `resolve { name, enableColors }` | Select a theme and optionally strip color codes — the function most consumers should use            |
+| `select name`                    | Return one theme as `{ theme, mode }`                                                               |
+| `withoutColors libThemes`        | Replace every slot and mode code with `""`                                                          |
+| `resolve { name, enableColors }` | Select a theme and optionally strip all color and mode codes                                         |
 
 ## Where to look next
 
-- [Palette files](palettes/README.md) — hex color definitions, how palettes feed themes, adding palettes
-- [Theme files](themes/README.md) — slot maps, overrides, dimFactor, creating themes
-- [Modulette](../auto-discover/modulette/README.md) — header-validated data discovery used by themes
-- [Modulon exclusions](../auto-discover/modulon/docs/03-EXCLUDING-MODULES.md) — when nearby `.nix` files should be skipped
-- [help-legend renderers](../decorators/help-legend/renderers/README.md) — shell-native output that pairs well with themed colors
+- [Theme files](themes/README.md) — authoring and validation details
+- [Modulette](../auto-discover/modulette/README.md) — header-validated discovery
+- [help-legend renderers](../decorators/help-legend/renderers/README.md) — shell-native consumers

@@ -18,16 +18,41 @@ let
     enableColors = true;
   };
   allThemesForced = builtins.deepSeq fuelLibs.themes.theme true;
+  requiredSlots = [
+    "zero"
+    "one"
+    "two"
+    "three"
+    "four"
+    "five"
+    "six"
+    "seven"
+    "bold_zero"
+    "bold_one"
+    "bold_two"
+    "bold_three"
+    "bold_four"
+    "bold_five"
+    "bold_six"
+    "bold_seven"
+    "dimmed_zero"
+    "dimmed_one"
+  ];
+  allThemesComplete = builtins.all (
+    theme:
+    builtins.all (
+      slot: builtins.hasAttr slot theme && builtins.stringLength theme.${slot} > 0
+    ) requiredSlots
+  ) (builtins.attrValues fuelLibs.themes.theme);
 
   mkThemeFixture =
     name:
     let
       fixtureRoot = ./. + "/${name}";
     in
-    import ../../libraries/themes/palette.nix {
+    import ../../libraries/themes/resolver.nix {
       flakeRoot = fuelLibs.flakeRoot;
       inherit lib;
-      palettesDirectory = fixtureRoot + "/palettes";
       themesDirectory = fixtureRoot + "/themes";
     };
 
@@ -38,25 +63,31 @@ let
         "wrong-length"
         "missing-prefix"
         "invalid-digit"
-        "invalid-override"
+        "invalid-factor"
+        "missing-slot"
       ];
 in
 {
   themes-fixture =
     assert allThemesForced;
+    assert allThemesComplete;
     assert disabledTheme.theme.bold_zero == "";
+    assert disabledTheme.theme.seven == "";
     assert disabledTheme.mode.reset == "";
     assert builtins.stringLength enabledTheme.theme.bold_zero > 0;
     assert builtins.stringLength enabledTheme.theme.zero > 0;
-    # 311amber resolves the CRT palette rather than Tailwind orange.
-    assert builtins.stringLength amberTheme.theme.bold_zero > 0;
+    # The factor refactor preserves the existing 311amber output.
+    assert amberTheme.theme.bold_zero == "\\e[1;38;2;255;179;67m";
+    assert amberTheme.theme.dimmed_zero == "\\e[38;2;140;98;36m";
     assert amberTheme.theme.bold_zero != enabledTheme.theme.bold_zero;
     pass "nix-fuel-themes-fixture";
 
   theme-validation-fixture =
     assert builtins.attrNames validThemeFixture.theme == [ "test" ];
-    assert builtins.stringLength validThemeFixture.theme.test.bold_zero > 0;
-    assert builtins.stringLength validThemeFixture.theme.test.zero > 0;
+    assert validThemeFixture.theme.test.zero == "\\e[38;2;32;64;96m";
+    assert validThemeFixture.theme.test.bold_zero == "\\e[1;38;2;48;96;144m";
+    assert validThemeFixture.theme.test.bold_five == "\\e[1;38;2;255;255;255m";
+    assert validThemeFixture.theme.test.dimmed_zero == "\\e[38;2;16;32;48m";
     assert builtins.all (result: result.success == false) invalidThemeFixtures;
     pass "nix-fuel-theme-validation-fixture";
 }

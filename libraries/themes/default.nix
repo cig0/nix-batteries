@@ -1,5 +1,5 @@
 # Theme option — loaded by Modulon, declares the per-host theme selection.
-# The actual theme data lives in palette.nix (pure data, imported by mkLibrary).
+# The actual theme data is rendered by resolver.nix (imported by mkLibrary).
 #
 # enableColors controls whether resolved escape codes produce real terminal
 # colors (true) or empty strings (false). When false, every color slot and

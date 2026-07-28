@@ -1,44 +1,33 @@
 # Theme module. Do not remove this header.
 # 311 Amber CRT — vintage phosphor monitor aesthetic
-/*
-  Override palette colors per-theme. Patched hex flows into
-  color.* automatically:
-
-    { }:
-    {
-      palette = "fuel";
-      overrides = { blue = "#4488dd"; };
-      dimFactor = 0.4;   # lower = dimmer (default: 0.55)
-      slots = { color }:
-      {
-        bold_two = color.bold.blue;  # ← uses overridden #4488dd
-      };
-    }
-*/
 { }:
 {
-  palette = "crt-amber";
-  overrides = {
+  # Preserve the existing 311amber rendering exactly.
+  boldFactor = 1.0;
+  dimFactor = 0.55;
+
+  slots = rec {
+    zero = "#ffb343";
+    one = "#f8fafc";
+    two = "#5b8dd9";
+    two_light = "#b1dafb";
+    three = "#cc66cc";
+    four = "#ffde21";
+    five = "#ef4444";
+    six = "#ffa6c9";
+    seven = "#00ff7f";
+
+    bold_zero = zero;
+    bold_one = one;
+    bold_two = two;
+    bold_two_light = two_light;
+    bold_three = three;
+    bold_four = four;
+    bold_five = five;
+    bold_six = six;
+    bold_seven = seven;
+
+    dimmed_zero = zero;
+    dimmed_one = one;
   };
-  slots =
-    { color }:
-    {
-      bold_zero = color.bold.orange;
-      bold_one = color.bold.white;
-      bold_two = color.bold.blue;
-      bold_two_light = color.bold.blue_light;
-      bold_three = color.bold.magenta;
-      bold_four = color.bold.yellow;
-      bold_five = color.bold.red;
-      bold_six = color.bold.pink;
-      bold_seven = color.bold.green;
-      dimmed_zero = color.dimmed.orange;
-      dimmed_one = color.dimmed.white;
-      zero = color.orange;
-      one = color.white;
-      two = color.blue;
-      three = color.magenta;
-      four = color.yellow;
-      five = color.red;
-    };
 }
