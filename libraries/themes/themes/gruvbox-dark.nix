@@ -1,40 +1,30 @@
 # Theme module. Do not remove this header.
-/*
-  Override palette colors per-theme. Patched hex flows into
-  color.* automatically:
-
-    { }:
-    {
-      palette = "fuel";
-      overrides = { blue = "#4488dd"; };
-      dimFactor = 0.4;   # lower = dimmer (default: 0.55)
-      slots = { color }:
-      {
-        bold_two = color.bold.blue;  # ← uses overridden #4488dd
-      };
-    }
-*/
+# Gruvbox Dark — warm retro colors with an amber accent
 { }:
 {
-  palette = "fuel";
-  slots =
-    { color }:
-    {
-      bold_zero = color.bold.yellow;
-      bold_one = color.bold.white;
-      bold_two = color.bold.cyan;
-      bold_three = color.bold.green;
-      bold_four = color.bold.magenta;
-      bold_five = color.bold.red;
-      bold_six = "";
-      bold_seven = "";
-      dimmed_zero = color.dimmed.yellow;
-      dimmed_one = color.dimmed.white;
-      zero = color.yellow;
-      one = color.white;
-      two = color.cyan;
-      three = color.green;
-      four = color.magenta;
-      five = color.red;
-    };
+  boldFactor = 1.0;
+  dimFactor = 0.55;
+
+  slots = rec {
+    zero = "#fabd2f"; # Bright yellow
+    one = "#ebdbb2"; # Light foreground
+    two = "#8ec07c"; # Bright aqua
+    three = "#b8bb26"; # Bright green
+    four = "#d3869b"; # Bright purple
+    five = "#fb4934"; # Bright red
+    six = "#fe8019"; # Bright orange
+    seven = "#83a598"; # Bright blue
+
+    bold_zero = zero;
+    bold_one = one;
+    bold_two = two;
+    bold_three = three;
+    bold_four = four;
+    bold_five = five;
+    bold_six = six;
+    bold_seven = seven;
+
+    dimmed_zero = zero;
+    dimmed_one = one;
+  };
 }

@@ -1,40 +1,30 @@
 # Theme module. Do not remove this header.
-/*
-  Override palette colors per-theme. Patched hex flows into
-  color.* automatically:
-
-    { }:
-    {
-      palette = "fuel";
-      overrides = { blue = "#4488dd"; };
-      dimFactor = 0.4;   # lower = dimmer (default: 0.55)
-      slots = { color }:
-      {
-        bold_two = color.bold.blue;  # ← uses overridden #4488dd
-      };
-    }
-*/
+# Nord — cold arctic blues with Aurora accents
 { }:
 {
-  palette = "fuel";
-  slots =
-    { color }:
-    {
-      bold_zero = color.bold.blue;
-      bold_one = color.bold.white;
-      bold_two = color.bold.cyan;
-      bold_three = color.bold.magenta;
-      bold_four = color.bold.yellow;
-      bold_five = color.bold.red;
-      bold_six = "";
-      bold_seven = "";
-      dimmed_zero = color.dimmed.blue;
-      dimmed_one = color.dimmed.white;
-      zero = color.blue;
-      one = color.white;
-      two = color.cyan;
-      three = color.magenta;
-      four = color.yellow;
-      five = color.red;
-    };
+  boldFactor = 1.0;
+  dimFactor = 0.55;
+
+  slots = rec {
+    zero = "#5e81ac"; # Frost, nord10
+    one = "#d8dee9"; # Snow Storm, nord4
+    two = "#88c0d0"; # Frost, nord8
+    three = "#b48ead"; # Aurora purple, nord15
+    four = "#ebcb8b"; # Aurora yellow, nord13
+    five = "#bf616a"; # Aurora red, nord11
+    six = "#d08770"; # Aurora orange, nord12
+    seven = "#a3be8c"; # Aurora green, nord14
+
+    bold_zero = zero;
+    bold_one = one;
+    bold_two = two;
+    bold_three = three;
+    bold_four = four;
+    bold_five = five;
+    bold_six = six;
+    bold_seven = seven;
+
+    dimmed_zero = zero;
+    dimmed_one = one;
+  };
 }

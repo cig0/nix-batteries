@@ -1,115 +1,99 @@
-# lib/themes/themes - Theme Slot Maps
+# Theme definitions
 
-Each file maps semantic numbered slots to palette colors. Themes declare
-which palette they consume and may override individual palette colors.
-Consumers should use slots, not raw colors, so changing a theme does not
-require editing command modules.
+Each file in this directory is a self-contained theme. It owns the hex values
+for its semantic slots and the factors used to render bold and dimmed
+variants.
+
+Consumers use rendered slots and never depend on a theme's source colors.
 
 ## What belongs here
 
 - Theme files with the required `# Theme module.` header
-- Each theme declares its palette, optional overrides, and slot-to-color
-  assignments
+- Flat `#RRGGBB` slot definitions
+- Per-theme `boldFactor` and `dimFactor`
+- Optional specialized slots owned by one theme
 
-## What does not belong here
+Command-specific display decisions and escape-code rendering do not belong in
+theme files.
 
-- Hex color definitions; those live in `../palettes/`
-- Palette selection at the host level; set `myOptions.hm.data.theme` (name + enableColors)
-- Command-specific color decisions
-
-## Theme file format
-
-Every theme file is a function that returns an attrset with `palette` and
-`slots`:
+## Required format
 
 ```nix
 # Theme module. Do not remove this header.
 { }:
 {
-  palette = "tailwind-inspired";
-  slots = { color }:
-  {
-    bold_zero  = color.bold.green;
-    bold_one   = color.bold.white;
-    bold_two   = color.bold.blue;
-    bold_three = color.bold.magenta;
-    bold_four  = color.bold.yellow;
-    bold_five  = color.bold.red;
-    dimmed_zero = color.dimmed.green;
-    dimmed_one  = color.dimmed.white;
-    zero  = color.green;
-    one   = color.white;
-    two   = color.blue;
-    three = color.magenta;
-    four  = color.yellow;
-    five  = color.red;
+  boldFactor = 1.0;
+  dimFactor = 0.55;
+
+  slots = rec {
+    zero = "#5e81ac";
+    one = "#d8dee9";
+    two = "#88c0d0";
+    three = "#b48ead";
+    four = "#ebcb8b";
+    five = "#bf616a";
+    six = "#d08770";
+    seven = "#a3be8c";
+
+    bold_zero = zero;
+    bold_one = one;
+    bold_two = two;
+    bold_three = three;
+    bold_four = four;
+    bold_five = five;
+    bold_six = six;
+    bold_seven = seven;
+
+    dimmed_zero = zero;
+    dimmed_one = one;
   };
 }
 ```
 
-- **`palette`** — name of the palette file in `../palettes/` (without
-  `.nix`). The palette is immutable; its hex values are the base for
-  `color.*` lookups.
-- **`overrides`** — optional `name → "#hex"` patches to the palette colors.
-  Overridden colors affect all variants (regular, bold, dimmed) for that
-  name. Omit when empty — `palette.nix` defaults to `{ }`.
-- **`dimFactor`** — optional dimming intensity for `color.dimmed.*`
-  (default: `0.55`). Multiply each RGB channel by this value. Lower =
-  dimmer. Omit when you want the default.
-- **`slots`** — function from `{ color }` to the slot attrset. Maps
-  semantic slot names to `color.*` references.
+The recursive attrset is ordinary Nix. Assigning `bold_zero = zero` and
+`dimmed_zero = zero` makes their shared source color explicit while allowing
+the resolver to apply different rendering behavior.
 
-## Overrides example
+## Factors
 
-`steel.nix` is a bundled theme that uses overrides — Tailwind palette with a
-muted blue:
+- `boldFactor` scales the RGB source for `bold_*` slots before applying SGR
+  bold.
+- `dimFactor` scales the RGB source for `dimmed_*` slots before regular
+  true-color rendering.
+- Unprefixed slots render their RGB source without scaling.
+- Scaled channels are floored and clamped to 255.
 
-```nix
-# Theme module. Do not remove this header.
-# Steel — Tailwind palette with a muted blue override
-{ }:
-{
-  palette = "tailwind-inspired";
-  overrides = { blue = "#4a6fa5"; };
-  slots = { color }:
-  {
-    bold_zero = color.bold.blue;    # ← #4a6fa5, not the palette's #3b82f6
-    bold_one  = color.bold.white;
-    # ...
-  };
-}
-```
+Factors default to `1.0` and `0.55`, respectively, and must be non-negative
+numbers. Bundled themes declare both fields explicitly so their tuning is
+visible beside their colors.
 
-Patched hex flows into `color.*` automatically — `color.bold.blue`,
-`color.blue`, and `color.dimmed.blue` all derive from the overridden
-`#4a6fa5`.
+## Validation
 
-`dimFactor` controls how much `color.dimmed.*` is dimmed. The default
-is `0.55` — lower values produce dimmer colors. A theme on a dark
-background might use `dimFactor = 0.4` for deeper dimming:
+Every theme must define:
 
-```nix
-{ }:
-{
-  palette = "crt";
-  dimFactor = 0.4;
-  slots = { color }:
-  {
-    dimmed_zero = color.dimmed.orange;  # dimmed at 40% instead of 55%
-    # ...
-  };
-}
-```
+- `zero` through `seven`
+- `bold_zero` through `bold_seven`
+- `dimmed_zero` and `dimmed_one`
 
-Overrides can replace existing palette colors **or add new ones**. If a theme
-needs a color that doesn't exist in its chosen palette, add it via overrides
-rather than modifying the palette file.
+Every slot must be a string in the exact `#RRGGBB` form. Additional slots are
+allowed and follow the same prefix rules.
 
-Overrides only affect the theme declaring them. Other themes using the same
-palette are unaffected — palettes are immutable.
+Theme files are evaluated lazily by Nix, so fixture checks force all bundled
+themes to ensure invalid colors, factors, or missing slots fail during
+repository validation.
+
+## Adding a theme
+
+1. Copy an existing theme file.
+2. Keep the required Modulette header.
+3. Replace all prime slot colors with values that belong to the new theme.
+4. Assign the bold and dimmed slots to their intended prime colors.
+5. Tune `boldFactor` and `dimFactor`.
+6. Run the theme fixtures and the full flake checks.
+
+The theme becomes available under the filename without `.nix`.
 
 ## Where to look next
 
-- `../README.md` - slot assignments and available themes
-- `../palette.nix` - palette discovery, hex rendering, theme resolution
-- `../palettes/` - palette files (immutable hex color sets)
+- `../README.md` — public API, slot roles, and integration
+- `../resolver.nix` — validation, factor scaling, and escape-code rendering

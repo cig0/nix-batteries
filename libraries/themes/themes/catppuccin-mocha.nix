@@ -1,40 +1,30 @@
 # Theme module. Do not remove this header.
-/*
-  Override palette colors per-theme. Patched hex flows into
-  color.* automatically:
-
-    { }:
-    {
-      palette = "fuel";
-      overrides = { blue = "#4488dd"; };
-      dimFactor = 0.4;   # lower = dimmer (default: 0.55)
-      slots = { color }:
-      {
-        bold_two = color.bold.blue;  # ← uses overridden #4488dd
-      };
-    }
-*/
+# Catppuccin Mocha — soft pastels with a Mauve accent
 { }:
 {
-  palette = "fuel";
-  slots =
-    { color }:
-    {
-      bold_zero = color.bold.magenta;
-      bold_one = color.bold.white;
-      bold_two = color.bold.cyan;
-      bold_three = color.bold.blue;
-      bold_four = color.bold.yellow;
-      bold_five = color.bold.red;
-      bold_six = "";
-      bold_seven = "";
-      dimmed_zero = color.dimmed.magenta;
-      dimmed_one = color.dimmed.white;
-      zero = color.magenta;
-      one = color.white;
-      two = color.cyan;
-      three = color.blue;
-      four = color.yellow;
-      five = color.red;
-    };
+  boldFactor = 1.0;
+  dimFactor = 0.55;
+
+  slots = rec {
+    zero = "#cba6f7"; # Mauve
+    one = "#cdd6f4"; # Text
+    two = "#94e2d5"; # Teal
+    three = "#74c7ec"; # Sapphire
+    four = "#fab387"; # Peach
+    five = "#f38ba8"; # Red
+    six = "#f5c2e7"; # Pink
+    seven = "#a6e3a1"; # Green
+
+    bold_zero = zero;
+    bold_one = one;
+    bold_two = two;
+    bold_three = three;
+    bold_four = four;
+    bold_five = five;
+    bold_six = six;
+    bold_seven = seven;
+
+    dimmed_zero = zero;
+    dimmed_one = one;
+  };
 }

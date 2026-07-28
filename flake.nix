@@ -31,7 +31,7 @@
         modulon =
           collectorArgs:
           import "${self.outPath}/libraries/auto-discover/modulon" { inherit lib; } collectorArgs;
-        themes = import "${self.outPath}/libraries/themes/palette.nix" {
+        themes = import "${self.outPath}/libraries/themes/resolver.nix" {
           flakeRoot = self.outPath;
           inherit lib;
         };
