@@ -33,7 +33,7 @@ slot produces a different color — no consumer edits.
 
 Each theme resolves its palette independently:
 
-1. Theme declares `palette = "crt"` (or `"tailwind-inspired"`, `"og"`, etc.)
+1. Theme declares `palette = "crt"` (or `"tailwind-inspired"`, `"fuel"`, etc.)
 2. `palette.nix` loads the palette hex values from `palettes/<name>.nix`
 3. Theme's `overrides` (if any) are merged: `hex = basePalette // overrides`
 4. The merged hex is converted to `color.*` escape codes
@@ -44,29 +44,29 @@ Each theme resolves its palette independently:
 Every theme maps the same semantic slots to different palette colors. The slot
 role is fixed — only the color changes between themes.
 
-| Slot | Role |
-|------|------|
-| `bold_zero` | Primary accent (success, headers, positive) |
-| `bold_one` | Text emphasis |
-| `bold_two` | Tertiary accent (e.g. NixOS section) |
-| `bold_three` | Callout / alternative highlight |
-| `bold_four` | Warning / highlight |
-| `bold_five` | Error / danger |
-| `dimmed_zero` | Dimmed primary accent |
-| `dimmed_one` | Dimmed text emphasis |
-| `zero` | Non-bold primary accent |
-| `one` | Non-bold text emphasis |
-| `two` | Non-bold tertiary accent |
-| `three` | Non-bold callout |
-| `four` | Non-bold warning |
-| `five` | Non-bold error |
+| Slot          | Role                                        |
+| ------------- | ------------------------------------------- |
+| `bold_zero`   | Primary accent (success, headers, positive) |
+| `bold_one`    | Text emphasis                               |
+| `bold_two`    | Tertiary accent (e.g. NixOS section)        |
+| `bold_three`  | Callout / alternative highlight             |
+| `bold_four`   | Warning / highlight                         |
+| `bold_five`   | Error / danger                              |
+| `dimmed_zero` | Dimmed primary accent                       |
+| `dimmed_one`  | Dimmed text emphasis                        |
+| `zero`        | Non-bold primary accent                     |
+| `one`         | Non-bold text emphasis                      |
+| `two`         | Non-bold tertiary accent                    |
+| `three`       | Non-bold callout                            |
+| `four`        | Non-bold warning                            |
+| `five`        | Non-bold error                              |
 
 Mode codes are theme-independent text attributes (defined in `palette.nix`):
 
-| Attribute | Code | Role |
-|-----------|------|------|
-| `mode.reset` | `\e[0m` | Reset all text attributes |
-| `mode.italic` | `\e[3m` | Italic text |
+| Attribute     | Code    | Role                      |
+| ------------- | ------- | ------------------------- |
+| `mode.reset`  | `\e[0m` | Reset all text attributes |
+| `mode.italic` | `\e[3m` | Italic text               |
 
 ## Quick start
 
@@ -162,12 +162,12 @@ _module.args = { inherit libThemes; };
 
 Every theme file declares four fields:
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `palette` | yes | Palette file name in `palettes/` (without `.nix`) |
-| `overrides` | no | `{ name = "#hex"; }` patches to palette colors (default: `{ }`) |
-| `dimFactor` | no | Dimming intensity for `color.dimmed.*` (default: `0.55`, lower = dimmer) |
-| `slots` | yes | Function from `{ color }` to the slot attrset |
+| Field       | Required | Description                                                              |
+| ----------- | -------- | ------------------------------------------------------------------------ |
+| `palette`   | yes      | Palette file name in `palettes/` (without `.nix`)                        |
+| `overrides` | no       | `{ name = "#hex"; }` patches to palette colors (default: `{ }`)          |
+| `dimFactor` | no       | Dimming intensity for `color.dimmed.*` (default: `0.55`, lower = dimmer) |
+| `slots`     | yes      | Function from `{ color }` to the slot attrset                            |
 
 Overrides replace or add palette colors for a single theme — all variants
 (`color.bold.<name>`, `color.<name>`, `color.dimmed.<name>`) derive from the
@@ -195,15 +195,15 @@ To add a new palette, see [palette files](palettes/README.md).
 
 ## Available themes
 
-| Theme | Palette | Slot 0 | Slot 1 | Slot 2 | Slot 3 | Slot 4 | Slot 5 | Feel |
-|-------|---------|--------|--------|--------|--------|--------|--------|------|
-| 311amber | crt | orange | white | blue | magenta | yellow | red | Vintage phosphor CRT |
-| catppuccin-mocha | tailwind-inspired | magenta | white | cyan | blue | yellow | red | Soft pastels, Mauve accent |
-| dracula | tailwind-inspired | cyan | white | magenta | green | yellow | red | Dark purple, cyan accents |
-| gruvbox-dark | tailwind-inspired | yellow | white | cyan | green | magenta | red | Warm, retro, amber accent |
-| nord | tailwind-inspired | blue | white | cyan | magenta | yellow | red | Cold, icy blues |
-| nushell-inspired | og | green | white | blue | magenta | yellow | red | ANSI terminal colors |
-| steel | tailwind-inspired + overrides | blue | white | cyan | magenta | yellow | red | Muted steel blue accent |
+| Theme            | Palette                       | Slot 0  | Slot 1 | Slot 2  | Slot 3  | Slot 4  | Slot 5 | Feel                       |
+| ---------------- | ----------------------------- | ------- | ------ | ------- | ------- | ------- | ------ | -------------------------- |
+| 311amber         | crt                           | orange  | white  | blue    | magenta | yellow  | red    | Vintage phosphor CRT       |
+| catppuccin-mocha | fuel                          | magenta | white  | cyan    | blue    | yellow  | red    | Soft pastels, Mauve accent |
+| dracula          | fuel                          | cyan    | white  | magenta | green   | yellow  | red    | Dark purple, cyan accents  |
+| gruvbox-dark     | fuel                          | yellow  | white  | cyan    | green   | magenta | red    | Warm, retro, amber accent  |
+| nord             | fuel                          | blue    | white  | cyan    | magenta | yellow  | red    | Cold, icy blues            |
+| nushell-inspired | fuel                          | green   | white  | blue    | magenta | yellow  | red    | ANSI terminal colors       |
+| steel            | tailwind-inspired + overrides | blue    | white  | cyan    | magenta | yellow  | red    | Muted steel blue accent    |
 
 Set `myOptions.hm.data.theme.name` and `myOptions.hm.data.theme.enableColors`
 in your host's `profile.nix`. The name is the filename without `.nix`;
@@ -215,11 +215,11 @@ throws with a list of available palettes.
 
 ## Available palettes
 
-| Palette | Feel |
-|---------|------|
-| `crt` | Warm amber phosphor monitor aesthetic — shifted blues/magentas |
-| `og` | Standard ANSI terminal colors (xterm-256color) |
-| `tailwind-inspired` | Tailwind CSS default palette, neutral and readable |
+| Palette             | Feel                                                           |
+| ------------------- | -------------------------------------------------------------- |
+| `crt`               | Warm amber phosphor monitor aesthetic — shifted blues/magentas |
+| `fuel`              | Standard ANSI terminal colors (xterm-256color)                 |
+| `tailwind-inspired` | Tailwind CSS default palette, neutral and readable             |
 
 Each palette is a `name → "#RRGGBB"` attrset. Themes consume palettes via the
 `palette` field and may override individual colors via `overrides`. Palette and
@@ -230,53 +230,53 @@ invalid values identify their palette or theme and color key in the error.
 
 ### crt
 
-| Name | Hex | Description |
-|------|-----|-------------|
-| blue | `#5b8dd9` | Warmer blue for dark backgrounds |
-| cyan | `#00b8b8` | Teal-shifted cyan |
-| green | `#22c55e` | Standard green |
-| grey | `#aaaaaa` | Light grey for dimmed text |
-| magenta | `#cc66cc` | Warmer magenta |
-| orange | `#ffb343` | Amber orange |
-| red | `#ef4444` | Standard red |
-| white | `#f8fafc` | Near-white |
-| yellow | `#ffed29` | Bright yolk yellow |
+| Name    | Hex       | Description                      |
+| ------- | --------- | -------------------------------- |
+| blue    | `#5b8dd9` | Warmer blue for dark backgrounds |
+| cyan    | `#00b8b8` | Teal-shifted cyan                |
+| green   | `#22c55e` | Standard green                   |
+| grey    | `#aaaaaa` | Light grey for dimmed text       |
+| magenta | `#cc66cc` | Warmer magenta                   |
+| orange  | `#ffb343` | Amber orange                     |
+| red     | `#ef4444` | Standard red                     |
+| white   | `#f8fafc` | Near-white                       |
+| yellow  | `#ffed29` | Bright yolk yellow               |
 
-### og
+### fuel
 
-| Name | Hex | ANSI code | Description |
-|------|-----|-----------|-------------|
-| blue | `#0000ee` | 34 | Standard ANSI blue |
-| cyan | `#00cdcd` | 36 | Standard ANSI cyan |
-| green | `#00cd00` | 32 | Standard ANSI green |
-| grey | `#767676` | — | Terminal grey |
-| magenta | `#cd00cd` | 35 | Standard ANSI magenta |
-| orange | `#ff6600` | — | Vivid orange (compat) |
-| red | `#cd0000` | 31 | Standard ANSI red |
-| white | `#ffffff` | 97 | Bright white |
-| yellow | `#cdcd00` | 33 | Standard ANSI yellow |
+| Name    | Hex       | ANSI code | Description           |
+| ------- | --------- | --------- | --------------------- |
+| blue    | `#0000ee` | 34        | Standard ANSI blue    |
+| cyan    | `#00cdcd` | 36        | Standard ANSI cyan    |
+| green   | `#00cd00` | 32        | Standard ANSI green   |
+| grey    | `#767676` | —         | Terminal grey         |
+| magenta | `#cd00cd` | 35        | Standard ANSI magenta |
+| orange  | `#ff6600` | —         | Vivid orange (compat) |
+| red     | `#cd0000` | 31        | Standard ANSI red     |
+| white   | `#ffffff` | 97        | Bright white          |
+| yellow  | `#cdcd00` | 33        | Standard ANSI yellow  |
 
 ### tailwind-inspired
 
-| Name | Hex | Description |
-|------|-----|-------------|
-| blue | `#3b82f6` | Tailwind blue-500 |
-| cyan | `#06b6d4` | Tailwind cyan-500 |
-| green | `#22c55e` | Tailwind green-500 |
-| grey | `#9ca3af` | Tailwind gray-400 |
+| Name    | Hex       | Description          |
+| ------- | --------- | -------------------- |
+| blue    | `#3b82f6` | Tailwind blue-500    |
+| cyan    | `#06b6d4` | Tailwind cyan-500    |
+| green   | `#22c55e` | Tailwind green-500   |
+| grey    | `#9ca3af` | Tailwind gray-400    |
 | magenta | `#d946ef` | Tailwind fuchsia-500 |
-| orange | `#ff6600` | Vivid orange |
-| red | `#ef4444` | Tailwind red-500 |
-| white | `#f8fafc` | Tailwind slate-50 |
-| yellow | `#f59e0b` | Tailwind amber-500 |
+| orange  | `#ff6600` | Vivid orange         |
+| red     | `#ef4444` | Tailwind red-500     |
+| white   | `#f8fafc` | Tailwind slate-50    |
+| yellow  | `#f59e0b` | Tailwind amber-500   |
 
 Each hex definition generates three foreground variants:
 
-| Variant | Format | Example (green `#22c55e`) |
-|---------|--------|---------------------------|
-| Regular | `\e[38;2;R;G;Bm` | `\e[38;2;34;197;94m` |
-| Bold | `\e[1;38;2;R;G;Bm` | `\e[1;38;2;34;197;94m` |
-| Dimmed | computed RGB (dimFactor = 0.55) | `\e[38;2;18;108;51m` |
+| Variant | Format                          | Example (green `#22c55e`) |
+| ------- | ------------------------------- | ------------------------- |
+| Regular | `\e[38;2;R;G;Bm`                | `\e[38;2;34;197;94m`      |
+| Bold    | `\e[1;38;2;R;G;Bm`              | `\e[1;38;2;34;197;94m`    |
+| Dimmed  | computed RGB (dimFactor = 0.55) | `\e[38;2;18;108;51m`      |
 
 Dimmed variants use computed reduced-brightness RGB instead of the faint SGR
 attribute (`\e[2`), which renders inconsistently across terminals when combined
@@ -284,14 +284,14 @@ with 24-bit color.
 
 ## API
 
-| Attribute | Description |
-|-----------|-------------|
-| `theme.*` | Numbered slot constants per theme (bold_zero, bold_one, …) |
-| `mode.italic` | Italic text |
-| `mode.reset` | Reset all text attributes |
-| `select name` | Return one theme as `{ theme, mode }` — use when you need a specific theme without the color toggle |
-| `withoutColors libThemes` | Replace every slot with `""` — used internally by `resolve`, rarely called directly |
-| `resolve { name, enableColors }` | Select a theme and optionally strip color codes — the function most consumers should use |
+| Attribute                        | Description                                                                                         |
+| -------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `theme.*`                        | Numbered slot constants per theme (bold_zero, bold_one, …)                                          |
+| `mode.italic`                    | Italic text                                                                                         |
+| `mode.reset`                     | Reset all text attributes                                                                           |
+| `select name`                    | Return one theme as `{ theme, mode }` — use when you need a specific theme without the color toggle |
+| `withoutColors libThemes`        | Replace every slot with `""` — used internally by `resolve`, rarely called directly                 |
+| `resolve { name, enableColors }` | Select a theme and optionally strip color codes — the function most consumers should use            |
 
 ## Where to look next
 

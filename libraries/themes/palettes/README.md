@@ -49,7 +49,7 @@ attrset, and passes it to the theme's `slots` function.
 | Palette             | Feel                                               |
 | ------------------- | -------------------------------------------------- |
 | `crt`               | Warm amber phosphor monitor aesthetic              |
-| `og`                | Standard ANSI terminal colors (xterm-256color)     |
+| `fuel`              | Standard ANSI terminal colors (xterm-256color)     |
 | `tailwind-inspired` | Tailwind CSS default palette, neutral and readable |
 
 ## Slots assignment

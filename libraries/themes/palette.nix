@@ -43,7 +43,7 @@ let
 
   # ----+ Configuration +----
   # Used when a theme does not declare the field.
-  defaultPalette = "tailwind-inspired";
+  defaultPalette = "fuel";
   defaultDimFactor = 0.55;
 
   # ----+ Palette discovery +----
