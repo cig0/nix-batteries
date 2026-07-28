@@ -27,7 +27,7 @@ Ref: https://www.figma.com/colors/
 graph LR
     A["palettes/crt.nix"] -->|"+ overrides"| B["makeColor"]
     C["palettes/tailwind-inspired.nix"] -->|"+ overrides"| B
-    D["palettes/og.nix"] -->|"+ overrides"| B
+    D["palettes/fuel.nix"] -->|"+ overrides"| B
     B -->|"color.bold.green"| E["theme slots"]
     E -->|"bold_zero = …"| F["libThemes.theme"]
 ```
@@ -45,32 +45,32 @@ attrset, and passes it to the theme's `slots` function.
 
 ## Available palettes
 
-| Palette | Feel |
-|---------|------|
-| `crt` | Warm amber phosphor monitor aesthetic |
-| `og` | Standard ANSI terminal colors (xterm-256color) |
+| Palette             | Feel                                               |
+| ------------------- | -------------------------------------------------- |
+| `crt`               | Warm amber phosphor monitor aesthetic              |
+| `og`                | Standard ANSI terminal colors (xterm-256color)     |
 | `tailwind-inspired` | Tailwind CSS default palette, neutral and readable |
 
 ## Slots assignment
 
-  Slot | Color           | Role
-  -----|----------------|-------------------------------------------
-  0    | bold_zero      | Primary accent (success, headers, positive)
-  1    | bold_one       | Text emphasis
-  2    | bold_two       | Tertiary accent (e.g. NixOS section)
-  3    | bold_three     | Callout / alternative highlight
-  4    | bold_four      | Warning / highlight
-  5    | bold_five      | Error / danger
+| Slot | Color      | Role                                        |
+| ---- | ---------- | ------------------------------------------- |
+| 0    | bold_zero  | Primary accent (success, headers, positive) |
+| 1    | bold_one   | Text emphasis                               |
+| 2    | bold_two   | Tertiary accent (e.g. NixOS section)        |
+| 3    | bold_three | Callout / alternative highlight             |
+| 4    | bold_four  | Warning / highlight                         |
+| 5    | bold_five  | Error / danger                              |
 
-  Non-bold slots follow the same numbering.
-  Dimmed slots use dimmed yellow for accent, grey for muted text.
+Non-bold slots follow the same numbering.
+Dimmed slots use dimmed yellow for accent, grey for muted text.
 
-  Mode codes are theme-independent text attributes (defined in `palette.nix`):
+Mode codes are theme-independent text attributes (defined in `palette.nix`):
 
-  Attribute     | Code      | Role
-  -------------|-----------|--------------------------------
-  mode.reset   | `\e[0m`   | Reset all text attributes
-  mode.italic  | `\e[3m`   | Italic text
+| Attribute   | Code    | Role                      |
+| ----------- | ------- | ------------------------- |
+| mode.reset  | `\e[0m` | Reset all text attributes |
+| mode.italic | `\e[3m` | Italic text               |
 
 ## Where to look next
 

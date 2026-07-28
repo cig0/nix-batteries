@@ -16,7 +16,7 @@
 */
 { }:
 {
-  palette = "og";
+  palette = "fuel";
   slots =
     { color }:
     {
