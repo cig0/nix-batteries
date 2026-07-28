@@ -168,8 +168,12 @@ let
       fg rgb;
 
   mode = {
+    blink = "\\e[5m";
+    dim = "\\e[2m";
     italic = "\\e[3m";
     reset = "\\e[0m";
+    reverse = "\\e[7m";
+    underline = "\\e[4m";
   };
 
   rawThemes = modulette.discoverModules {

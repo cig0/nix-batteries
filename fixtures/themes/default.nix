@@ -73,9 +73,15 @@ in
     assert allThemesComplete;
     assert disabledTheme.theme.bold_zero == "";
     assert disabledTheme.theme.seven == "";
-    assert disabledTheme.mode.reset == "";
+    assert builtins.all (value: value == "") (builtins.attrValues disabledTheme.mode);
     assert builtins.stringLength enabledTheme.theme.bold_zero > 0;
     assert builtins.stringLength enabledTheme.theme.zero > 0;
+    assert enabledTheme.mode.blink == "\\e[5m";
+    assert enabledTheme.mode.dim == "\\e[2m";
+    assert enabledTheme.mode.italic == "\\e[3m";
+    assert enabledTheme.mode.reset == "\\e[0m";
+    assert enabledTheme.mode.reverse == "\\e[7m";
+    assert enabledTheme.mode.underline == "\\e[4m";
     # The factor refactor preserves the existing 311amber output.
     assert amberTheme.theme.bold_zero == "\\e[1;38;2;255;179;67m";
     assert amberTheme.theme.dimmed_zero == "\\e[38;2;140;98;36m";

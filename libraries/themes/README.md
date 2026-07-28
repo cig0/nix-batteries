@@ -77,10 +77,14 @@ Themes may add specialized slots. `311amber`, for example, also provides
 
 Mode codes remain theme-independent:
 
-| Attribute     | Code    | Role                      |
-| ------------- | ------- | ------------------------- |
-| `mode.reset`  | `\e[0m` | Reset all text attributes |
-| `mode.italic` | `\e[3m` | Italic text               |
+| Attribute        | Code    | Role                          |
+| ---------------- | ------- | ----------------------------- |
+| `mode.reset`     | `\e[0m` | Reset all text attributes     |
+| `mode.dim`       | `\e[2m` | Dim or faint text             |
+| `mode.italic`    | `\e[3m` | Italic text                   |
+| `mode.underline` | `\e[4m` | Underlined text               |
+| `mode.blink`     | `\e[5m` | Blinking text                 |
+| `mode.reverse`   | `\e[7m` | Reverse foreground/background |
 
 ## Theme format
 
@@ -198,8 +202,12 @@ with the list of available themes.
 | Attribute                        | Description                                                                                         |
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `theme.*`                        | Rendered flat slot constants for every bundled theme                                                |
+| `mode.blink`                     | Blinking text                                                                                       |
+| `mode.dim`                       | Dim or faint text                                                                                   |
 | `mode.italic`                    | Italic text                                                                                         |
 | `mode.reset`                     | Reset all text attributes                                                                           |
+| `mode.reverse`                   | Reverse foreground and background                                                                  |
+| `mode.underline`                 | Underlined text                                                                                     |
 | `select name`                    | Return one theme as `{ theme, mode }`                                                               |
 | `withoutColors libThemes`        | Replace every slot and mode code with `""`                                                          |
 | `resolve { name, enableColors }` | Select a theme and optionally strip all color and mode codes                                         |
