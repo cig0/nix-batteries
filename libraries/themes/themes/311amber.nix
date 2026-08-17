@@ -7,15 +7,15 @@
   dimFactor = 0.55;
 
   slots = rec {
-    zero = "#ffb343";
-    one = "#f8fafc";
-    two = "#5b8dd9";
-    two_light = "#b1dafb";
-    three = "#cc66cc";
-    four = "#ffde21";
-    five = "#ef4444";
-    six = "#ffa6c9";
-    seven = "#00ff7f";
+    zero = "#ffb343"; # Orange
+    one = "#f8fafc"; # White
+    two = "#5b8dd9"; # Blue
+    two_light = "#b1dafb"; # Light blue
+    three = "#cc66cc"; # Magenta
+    four = "#ffde21"; # Yellow
+    five = "#ef4444"; # Red
+    six = "#ffa6c9"; #  Pink
+    seven = "#00ff7f"; # Green
 
     bold_zero = zero;
     bold_one = one;
