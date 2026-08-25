@@ -8,7 +8,7 @@ implementation rules. Read and follow both files.
 - This repository is a reusable Nix flake library toolkit. It is commonly
   consumed by `nix-ignition`, but library code must stay useful outside that
   consumer.
-- Public library exports live under `self.fuelLibs` in `flake.nix`. Library
+- Public library exports live under `self.nitroLibs` in `flake.nix`. Library
   source lives under `libraries/` and includes Modulon, Modulette, guard-flake-input,
   help-legend decorators, themes, and small runtime helper generators.
 - Nix is the primary implementation language. Some library helpers generate
@@ -62,7 +62,7 @@ implementation rules. Read and follow both files.
   `#` for inline comments or at most three consecutive comment lines.
 - Keep library functions explicit about their inputs. Prefer arguments over
   hidden access to consumer-specific paths or option names.
-- Keep public `self.fuelLibs` names stable unless the user explicitly asks for a
+- Keep public `self.nitroLibs` names stable unless the user explicitly asks for a
   breaking API change.
 - When adding behavior to a public helper, add or update a focused fixture under
   `fixtures/` and wire it into `checks`.
@@ -97,7 +97,7 @@ principle from `AGENTS.md`.
 - Run `nix flake check` after changing exported library behavior, fixtures, or
   flake outputs. Use `nix flake check --all-systems --no-build` to evaluate the
   full supported system matrix from one host.
-- Run focused `nix eval` smoke checks when changing public `self.fuelLibs` names or
+- Run focused `nix eval` smoke checks when changing public `self.nitroLibs` names or
   return shapes.
 - Parse isolated generated shell snippets with their target runtime when
   practical.

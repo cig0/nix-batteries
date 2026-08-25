@@ -18,10 +18,10 @@ This is fragile. `guard-flake-input` makes the relationship explicit in code: if
 
 The guard function takes a flake input name and the `_inputs` attrset (normalized by `channel-inputs.nix`), then returns a record with:
 
-| Field | Type | Description |
-|---|---|---|
-| `has` | `bool` | Whether the input exists |
-| `input` | `a or null` | The input value, or `null` if missing |
+| Field   | Type                 | Description                                                                            |
+| ------- | -------------------- | -------------------------------------------------------------------------------------- |
+| `has`   | `bool`               | Whether the input exists                                                               |
+| `input` | `a or null`          | The input value, or `null` if missing                                                  |
 | `apply` | `(a -> b) -> b -> b` | Call a function with the input if present, else return a fallback with a trace warning |
 
 Because `_inputs` keys are already normalized (suffixes like `-unstable` are stripped by `channel-inputs.nix`), referencing `"rust-overlay"` works uniformly across channels.
@@ -46,7 +46,7 @@ After — degrades gracefully:
 { _inputs, ... }:
 
 let
-  rust = _inputs.nix-fuel.fuelLibs.guardFlakeInput "rust-overlay" _inputs;
+  rust = _inputs.nix-nitro.nitroLibs.guardFlakeInput "rust-overlay" _inputs;
 in
 {
   nixpkgs.overlays = rust.apply (input: [ input.overlays.default ]) [ ];
@@ -62,7 +62,7 @@ If `rust-overlay` is missing → overlay is skipped, trace message is emitted.
 { _inputs, lib, ... }:
 
 let
-  nixvim = _inputs.nix-fuel.fuelLibs.guardFlakeInput "nixvim" _inputs;
+  nixvim = _inputs.nix-nitro.nitroLibs.guardFlakeInput "nixvim" _inputs;
 in
 {
   imports = lib.optional nixvim.has [
@@ -79,7 +79,7 @@ in
 { _inputs, lib, ... }:
 
 let
-  guard = _inputs.nix-fuel.fuelLibs.guardFlakeInput;
+  guard = _inputs.nix-nitro.nitroLibs.guardFlakeInput;
   nixIndex = guard "nix-index-database" _inputs;
   nixvim = guard "nixvim" _inputs;
 in
@@ -101,7 +101,7 @@ When you don't need the input value itself, just whether it exists:
 { _inputs, lib, ... }:
 
 let
-  disko = _inputs.nix-fuel.fuelLibs.guardFlakeInput "disko" _inputs;
+  disko = _inputs.nix-nitro.nitroLibs.guardFlakeInput "disko" _inputs;
 in
 {
   # Only show disk formatting commands if disko is available
@@ -117,7 +117,7 @@ in
 { _inputs, ... }:
 
 let
-  guard = _inputs.nix-fuel.fuelLibs.guardFlakeInput;
+  guard = _inputs.nix-nitro.nitroLibs.guardFlakeInput;
   rust = guard "rust-overlay" _inputs;
   lanzaboote = guard "lanzaboote" _inputs;
 in
@@ -135,7 +135,7 @@ To make `guard-flake-input` available as a module argument, add it to `_module.a
 ```nix
 _module.args = {
   _inputs = releaseChannel._inputs;
-  guard = name: releaseChannel._inputs.nix-fuel.fuelLibs.guardFlakeInput name releaseChannel._inputs;
+  guard = name: releaseChannel._inputs.nix-nitro.nitroLibs.guardFlakeInput name releaseChannel._inputs;
 };
 ```
 

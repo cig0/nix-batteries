@@ -6,11 +6,11 @@ file output.
 
 ## Exports
 
-| Attribute | Description |
-|---|---|
-| `allEntries` | Flat list of every discovered option as `{ path, value }` |
-| `markdownHeader` | The table header row as a string |
-| `markdown` | Render all entries under the default namespace |
+| Attribute              | Description                                                                 |
+| ---------------------- | --------------------------------------------------------------------------- |
+| `allEntries`           | Flat list of every discovered option as `{ path, value }`                   |
+| `markdownHeader`       | The table header row as a string                                            |
+| `markdown`             | Render all entries under the default namespace                              |
 | `markdownForNamespace` | Render entries under a custom namespace with optional header and exclusions |
 
 ## Boundary
@@ -49,7 +49,7 @@ Callers supply the option tree and decide where the result goes.
 
 ```nix
 let
-  nixOptionsToMd = inputs.nix-fuel.fuelLibs.nixOptionsToMd;
+  nixOptionsToMd = inputs.nix-nitro.nitroLibs.nixOptionsToMd;
   optionTree = {
     programs.git = {
       enable = lib.mkEnableOption "Git configuration";

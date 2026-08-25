@@ -1,6 +1,6 @@
 # Modulette Fixtures
 
-This directory contains focused fixtures for both scanning modes of `fuelLibs.modulette.discoverModules`.
+This directory contains focused fixtures for both scanning modes of `nitroLibs.modulette.discoverModules`.
 
 ## Flat mode fixture
 
@@ -12,7 +12,7 @@ keyed by filename without `.nix`.
 The root `flake.nix` check scans `modules/` with:
 
 ```nix
-self.fuelLibs.modulette.discoverModules {
+self.nitroLibs.modulette.discoverModules {
   mode = "flat";
   directory = ./fixtures/modulette/modules;
   headerText = "# Modulette fixture module. Do not remove this header.";
@@ -38,7 +38,7 @@ The `hosts/` fixture proves that discovery can scan subdirectories, import a tar
 The root `flake.nix` check scans `hosts/` with:
 
 ```nix
-self.fuelLibs.modulette.discoverModules {
+self.nitroLibs.modulette.discoverModules {
   mode = "directory";
   directory = ./fixtures/modulette/hosts;
   targetFile = "host.nix";

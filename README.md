@@ -1,6 +1,6 @@
-![A Nix flake toolkit with reusable building blocks. Home of Modulon.](assets/images/nix-fuel.png)
+![A Nix flake toolkit with reusable building blocks. Home of Modulon.](assets/images/nix-nitro.png)
 
-<p align="center" style="font-size: 1.5em;"><strong>fuel ❤️‍🔥</strong></p>
+<p align="center" style="font-size: 1.5em;"><strong>nitro ❤️‍🔥</strong></p>
 
 <p align="center"><strong>Nix flake Library Toolkit</strong></p>
 
@@ -21,11 +21,11 @@ file should stay out of the module graph.
 
 ### Building blocks available
 
-| Directory | Owns |
-|-----------|------|
-| `libraries/decorators/` | Presentation helpers |
-| `libraries/guard-flake-input/` | Guardrails for the optional disabling of flake inputs |
-| `libraries/auto-discover/modulette/` | Discovering header-validated Nix modules |
-| `libraries/auto-discover/modulon/` | Plug-and-play module management framework for NixOS and Nix flakes |
-| `libraries/themes/` | Theme option module and themes modules |
-| `libraries/toolbox/` | Small reusable shell/runtime code generators |
+| Directory                            | Owns                                                               |
+| ------------------------------------ | ------------------------------------------------------------------ |
+| `libraries/decorators/`              | Presentation helpers                                               |
+| `libraries/guard-flake-input/`       | Guardrails for the optional disabling of flake inputs              |
+| `libraries/auto-discover/modulette/` | Discovering header-validated Nix modules                           |
+| `libraries/auto-discover/modulon/`   | Plug-and-play module management framework for NixOS and Nix flakes |
+| `libraries/themes/`                  | Theme option module and themes modules                             |
+| `libraries/toolbox/`                 | Small reusable shell/runtime code generators                       |

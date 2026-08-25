@@ -15,36 +15,36 @@ they support without letting them leak into the module graph.
 graph TD
     %% User input
     A[User calls moduleImporter] --> B[dirs: list of paths]
-    
+
     %% Directory scanning
     B --> C[Scan directories recursively]
     C --> D[Find all .nix files]
-    
+
     %% Exclusion filtering
     D --> E{Excluded filename?}
     E -->|Yes| F[Skip file]
     E -->|No| G{Excluded path pattern?}
     G -->|Yes| F
     G -->|No| H[Read file content]
-    
+
     %% Content analysis
     H --> I{Contains @MODULON_SKIP?}
     I -->|Yes| F
     I -->|No| J{Matches 2+ patterns?}
     J -->|No| F
     J -->|Yes| K[Add to imports list]
-    
+
     %% Output
     K --> L[Return imports attribute set]
     F --> M[File not imported]
-    
+
     %% Styling
     classDef user fill:#0d47a1,color:#fff
     classDef scan fill:#4a148c,color:#fff
     classDef filter fill:#1b5e20,color:#fff
     classDef decision fill:#e65100,color:#fff
     classDef result fill:#b71c1c,color:#fff
-    
+
     class A,B user
     class C,D scan
     class E,G,I,J decision
@@ -63,7 +63,7 @@ graph TD
 
 ## The Discovery Process
 
-The core of Modulon is exposed as `nix-fuel.fuelLibs.modulon`. When called, this
+The core of Modulon is exposed as `nix-nitro.nitroLibs.modulon`. When called, this
 function:
 
 1. Recursively scans the directories specified in the `dirs` option for files ending in `.nix`

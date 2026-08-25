@@ -1,5 +1,5 @@
 {
-  fuelLibs,
+  nitroLibs,
   lib,
   pkgs,
 }:
@@ -19,24 +19,24 @@ let
     "nixOptionsToMd"
     "themes"
   ];
-  fuelLibNames = builtins.attrNames fuelLibs;
-  missingLibNames = builtins.filter (name: !(builtins.elem name fuelLibNames)) expectedLibNames;
-  unexpectedLibNames = builtins.filter (name: !(builtins.elem name expectedLibNames)) fuelLibNames;
+  nitroLibNames = builtins.attrNames nitroLibs;
+  missingLibNames = builtins.filter (name: !(builtins.elem name nitroLibNames)) expectedLibNames;
+  unexpectedLibNames = builtins.filter (name: !(builtins.elem name expectedLibNames)) nitroLibNames;
 
-  modulonFixture = fuelLibs.modulon {
+  modulonFixture = nitroLibs.modulon {
     dirs = [ ./modulon/modules ];
     extraModules = [ ./modulon/extra-module.nix ];
   };
   modulonImports = map toString modulonFixture.imports;
 
-  moduletteFixture = fuelLibs.modulette.discoverModules {
+  moduletteFixture = nitroLibs.modulette.discoverModules {
     mode = "flat";
     directory = ./modulette/modules;
     headerText = "# Modulette fixture module. Do not remove this header.";
     args.value = "loaded";
   };
 
-  moduletteDirectoryFixture = fuelLibs.modulette.discoverModules {
+  moduletteDirectoryFixture = nitroLibs.modulette.discoverModules {
     mode = "directory";
     directory = ./modulette/hosts;
     targetFile = "host.nix";
@@ -44,13 +44,13 @@ let
     args.value = "loaded";
   };
 
-  missingInputGuard = fuelLibs.guardFlakeInput "missing-input" { };
+  missingInputGuard = nitroLibs.guardFlakeInput "missing-input" { };
 
-  dynamicAliasNames = fuelLibs.dynamicAliases.discoverNixFileNames {
+  dynamicAliasNames = nitroLibs.dynamicAliases.discoverNixFileNames {
     directory = ./dynamic-aliases/nix-files;
   };
-  dynamicAliasMkArgs = builtins.functionArgs fuelLibs.dynamicAliases.mk;
-  dynamicAliasProjectTasks = fuelLibs.dynamicAliases.mk {
+  dynamicAliasMkArgs = builtins.functionArgs nitroLibs.dynamicAliases.mk;
+  dynamicAliasProjectTasks = nitroLibs.dynamicAliases.mk {
     names = [
       "fmt"
       "test"
@@ -60,7 +60,7 @@ let
     legendFor = name: _: "Run project ${name}";
     groupName = "Project Tasks";
   };
-  dynamicAliasEntryTasks = fuelLibs.dynamicAliases.mk {
+  dynamicAliasEntryTasks = nitroLibs.dynamicAliases.mk {
     entries.rust = {
       command = "nix develop";
       display = "nix develop .#rust";
@@ -69,14 +69,14 @@ let
     valueFor = name: entry: "${entry.command} /workspace#${name}";
     legendFor = _: entry: entry.display;
   };
-  dynamicAliasCompatTasks = fuelLibs.dynamicAliases.mk {
+  dynamicAliasCompatTasks = nitroLibs.dynamicAliases.mk {
     names = [ "docs" ];
     metadata.owner = "external-caller";
     nameFor = name: _: "p-${name}";
     valueFor = name: _: "just ${name}";
   };
   dynamicAliasDuplicateCheck = builtins.tryEval (
-    fuelLibs.dynamicAliases.mk {
+    nitroLibs.dynamicAliases.mk {
       names = [
         "one"
         "two"
@@ -88,12 +88,12 @@ let
 
   nixOptionsToMdFixtureResult = import ./nix-options-to-md {
     inherit lib;
-    nixOptionsToMd = fuelLibs.nixOptionsToMd;
+    nixOptionsToMd = nitroLibs.nixOptionsToMd;
   };
 
   rendererChecks = import ./renderers {
     inherit
-      fuelLibs
+      nitroLibs
       lib
       pass
       pkgs
@@ -101,28 +101,28 @@ let
   };
   themeChecks = import ./themes {
     inherit
-      fuelLibs
+      nitroLibs
       lib
       pass
       ;
   };
 in
 {
-  fuelLibs-surface =
+  nitroLibs-surface =
     assert missingLibNames == [ ];
     assert unexpectedLibNames == [ ];
-    pass "nix-fuel-fuelLibs-surface";
+    pass "nix-nitro-nitroLibs-surface";
 
   modulon-fixture =
     assert builtins.elem (toString ./modulon/modules/valid.nix) modulonImports;
     assert builtins.elem (toString ./modulon/extra-module.nix) modulonImports;
     assert !(builtins.elem (toString ./modulon/modules/skipped.nix) modulonImports);
-    pass "nix-fuel-modulon-fixture";
+    pass "nix-nitro-modulon-fixture";
 
   modulette-fixture =
     assert builtins.attrNames moduletteFixture == [ "alpha" ];
     assert moduletteFixture.alpha.value == "loaded";
-    pass "nix-fuel-modulette-fixture";
+    pass "nix-nitro-modulette-fixture";
 
   modulette-directory-fixture =
     assert
@@ -134,12 +134,12 @@ in
     assert moduletteDirectoryFixture.alpha.id == "alpha";
     assert moduletteDirectoryFixture.beta.value == "loaded";
     assert moduletteDirectoryFixture.beta.id == "beta";
-    pass "nix-fuel-modulette-directory-fixture";
+    pass "nix-nitro-modulette-directory-fixture";
 
   guard-flake-input-fixture =
     assert missingInputGuard.has == false;
     assert missingInputGuard.input == null;
-    pass "nix-fuel-guard-flake-input-fixture";
+    pass "nix-nitro-guard-flake-input-fixture";
 
   dynamic-aliases-fixture =
     assert
@@ -178,7 +178,7 @@ in
     assert dynamicAliasEntryTasks.group == null;
     assert dynamicAliasCompatTasks.aliases.p-docs == "just docs";
     assert dynamicAliasDuplicateCheck.success == false;
-    pass "nix-fuel-dynamic-aliases-fixture";
+    pass "nix-nitro-dynamic-aliases-fixture";
 
   nix-options-to-md-fixture =
     assert nixOptionsToMdFixtureResult.hasHeader;
@@ -187,7 +187,7 @@ in
     assert nixOptionsToMdFixtureResult.hasNestedRow;
     assert nixOptionsToMdFixtureResult.customNamespace;
     assert nixOptionsToMdFixtureResult.customExcludesNested;
-    pass "nix-fuel-nix-options-to-md-fixture";
+    pass "nix-nitro-nix-options-to-md-fixture";
 }
 // rendererChecks
 // themeChecks

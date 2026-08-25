@@ -7,10 +7,10 @@ Fish, Nushell, Home Manager, or another shell system.
 
 ## Exports
 
-| Attribute | Description |
-|---|---|
-| `mk` | Build alias, legend, and group data from names or entries |
-| `discoverNixFileNames` | Return flat `.nix` basenames from a directory |
+| Attribute              | Description                                               |
+| ---------------------- | --------------------------------------------------------- |
+| `mk`                   | Build alias, legend, and group data from names or entries |
+| `discoverNixFileNames` | Return flat `.nix` basenames from a directory             |
 
 ## Boundary
 
@@ -103,7 +103,7 @@ Inside your flake or module:
 
 ```nix
 let
-  dynamicAliases = inputs.nix-fuel.fuelLibs.dynamicAliases;
+  dynamicAliases = inputs.nix-nitro.nitroLibs.dynamicAliases;
   flakeSrcPath = "/home/me/work/my-flake";
 in
 ...
