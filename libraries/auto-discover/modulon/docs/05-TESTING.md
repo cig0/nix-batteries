@@ -1,6 +1,6 @@
 # Testing Modulon
 
-This `nix-fuel` tree validates Modulon through focused flake checks, fixture
+This `nix-nitro` tree validates Modulon through focused flake checks, fixture
 evaluation, and direct parser checks.
 
 Start with the standard flake command:
@@ -17,7 +17,7 @@ derivations, use:
 nix flake check --all-systems --no-build
 ```
 
-Nix still reports `fuelLibs` as an unchecked flake output because custom
+Nix still reports `nitroLibs` as an unchecked flake output because custom
 library outputs are not standard buildable output types. The committed `checks`
 exercise the public library surface and focused fixtures directly.
 
@@ -35,13 +35,24 @@ The check set includes a Modulon fixture that verifies:
 For a fast library-surface check:
 
 ```shell
-nix eval --no-write-lock-file --json '.#fuelLibs' --apply builtins.attrNames
+nix eval --no-write-lock-file --json '.#nitroLibs' --apply builtins.attrNames
 ```
 
 Expected output includes `modulon`:
 
 ```json
-["dynamicAliases","flakeRoot","gitRepoState","guardFlakeInput","helpLegendDecorator","mkGitRepoState","modulette","modulon","nixOptionsToMd","themes"]
+[
+  "dynamicAliases",
+  "flakeRoot",
+  "gitRepoState",
+  "guardFlakeInput",
+  "helpLegendDecorator",
+  "mkGitRepoState",
+  "modulette",
+  "modulon",
+  "nixOptionsToMd",
+  "themes"
+]
 ```
 
 ## Parser Check

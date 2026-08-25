@@ -1,23 +1,23 @@
 {
-  fuelLibs,
+  nitroLibs,
   lib,
   pass,
 }:
 
 let
-  enabledTheme = fuelLibs.themes.resolve {
+  enabledTheme = nitroLibs.themes.resolve {
     name = "nushell-inspired";
     enableColors = true;
   };
-  disabledTheme = fuelLibs.themes.resolve {
+  disabledTheme = nitroLibs.themes.resolve {
     name = "nushell-inspired";
     enableColors = false;
   };
-  amberTheme = fuelLibs.themes.resolve {
+  amberTheme = nitroLibs.themes.resolve {
     name = "311amber";
     enableColors = true;
   };
-  allThemesForced = builtins.deepSeq fuelLibs.themes.theme true;
+  allThemesForced = builtins.deepSeq nitroLibs.themes.theme true;
   requiredSlots = [
     "zero"
     "one"
@@ -43,7 +43,7 @@ let
     builtins.all (
       slot: builtins.hasAttr slot theme && builtins.stringLength theme.${slot} > 0
     ) requiredSlots
-  ) (builtins.attrValues fuelLibs.themes.theme);
+  ) (builtins.attrValues nitroLibs.themes.theme);
 
   mkThemeFixture =
     name:
@@ -51,7 +51,7 @@ let
       fixtureRoot = ./. + "/${name}";
     in
     import ../../libraries/themes/resolver.nix {
-      flakeRoot = fuelLibs.flakeRoot;
+      flakeRoot = nitroLibs.flakeRoot;
       inherit lib;
       themesDirectory = fixtureRoot + "/themes";
     };
@@ -86,7 +86,7 @@ in
     assert amberTheme.theme.bold_zero == "\\e[1;38;2;255;179;67m";
     assert amberTheme.theme.dimmed_zero == "\\e[38;2;140;98;36m";
     assert amberTheme.theme.bold_zero != enabledTheme.theme.bold_zero;
-    pass "nix-fuel-themes-fixture";
+    pass "nix-nitro-themes-fixture";
 
   theme-validation-fixture =
     assert builtins.attrNames validThemeFixture.theme == [ "test" ];
@@ -95,5 +95,5 @@ in
     assert validThemeFixture.theme.test.bold_five == "\\e[1;38;2;255;255;255m";
     assert validThemeFixture.theme.test.dimmed_zero == "\\e[38;2;16;32;48m";
     assert builtins.all (result: result.success == false) invalidThemeFixtures;
-    pass "nix-fuel-theme-validation-fixture";
+    pass "nix-nitro-theme-validation-fixture";
 }

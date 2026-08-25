@@ -1,13 +1,13 @@
 {
-  fuelLibs,
+  nitroLibs,
   lib,
   pass,
   pkgs,
 }:
 
 let
-  helpLegend = fuelLibs.helpLegendDecorator;
-  theme = fuelLibs.themes.resolve {
+  helpLegend = nitroLibs.helpLegendDecorator;
+  theme = nitroLibs.themes.resolve {
     name = "nushell-inspired";
     enableColors = true;
   };
@@ -49,7 +49,7 @@ let
   };
 
   renderedHelp = lib.mapAttrs (_: renderHelp) helpLegend.libHelpLegendRenderer;
-  gitRepoState = fuelLibs.gitRepoState;
+  gitRepoState = nitroLibs.gitRepoState;
 
   sources = {
     gitPosix = pkgs.writeText "git-state.sh" ''
@@ -115,9 +115,9 @@ in
     assert lib.hasInfix "native -h/--help" renderedHelp.nushell.check;
     assert lib.hasInfix "\\u{1b}[" renderedHelp.nushell.section.text;
     assert !(lib.hasInfix "\\e[" renderedHelp.nushell.section.text);
-    pass "nix-fuel-decorator-fixture";
+    pass "nix-nitro-decorator-fixture";
 
-  renderer-runtime-fixture = pkgs.runCommand "nix-fuel-renderer-runtime-fixture" { } ''
+  renderer-runtime-fixture = pkgs.runCommand "nix-nitro-renderer-runtime-fixture" { } ''
     ${pkgs.bash}/bin/bash -n ${sources.gitPosix}
     ${pkgs.bash}/bin/bash -n ${sources.helpPosix}
     ${pkgs.zsh}/bin/zsh -n ${sources.gitPosix}

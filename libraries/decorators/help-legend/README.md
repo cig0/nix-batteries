@@ -51,7 +51,7 @@ for generated shell functions.
 
 ```nix
 let
-  L = nix-fuel.fuelLibs.helpLegendDecorator;
+  L = nix-nitro.nitroLibs.helpLegendDecorator;
   libHelpLegendRenderer = L.libHelpLegendRenderer.posix;
 in
 ...
@@ -265,7 +265,7 @@ leaves `-h` and `--help` to native custom-command help.
 - `mkHelpCheck { cmd, desc, layout, libHelpLegendRenderer, cmdColor, reset }` renders the
   per-command `-h` / `--help` guard.
 - `mkHelpSection { groups, descFn, layout, libHelpLegendRenderer, cmdColor, headerColor,
-  reset, closing ? [ ] }` renders grouped rows.
+reset, closing ? [ ] }` renders grouped rows.
 - `mkCenteredTitle { title, width, libHelpLegendRenderer, color, reset, leadingLines ? 1 }`
   renders a centered heading.
 - `enabledWidth sections` returns the widest enabled section width when a help

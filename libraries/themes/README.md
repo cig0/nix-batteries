@@ -6,7 +6,7 @@ the theme, applies its bold and dim factors, and renders 24-bit foreground
 escape codes.
 
 Theme files are auto-discovered via Modulette. Add a `.nix` file with the
-required header and it becomes available through `fuelLibs.themes`.
+required header and it becomes available through `nitroLibs.themes`.
 
 ## Architecture
 
@@ -20,7 +20,7 @@ The system has two ownership layers:
 ```mermaid
 graph LR
     A["themes/*.nix<br/>(slot hex values + factors)"] --> B["resolver.nix"]
-    B -->|"render true-color codes"| C["fuelLibs.themes"]
+    B -->|"render true-color codes"| C["nitroLibs.themes"]
     C -->|resolve| D["shell output"]
 ```
 
@@ -31,11 +31,11 @@ readable in isolation.
 
 Slot names declare their rendering behavior:
 
-| Name pattern | Rendering                                                                 |
-| ------------ | ------------------------------------------------------------------------- |
-| `zero`       | Original RGB rendered as a regular 24-bit foreground                      |
-| `bold_zero`  | RGB multiplied by `boldFactor`, clamped to 255, and rendered with SGR bold |
-| `dimmed_zero`| RGB multiplied by `dimFactor` and rendered as a regular 24-bit foreground |
+| Name pattern  | Rendering                                                                  |
+| ------------- | -------------------------------------------------------------------------- |
+| `zero`        | Original RGB rendered as a regular 24-bit foreground                       |
+| `bold_zero`   | RGB multiplied by `boldFactor`, clamped to 255, and rendered with SGR bold |
+| `dimmed_zero` | RGB multiplied by `dimFactor` and rendered as a regular 24-bit foreground  |
 
 Both factors are non-negative numbers. Their defaults are:
 
@@ -133,11 +133,11 @@ the complete missing-slot list.
 Add the flake and obtain the public theme library:
 
 ```nix
-inputs.fuel.url = "github:your-org/nix-fuel";
+inputs.nitro.url = "github:your-org/nix-nitro";
 
-outputs = { fuel, ... }:
+outputs = { nitro, ... }:
 let
-  libThemes = fuel.fuelLibs.themes;
+  libThemes = nitro.nitroLibs.themes;
 in
 {
   # ...
@@ -184,33 +184,33 @@ interpret factors themselves.
 
 ## Bundled themes
 
-| Theme            | Source or intent                                  |
-| ---------------- | ------------------------------------------------- |
-| 311amber         | Custom vintage amber phosphor CRT                 |
-| catppuccin-mocha | Official Catppuccin Mocha colors                  |
-| dracula          | Official Dracula OSS colors                       |
-| gruvbox-dark     | Official Gruvbox dark bright colors               |
-| nord             | Official Nord Frost, Snow Storm, and Aurora colors|
-| nushell-inspired | Nushell default terminal color roles              |
-| steel            | Custom muted blue with Tailwind-inspired accents  |
+| Theme            | Source or intent                                   |
+| ---------------- | -------------------------------------------------- |
+| 311amber         | Custom vintage amber phosphor CRT                  |
+| catppuccin-mocha | Official Catppuccin Mocha colors                   |
+| dracula          | Official Dracula OSS colors                        |
+| gruvbox-dark     | Official Gruvbox dark bright colors                |
+| nord             | Official Nord Frost, Snow Storm, and Aurora colors |
+| nushell-inspired | Nushell default terminal color roles               |
+| steel            | Custom muted blue with Tailwind-inspired accents   |
 
 The selected theme name is the filename without `.nix`. An unknown name throws
 with the list of available themes.
 
 ## API
 
-| Attribute                        | Description                                                                                         |
-| -------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `theme.*`                        | Rendered flat slot constants for every bundled theme                                                |
-| `mode.blink`                     | Blinking text                                                                                       |
-| `mode.dim`                       | Dim or faint text                                                                                   |
-| `mode.italic`                    | Italic text                                                                                         |
-| `mode.reset`                     | Reset all text attributes                                                                           |
-| `mode.reverse`                   | Reverse foreground and background                                                                  |
-| `mode.underline`                 | Underlined text                                                                                     |
-| `select name`                    | Return one theme as `{ theme, mode }`                                                               |
-| `withoutColors libThemes`        | Replace every slot and mode code with `""`                                                          |
-| `resolve { name, enableColors }` | Select a theme and optionally strip all color and mode codes                                         |
+| Attribute                        | Description                                                  |
+| -------------------------------- | ------------------------------------------------------------ |
+| `theme.*`                        | Rendered flat slot constants for every bundled theme         |
+| `mode.blink`                     | Blinking text                                                |
+| `mode.dim`                       | Dim or faint text                                            |
+| `mode.italic`                    | Italic text                                                  |
+| `mode.reset`                     | Reset all text attributes                                    |
+| `mode.reverse`                   | Reverse foreground and background                            |
+| `mode.underline`                 | Underlined text                                              |
+| `select name`                    | Return one theme as `{ theme, mode }`                        |
+| `withoutColors libThemes`        | Replace every slot and mode code with `""`                   |
+| `resolve { name, enableColors }` | Select a theme and optionally strip all color and mode codes |
 
 ## Where to look next
 

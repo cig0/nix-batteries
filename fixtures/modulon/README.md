@@ -1,13 +1,13 @@
 # Modulon Fixture
 
-This fixture proves that `fuelLibs.modulon` builds an `imports` list from a
+This fixture proves that `nitroLibs.modulon` builds an `imports` list from a
 module directory, ignores files marked with `@MODULON_SKIP`, and preserves
 modules passed through `extraModules`.
 
 The root `flake.nix` check builds the fixture with:
 
 ```nix
-self.fuelLibs.modulon {
+self.nitroLibs.modulon {
   dirs = [ ./fixtures/modulon/modules ];
   extraModules = [ ./fixtures/modulon/extra-module.nix ];
 }

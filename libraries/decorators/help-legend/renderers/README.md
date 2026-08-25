@@ -24,17 +24,17 @@ handles native help before a custom-command body runs.
 
 ## Pick the renderer
 
-| Renderer | Use for | Function shape | Help argument | Print primitive | Validate with |
-|----------|---------|----------------|---------------|-----------------|---------------|
-| `libHelpLegendRenderer.posix` | bash and zsh snippets | `name() { ... }` | `$1` | `printf '%b'` | `bash -n`, `zsh -n` |
-| `libHelpLegendRenderer.fish` | Fish functions | `function name ... end` | `$argv[1]` | `printf '%b'` | `fish --no-execute` |
-| `libHelpLegendRenderer.nushell` | Nushell commands | `def name [] { ... }` | native `-h` / `--help` | `print --no-newline` | `nu-check` |
+| Renderer                        | Use for               | Function shape          | Help argument          | Print primitive      | Validate with       |
+| ------------------------------- | --------------------- | ----------------------- | ---------------------- | -------------------- | ------------------- |
+| `libHelpLegendRenderer.posix`   | bash and zsh snippets | `name() { ... }`        | `$1`                   | `printf '%b'`        | `bash -n`, `zsh -n` |
+| `libHelpLegendRenderer.fish`    | Fish functions        | `function name ... end` | `$argv[1]`             | `printf '%b'`        | `fish --no-execute` |
+| `libHelpLegendRenderer.nushell` | Nushell commands      | `def name [] { ... }`   | native `-h` / `--help` | `print --no-newline` | `nu-check`          |
 
 The Nix side should look almost identical for every renderer:
 
 ```nix
 let
-  L = nix-fuel.fuelLibs.helpLegendDecorator;
+  L = nix-nitro.nitroLibs.helpLegendDecorator;
   libHelpLegendRenderer = L.libHelpLegendRenderer.posix; # or fish / nushell
 
   layout = L.sectionLayout {

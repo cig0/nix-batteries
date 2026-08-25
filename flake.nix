@@ -1,5 +1,5 @@
 {
-  description = "fuel - A Nix flake toolkit with reusable building blocks";
+  description = "nitro - A Nix flake toolkit with reusable building blocks";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -18,7 +18,7 @@
       forAllSystems = lib.genAttrs supportedSystems;
     in
     {
-      fuelLibs = rec {
+      nitroLibs = rec {
         flakeRoot = self.outPath;
 
         guardFlakeInput = import "${self.outPath}/libraries/guard-flake-input" { inherit lib; };
@@ -40,7 +40,7 @@
       checks = forAllSystems (
         system:
         import ./fixtures {
-          fuelLibs = self.fuelLibs;
+          nitroLibs = self.nitroLibs;
           inherit lib;
           pkgs = nixpkgs.legacyPackages.${system};
         }

@@ -6,12 +6,12 @@ during Nix evaluation.
 
 ## Exports
 
-| Attribute | Description |
-|---|---|
-| `revisionFunction.{posix,fish,nushell}` | Define a shell-native `_gitRevision` helper |
-| `revisionCall.{posix,fish,nushell}` | Call `_gitRevision` in shell-native syntax |
+| Attribute                                 | Description                                   |
+| ----------------------------------------- | --------------------------------------------- |
+| `revisionFunction.{posix,fish,nushell}`   | Define a shell-native `_gitRevision` helper   |
+| `revisionCall.{posix,fish,nushell}`       | Call `_gitRevision` in shell-native syntax    |
 | `dirtyStateFunction.{posix,fish,nushell}` | Define a shell-native `_gitDirtyState` helper |
-| `dirtyStateCall.{posix,fish,nushell}` | Call `_gitDirtyState` in shell-native syntax |
+| `dirtyStateCall.{posix,fish,nushell}`     | Call `_gitDirtyState` in shell-native syntax  |
 
 ## Parameters
 
@@ -69,7 +69,7 @@ the consumer owns the `git-` display prefix, colors, and separators:
 
 ```nix
 let
-  gitRepoState = _inputs.nix-fuel.fuelLibs.gitRepoState;
+  gitRepoState = _inputs.nix-nitro.nitroLibs.gitRepoState;
 in
 ''
   ${gitRepoState.revisionFunction.posix}
