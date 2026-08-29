@@ -1,10 +1,17 @@
 # Theme module. Do not remove this header.
 # 311 Amber CRT — vintage phosphor monitor aesthetic
 { }:
-{
+rec {
   # Preserve the existing 311amber rendering exactly.
   boldFactor = 1.0;
   dimFactor = 0.55;
+
+  # Interactive selectors use a high-contrast theme-owned pair instead of
+  # inferring UI roles from numbered slots. Consumers receive raw #RRGGBB.
+  selection = {
+    background = slots.seven;
+    foreground = "#000000";
+  };
 
   slots = rec {
     zero = "#ffb343"; # Orange
@@ -14,7 +21,7 @@
     three = "#cc66cc"; # Magenta
     four = "#ffde21"; # Yellow
     five = "#ef4444"; # Red
-    six = "#ffa6c9"; #  Pink
+    six = "#ffa6c9"; # Pink
     seven = "#00ff7f"; # Green
 
     bold_zero = zero;

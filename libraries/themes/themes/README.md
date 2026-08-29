@@ -4,13 +4,16 @@ Each file in this directory is a self-contained theme. It owns the hex values
 for its semantic slots and the factors used to render bold and dimmed
 variants.
 
-Consumers use rendered slots and never depend on a theme's source colors.
+Consumers use the resolver's validated output rather than importing theme
+files directly. ANSI output uses rendered slots; tools that accept raw hex
+values use the resolver's `colors` output.
 
 ## What belongs here
 
 - Theme files with the required `# Theme module.` header
 - Flat `#RRGGBB` slot definitions
 - Per-theme `boldFactor` and `dimFactor`
+- An optional selection foreground/background pair
 - Optional specialized slots owned by one theme
 
 Command-specific display decisions and escape-code rendering do not belong in
@@ -21,9 +24,14 @@ theme files.
 ```nix
 # Theme module. Do not remove this header.
 { }:
-{
+rec {
   boldFactor = 1.0;
   dimFactor = 0.55;
+
+  selection = {
+    background = slots.seven;
+    foreground = "#000000";
+  };
 
   slots = rec {
     zero = "#5e81ac";
@@ -54,6 +62,23 @@ The recursive attrset is ordinary Nix. Assigning `bold_zero = zero` and
 `dimmed_zero = zero` makes their shared source color explicit while allowing
 the resolver to apply different rendering behavior.
 
+## Selection colors
+
+Interactive selectors may need colors that numbered terminal-output slots do
+not describe. A theme can opt in with both fields below:
+
+```nix
+selection = {
+  background = slots.seven;
+  foreground = "#000000";
+};
+```
+
+`background` identifies the selected-row background. `foreground` identifies
+text drawn on that background. Defining the pair in the theme avoids asking
+consumers to infer contrast or UI roles from numbered slots. Both values must
+use `#RRGGBB`; partial pairs and additional selection fields are rejected.
+
 ## Factors
 
 - `boldFactor` scales the RGB source for `bold_*` slots before applying SGR
@@ -75,8 +100,8 @@ Every theme must define:
 - `bold_zero` through `bold_seven`
 - `dimmed_zero` and `dimmed_one`
 
-Every slot must be a string in the exact `#RRGGBB` form. Additional slots are
-allowed and follow the same prefix rules.
+Every slot and selection color must be a string in the exact `#RRGGBB` form.
+Additional slots are allowed and follow the same prefix rules.
 
 Theme files are evaluated lazily by Nix, so fixture checks force all bundled
 themes to ensure invalid colors, factors, or missing slots fail during
