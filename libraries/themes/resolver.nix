@@ -9,7 +9,8 @@
     dimmed_zero  regular true-color foreground scaled by dimFactor
 
   Theme files are auto-discovered via Modulette. The resolver validates each
-  theme, applies its factors, and exports the rendered escape-code strings.
+  theme, preserves its raw colors for consumers that cannot use ANSI escape
+  codes, and renders the numbered slots as escape-code strings.
 */
 {
   flakeRoot,
@@ -83,6 +84,34 @@ let
       slots
     else
       throw "Theme '${name}' is missing required slots: ${lib.concatStringsSep ", " missing}";
+
+  /*
+    Selection colors are an optional, narrowly scoped theme contract for
+    interactive menus. Both roles are required together so consumers never
+    have to infer a foreground or background from unrelated numbered slots.
+  */
+  validateSelection =
+    themeName: selection:
+    if selection == null then
+      null
+    else if !builtins.isAttrs selection then
+      throw "Invalid theme '${themeName}' selection: expected an attribute set"
+    else
+      let
+        requiredFields = [
+          "background"
+          "foreground"
+        ];
+        selectionFields = builtins.attrNames selection;
+        missingFields = builtins.filter (field: !(builtins.hasAttr field selection)) requiredFields;
+        unexpectedFields = builtins.filter (field: !(builtins.elem field requiredFields)) selectionFields;
+      in
+      if missingFields != [ ] then
+        throw "Theme '${themeName}' selection is missing fields: ${lib.concatStringsSep ", " missingFields}"
+      else if unexpectedFields != [ ] then
+        throw "Theme '${themeName}' selection has unsupported fields: ${lib.concatStringsSep ", " unexpectedFields}"
+      else
+        validateHexSet "theme '${themeName}' selection" selection;
 
   hexDigitToInt =
     d:
@@ -183,43 +212,71 @@ let
     args = { };
   };
 
-  themes = lib.mapAttrs (
+  /*
+    Validate source data once, then derive both public representations from the
+    same normalized themes. This keeps raw data separate from ANSI rendering.
+  */
+  normalizedThemes = lib.mapAttrs (
     name: rawTheme:
     let
       boldFactor = validateFactor "theme '${name}' boldFactor" (rawTheme.boldFactor or defaultBoldFactor);
       dimFactor = validateFactor "theme '${name}' dimFactor" (rawTheme.dimFactor or defaultDimFactor);
       slots = validateHexSet "theme '${name}'" (validateRequiredSlots name rawTheme.slots);
+      selection = validateSelection name (rawTheme.selection or null);
     in
-    builtins.deepSeq [ boldFactor dimFactor slots ] (
-      lib.mapAttrs (
-        slotName: hex:
-        renderSlot {
-          inherit
-            boldFactor
-            dimFactor
-            hex
-            ;
-          name = slotName;
-        }
-      ) slots
-    )
+    builtins.deepSeq [ boldFactor dimFactor slots selection ] {
+      inherit
+        boldFactor
+        dimFactor
+        selection
+        slots
+        ;
+    }
   ) rawThemes;
+
+  themes = lib.mapAttrs (
+    _name: normalizedTheme:
+    lib.mapAttrs (
+      slotName: hex:
+      renderSlot {
+        inherit (normalizedTheme) boldFactor dimFactor;
+        inherit hex;
+        name = slotName;
+      }
+    ) normalizedTheme.slots
+  ) normalizedThemes;
+
+  # Raw colors serve tools such as fzf that accept #RRGGBB but not ANSI codes.
+  colors = lib.mapAttrs (
+    _name: normalizedTheme:
+    normalizedTheme.slots
+    // lib.optionalAttrs (normalizedTheme.selection != null) {
+      inherit (normalizedTheme) selection;
+    }
+  ) normalizedThemes;
 in
 rec {
+  inherit colors;
   theme = themes;
   inherit mode;
 
-  select = name: {
-    theme =
-      themes.${name}
-        or (throw "Unknown theme '${name}'. Available themes: ${lib.concatStringsSep ", " (builtins.attrNames themes)}");
-    inherit mode;
-  };
+  select =
+    name:
+    if builtins.hasAttr name themes then
+      {
+        colors = colors.${name};
+        theme = themes.${name};
+        inherit mode;
+      }
+    else
+      throw "Unknown theme '${name}'. Available themes: ${lib.concatStringsSep ", " (builtins.attrNames themes)}";
 
   withoutColors =
     libThemes:
     libThemes
     // {
+      # Raw colors cannot represent disabled styling; null makes that absence explicit.
+      colors = null;
       theme = lib.mapAttrsRecursive (_: _: "") libThemes.theme;
       mode = lib.mapAttrs (_: _: "") libThemes.mode;
     };

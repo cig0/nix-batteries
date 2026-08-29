@@ -1,27 +1,30 @@
 # Themes
 
-Self-contained true-color themes for terminal output. Each theme owns the
-`#RRGGBB` values assigned to semantic numbered slots. The resolver validates
-the theme, applies its bold and dim factors, and renders 24-bit foreground
-escape codes.
+Self-contained true-color themes for terminal output and interactive selectors.
+Each theme owns its `#RRGGBB` values. The resolver validates the source data,
+preserves raw colors, and renders numbered slots as 24-bit foreground escape
+codes.
 
 Theme files are auto-discovered via Modulette. Add a `.nix` file with the
 required header and it becomes available through `nitroLibs.themes`.
 
 ## Architecture
 
-The system has two ownership layers:
+The system has three ownership layers:
 
-1. **Theme** (`themes/*.nix`) — owns slot colors, `boldFactor`, and
-   `dimFactor`.
-2. **Consumer** — references only rendered semantic slots such as
-   `bold_zero`, `dimmed_one`, or `five`.
+1. **Theme** (`themes/*.nix`) — owns slot colors, optional selection colors,
+   `boldFactor`, and `dimFactor`.
+2. **Resolver** — validates source colors and exposes both raw and rendered
+   representations.
+3. **Consumer** — chooses the representation accepted by its output surface.
 
 ```mermaid
 graph LR
-    A["themes/*.nix<br/>(slot hex values + factors)"] --> B["resolver.nix"]
-    B -->|"render true-color codes"| C["nitroLibs.themes"]
-    C -->|resolve| D["shell output"]
+    A["themes/*.nix<br/>(raw colors + factors)"] --> B["resolver.nix"]
+    B -->|"validate raw colors"| C["nitroLibs.themes.colors"]
+    B -->|"render true-color codes"| D["nitroLibs.themes.theme"]
+    C -->|resolve| E["interactive tools"]
+    D -->|resolve| F["shell output"]
 ```
 
 There is no shared palette or fallback color source. A theme is complete and
@@ -75,6 +78,17 @@ Required rendered keys are:
 Themes may add specialized slots. `311amber`, for example, also provides
 `two_light` and `bold_two_light`.
 
+Themes may also define a complete `selection` pair for interactive menus:
+
+| Selection field | Role |
+| --- | --- |
+| `background` | Selected-row background |
+| `foreground` | Text displayed on the selected-row background |
+
+The pair is optional so themes can adopt it independently, but neither field
+may appear alone. `311amber` currently provides the pair; other bundled themes
+continue to use consumer fallbacks until their colors are intentionally chosen.
+
 Mode codes remain theme-independent:
 
 | Attribute        | Code    | Role                          |
@@ -95,9 +109,14 @@ hex value:
 ```nix
 # Theme module. Do not remove this header.
 { }:
-{
+rec {
   boldFactor = 1.0;
   dimFactor = 0.55;
+
+  selection = {
+    background = slots.seven;
+    foreground = "#000000";
+  };
 
   slots = rec {
     zero = "#4a6fa5";
@@ -124,9 +143,9 @@ hex value:
 }
 ```
 
-Every slot value must use the exact `#RRGGBB` form. Factors and slot values are
-validated before rendering. Missing required slots report the theme name and
-the complete missing-slot list.
+Every slot and selection value must use the exact `#RRGGBB` form. Factors and
+colors are validated before rendering. Missing required slots report the theme
+name and the complete missing-slot list.
 
 ## Quick start
 
@@ -148,21 +167,22 @@ Resolve one theme before passing it to consumers:
 
 ```nix
 let
-  colors = libThemes.resolve {
+  resolvedTheme = libThemes.resolve {
     name = "311amber";
     enableColors = true;
   };
 in
 ''
-  printf '%b' "${colors.theme.bold_zero}OK${colors.mode.reset}"
-  printf '%b' "\n${colors.theme.bold_four}WARN${colors.mode.reset}"
-  printf '%b' "\n${colors.theme.bold_five}ERROR${colors.mode.reset}"
+  printf '%b' "${resolvedTheme.theme.bold_zero}OK${resolvedTheme.mode.reset}"
+  printf '%b' "\n${resolvedTheme.theme.bold_four}WARN${resolvedTheme.mode.reset}"
+  printf '%b' "\n${resolvedTheme.theme.bold_five}ERROR${resolvedTheme.mode.reset}"
 ''
 ```
 
 When `enableColors = false`, all theme slots and mode codes resolve to empty
-strings. Output structure remains unchanged without conditional rendering in
-each consumer.
+strings and `colors` resolves to `null`. Raw colors cannot express disabled
+styling, so consumers can use this explicit absence instead of interpreting an
+empty hex value.
 
 ## Home Manager integration
 
@@ -178,8 +198,9 @@ myOptions.hm.data.theme = {
 `enableColors = null` is the module default and lets the consuming
 configuration decide whether active shells should enable colors.
 
-Resolve once and pass the selected `{ theme, mode }` value downstream through
-`extraSpecialArgs` or `_module.args`. Consumers should not select themes or
+Resolve once and pass the selected `{ colors, theme, mode }` value downstream
+through `extraSpecialArgs` or `_module.args`. ANSI consumers use `theme`; tools
+that accept raw hex values use `colors`. Consumers should not select themes or
 interpret factors themselves.
 
 ## Bundled themes
@@ -201,6 +222,8 @@ with the list of available themes.
 
 | Attribute                        | Description                                                  |
 | -------------------------------- | ------------------------------------------------------------ |
+| `colors.*`                       | Validated raw colors for every bundled theme                 |
+| `colors.*.selection`             | Optional interactive selection foreground/background pair   |
 | `theme.*`                        | Rendered flat slot constants for every bundled theme         |
 | `mode.blink`                     | Blinking text                                                |
 | `mode.dim`                       | Dim or faint text                                            |
@@ -208,8 +231,8 @@ with the list of available themes.
 | `mode.reset`                     | Reset all text attributes                                    |
 | `mode.reverse`                   | Reverse foreground and background                            |
 | `mode.underline`                 | Underlined text                                              |
-| `select name`                    | Return one theme as `{ theme, mode }`                        |
-| `withoutColors libThemes`        | Replace every slot and mode code with `""`                   |
+| `select name`                    | Return one theme as `{ colors, theme, mode }`                |
+| `withoutColors libThemes`        | Set `colors = null` and replace rendered codes with `""`     |
 | `resolve { name, enableColors }` | Select a theme and optionally strip all color and mode codes |
 
 ## Where to look next
