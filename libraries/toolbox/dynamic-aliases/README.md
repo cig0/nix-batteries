@@ -41,7 +41,7 @@ documented arguments.
 
 ## From Zero To Flake Shell Shortcuts
 
-This walkthrough builds the same shape of data used by `nix-ignition`: `nd-*`
+This walkthrough builds the same shape of data used by `nix-v8`: `nd-*`
 shortcuts for development shells and `ns-*` shortcuts for package-only shells.
 
 ### 1. Pick a layout
@@ -65,7 +65,7 @@ shells/package/cloud-infra-tools.nix
 
 Each file is a self-contained `mkShell` or `buildEnv`. The walkthrough below
 uses the directory layout for both development shells and packages — the same
-shape nix-ignition uses, since each shell gets an adjacent `README.md` and a
+shape nix-v8 uses, since each shell gets an adjacent `README.md` and a
 stable entry point.
 
 ### 2. Create a shell file

@@ -6,7 +6,7 @@ implementation rules. Read and follow both files.
 ## Project Context
 
 - This repository is a reusable Nix flake library toolkit. It is commonly
-  consumed by `nix-ignition`, but library code must stay useful outside that
+  consumed by `nix-v8`, but library code must stay useful outside that
   consumer.
 - Public library exports live under `self.nitroLibs` in `flake.nix`. Library
   source lives under `libraries/` and includes Modulon, Modulette, guard-flake-input,
