@@ -9,7 +9,7 @@ rec {
   # Interactive selectors use a high-contrast theme-owned pair instead of
   # inferring UI roles from numbered slots. Consumers receive raw #RRGGBB.
   selection = {
-    background = slots.seven;
+    background = slots.zero;
     foreground = "#000000";
   };
 
