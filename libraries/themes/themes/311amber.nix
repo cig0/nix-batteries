@@ -14,15 +14,15 @@ rec {
   };
 
   slots = rec {
-    zero = "#ffb343"; # Orange
-    one = "#f8fafc"; # White
-    two = "#5b8dd9"; # Blue
+    zero = "#ffb343"; # Vibrant orange
+    one = "#f8fafc"; # Muted-ish white
+    two = "#0080ff"; # Pale-ish blue
     two_light = "#b1dafb"; # Light blue
-    three = "#cc66cc"; # Magenta
-    four = "#ffde21"; # Yellow
+    three = "#ff00ff"; # Magenta
+    four = "#ffff00"; # Yellow
     five = "#ef4444"; # Red
-    six = "#ffa6c9"; # Pink
-    seven = "#00ff7f"; # Green
+    six = "#ffc0cb"; # Pink
+    seven = "#00ff7f"; # Vibrant green
 
     bold_zero = zero;
     bold_one = one;
