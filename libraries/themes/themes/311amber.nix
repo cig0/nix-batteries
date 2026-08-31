@@ -20,7 +20,7 @@ rec {
     two_light = "#b1dafb"; # Light blue
     three = "#ff00ff"; # Magenta
     four = "#ffff00"; # Yellow
-    five = "#ef4444"; # Red
+    five = "#ff0000"; # Red
     six = "#ffc0cb"; # Pink
     seven = "#00ff7f"; # Vibrant green
 
