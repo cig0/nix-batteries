@@ -17,6 +17,8 @@
   lib,
   # Caller arg supports focused fixture source trees.
   themesDirectory ? ./themes,
+  # Provider-owned logical path used by provenance consumers and fixtures.
+  themeModuleSourceDirectory ? "libraries/themes/themes",
   ...
 }:
 let
@@ -254,9 +256,19 @@ let
       inherit (normalizedTheme) selection;
     }
   ) normalizedThemes;
+
+  /*
+    Modulette discovery identifies the exact theme modules owned by this
+    provider. Publish that identity here so consumers never reconstruct source
+    paths from theme names or their own checkout layout.
+  */
+  themeMetadata = lib.mapAttrs (themeName: _normalizedTheme: {
+    provider = "nix-nitro";
+    source = "${themeModuleSourceDirectory}/${themeName}.nix";
+  }) normalizedThemes;
 in
 rec {
-  inherit colors;
+  inherit colors themeMetadata;
   theme = themes;
   inherit mode;
 

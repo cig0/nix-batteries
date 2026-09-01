@@ -54,6 +54,7 @@ let
       flakeRoot = nitroLibs.flakeRoot;
       inherit lib;
       themesDirectory = fixtureRoot + "/themes";
+      themeModuleSourceDirectory = "fixtures/themes/${name}/themes";
     };
 
   validThemeFixture = mkThemeFixture "valid";
@@ -91,8 +92,13 @@ in
     assert amberTheme.theme.dimmed_zero == "\\e[38;2;140;98;36m";
     assert amberTheme.theme.bold_zero != enabledTheme.theme.bold_zero;
     assert amberTheme.colors.zero == "#ffb343";
-    assert amberTheme.colors.selection.background == "#00ff7f";
+    assert amberTheme.colors.selection.background == "#ffff00";
     assert amberTheme.colors.selection.foreground == "#000000";
+    assert
+      nitroLibs.themes.themeMetadata."311amber" == {
+        provider = "nix-nitro";
+        source = "libraries/themes/themes/311amber.nix";
+      };
     pass "nix-nitro-themes-fixture";
 
   theme-validation-fixture =
@@ -103,6 +109,11 @@ in
     assert validThemeFixture.theme.test.bold_zero == "\\e[1;38;2;48;96;144m";
     assert validThemeFixture.theme.test.bold_five == "\\e[1;38;2;255;255;255m";
     assert validThemeFixture.theme.test.dimmed_zero == "\\e[38;2;16;32;48m";
+    assert
+      validThemeFixture.themeMetadata.test == {
+        provider = "nix-nitro";
+        source = "fixtures/themes/valid/themes/test.nix";
+      };
     assert builtins.all (result: result.success == false) invalidThemeFixtures;
     pass "nix-nitro-theme-validation-fixture";
 }
