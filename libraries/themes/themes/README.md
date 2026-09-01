@@ -121,4 +121,7 @@ The theme becomes available under the filename without `.nix`.
 ## Where to look next
 
 - `../README.md` — public API, slot roles, and integration
-- `../resolver.nix` — validation, factor scaling, and escape-code rendering
+- `../resolver.nix` — public orchestration and selection API
+- `../assertions.nix` — source validation and required-slot enforcement
+- `../normalizer.nix` — defaults and canonical theme representation
+- `../ansi-renderer.nix` — factor-aware escape-code rendering

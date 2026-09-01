@@ -1,30 +1,35 @@
 # Themes
 
 Self-contained true-color themes for terminal output and interactive selectors.
-Each theme owns its `#RRGGBB` values. The resolver validates the source data,
-preserves raw colors, and renders numbered slots as 24-bit foreground escape
-codes.
+Each theme owns its `#RRGGBB` values. An atomic pipeline discovers and validates
+that source data, preserves raw colors, and renders numbered slots as 24-bit
+foreground escape codes. `resolver.nix` coordinates the pipeline and exposes
+its public API.
 
 Theme files are auto-discovered via Modulette. Add a `.nix` file with the
 required header and it becomes available through `nitroLibs.themes`.
 
 ## Architecture
 
-The system has three ownership layers:
+The system has four ownership layers:
 
 1. **Theme** (`themes/*.nix`) — owns slot colors, optional selection colors,
    `boldFactor`, and `dimFactor`.
-2. **Resolver** — validates source colors and exposes both raw and rendered
-   representations.
-3. **Consumer** — chooses the representation accepted by its output surface.
+2. **Theme pipeline** — `discovery.nix`, `assertions.nix`, `normalizer.nix`,
+   `colors.nix`, `ansi-renderer.nix`, and `provenance.nix` each own one concern.
+3. **Resolver** — coordinates the pipeline and exposes raw colors, rendered
+   colors, provenance, and theme selection through one stable public API.
+4. **Consumer** — chooses the representation accepted by its output surface.
 
 ```mermaid
 graph LR
-    A["themes/*.nix<br/>(raw colors + factors)"] --> B["resolver.nix"]
-    B -->|"validate raw colors"| C["nitroLibs.themes.colors"]
-    B -->|"render true-color codes"| D["nitroLibs.themes.theme"]
-    C -->|resolve| E["interactive tools"]
-    D -->|resolve| F["shell output"]
+    A["themes/*.nix<br/>(raw colors + factors)"] --> B["discovery.nix"]
+    B --> C["assertions.nix → normalizer.nix"]
+    C --> D["colors.nix → ansi-renderer.nix"]
+    B --> E["provenance.nix"]
+    D --> F["resolver.nix"]
+    E --> F
+    F --> G["nitroLibs.themes"]
 ```
 
 There is no shared palette or fallback color source. A theme is complete and
@@ -225,6 +230,7 @@ with the list of available themes.
 | `colors.*`                       | Validated raw colors for every bundled theme                 |
 | `colors.*.selection`             | Optional interactive selection foreground/background pair   |
 | `theme.*`                        | Rendered flat slot constants for every bundled theme         |
+| `themeMetadata.*`               | Provider and source path for every discovered theme          |
 | `mode.blink`                     | Blinking text                                                |
 | `mode.dim`                       | Dim or faint text                                            |
 | `mode.italic`                    | Italic text                                                  |
@@ -238,5 +244,9 @@ with the list of available themes.
 ## Where to look next
 
 - [Theme files](themes/README.md) — authoring and validation details
+- `resolver.nix` — public orchestration and selection API
+- `assertions.nix` — theme source contract enforcement
+- `normalizer.nix` — defaults and canonical validated theme shape
+- `ansi-renderer.nix` — terminal presentation
 - [Modulette](../auto-discover/modulette/README.md) — header-validated discovery
 - [help-legend renderers](../decorators/help-legend/renderers/README.md) — shell-native consumers
