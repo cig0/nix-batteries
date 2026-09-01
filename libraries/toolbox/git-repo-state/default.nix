@@ -1,3 +1,10 @@
+/*
+  Cross-shell Git repository-state snippet generator.
+
+  Callers configure function names and fallback text; this library returns
+  POSIX, Fish, and Nushell source snippets plus their matching call forms.
+  Consumers own snippet installation and display decisions.
+*/
 {
   revisionFunctionName ? "_gitRevision",
   dirtyStateFunctionName ? "_gitDirtyState",

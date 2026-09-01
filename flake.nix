@@ -1,3 +1,12 @@
+/*
+  nix-nitro public flake surface.
+
+  libraries/* → self.nitroLibs
+  fixtures/*  → checks.<system>
+
+  This file wires reusable libraries and their focused fixtures. Library
+  implementation and validation ownership remain in those adjacent directories.
+*/
 {
   description = "nitro - A Nix flake toolkit with reusable building blocks";
 

@@ -1,3 +1,9 @@
+/*
+  Renderer fixture for the public help-legend and git-state libraries.
+
+  fixtures/default.nix supplies nixpkgs and nitroLibs. This fixture generates
+  shell snippets and checks their rendered contracts and native shell syntax.
+*/
 {
   nitroLibs,
   lib,

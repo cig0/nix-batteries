@@ -1,3 +1,9 @@
+/*
+  nix-nitro public-library fixture coordinator.
+
+  flake.nix → checks.<system> → this file → focused fixture directories.
+  It verifies public library contracts; each child fixture owns its own cases.
+*/
 {
   nitroLibs,
   lib,

@@ -1,3 +1,10 @@
+/*
+  Dynamic alias catalogue builder.
+
+  Callers supply semantic entries and naming functions; this library returns
+  aliases, help-legend data, and an optional group while rejecting collisions.
+  It owns no shell rendering or command-discovery policy.
+*/
 { lib }:
 let
   countOccurrences =

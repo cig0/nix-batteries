@@ -1,3 +1,9 @@
+/*
+  POSIX presentation adapter for help-legend.
+
+  help-legend/default.nix discovers this renderer and uses its string-returning
+  functions to build Bash and Zsh-compatible help output.
+*/
 { ... }:
 {
   shell = "posix";

@@ -1,3 +1,10 @@
+/*
+  Modulon Nix-module collector.
+
+  Callers provide module directories and explicit additions; this library
+  returns an imports list. It discovers loaded Nix modules only, while
+  Modulette owns passive data-module discovery.
+*/
 { lib }:
 {
   dirs ? [ ],

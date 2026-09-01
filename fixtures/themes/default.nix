@@ -1,3 +1,10 @@
+/*
+  Theme-library fixture boundary.
+
+  The public nitroLibs.themes result and fixture-only theme directories enter
+  here. This file verifies raw colors, ANSI output, provenance, and rejection
+  of invalid source contracts.
+*/
 {
   nitroLibs,
   lib,
