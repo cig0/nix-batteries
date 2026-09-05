@@ -1,14 +1,14 @@
 /*
-  nix-nitro public flake surface.
+  nix-sidecar public flake surface.
 
-  libraries/* → self.nitroLibs
+  libraries/* → self.sidecarLibs
   fixtures/*  → checks.<system>
 
   This file wires reusable libraries and their focused fixtures. Library
   implementation and validation ownership remain in those adjacent directories.
 */
 {
-  description = "nitro - A Nix flake toolkit with reusable building blocks";
+  description = "Sidecar - A Nix flake toolkit with reusable building blocks";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -27,7 +27,7 @@
       forAllSystems = lib.genAttrs supportedSystems;
     in
     {
-      nitroLibs = rec {
+      sidecarLibs = rec {
         flakeRoot = self.outPath;
 
         guardFlakeInput = import "${self.outPath}/libraries/guard-flake-input" { inherit lib; };
@@ -49,7 +49,7 @@
       checks = forAllSystems (
         system:
         import ./fixtures {
-          nitroLibs = self.nitroLibs;
+          sidecarLibs = self.sidecarLibs;
           inherit lib;
           pkgs = nixpkgs.legacyPackages.${system};
         }

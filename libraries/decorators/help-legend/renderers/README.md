@@ -34,7 +34,7 @@ The Nix side should look almost identical for every renderer:
 
 ```nix
 let
-  L = nix-nitro.nitroLibs.helpLegendDecorator;
+  L = nix-sidecar.sidecarLibs.helpLegendDecorator;
   libHelpLegendRenderer = L.libHelpLegendRenderer.posix; # or fish / nushell
 
   layout = L.sectionLayout {

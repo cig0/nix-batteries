@@ -7,7 +7,7 @@ foreground escape codes. `resolver.nix` coordinates the pipeline and exposes
 its public API.
 
 Theme files are auto-discovered via Modulette. Add a `.nix` file with the
-required header and it becomes available through `nitroLibs.themes`.
+required header and it becomes available through `sidecarLibs.themes`.
 
 ## Architecture
 
@@ -29,7 +29,7 @@ graph LR
     B --> E["provenance.nix"]
     D --> F["resolver.nix"]
     E --> F
-    F --> G["nitroLibs.themes"]
+    F --> G["sidecarLibs.themes"]
 ```
 
 There is no shared palette or fallback color source. A theme is complete and
@@ -157,11 +157,11 @@ name and the complete missing-slot list.
 Add the flake and obtain the public theme library:
 
 ```nix
-inputs.nitro.url = "github:your-org/nix-nitro";
+inputs.sidecar.url = "github:your-org/nix-sidecar";
 
-outputs = { nitro, ... }:
+outputs = { sidecar, ... }:
 let
-  libThemes = nitro.nitroLibs.themes;
+  libThemes = sidecar.sidecarLibs.themes;
 in
 {
   # ...

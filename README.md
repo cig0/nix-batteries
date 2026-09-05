@@ -1,6 +1,6 @@
-![A Nix flake toolkit with reusable building blocks. Home of Modulon.](assets/images/nix-nitro.png)
+![A Nix flake toolkit with reusable building blocks. Home of Modulon.](assets/images/nix-sidecar.png)
 
-<p align="center" style="font-size: 1.5em;"><strong>nitro ❤️‍🔥</strong></p>
+<p align="center" style="font-size: 1.5em;"><strong>sidecar ❤️‍🔥</strong></p>
 
 <p align="center"><strong>Nix flake Library Toolkit</strong></p>
 

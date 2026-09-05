@@ -103,7 +103,7 @@ Inside your flake or module:
 
 ```nix
 let
-  dynamicAliases = inputs.nix-nitro.nitroLibs.dynamicAliases;
+  dynamicAliases = inputs.nix-sidecar.sidecarLibs.dynamicAliases;
   flakeSrcPath = "/home/me/work/my-flake";
 in
 ...

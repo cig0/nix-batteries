@@ -1,19 +1,19 @@
 /*
   Renderer fixture for the public help-legend and git-state libraries.
 
-  fixtures/default.nix supplies nixpkgs and nitroLibs. This fixture generates
+  fixtures/default.nix supplies nixpkgs and sidecarLibs. This fixture generates
   shell snippets and checks their rendered contracts and native shell syntax.
 */
 {
-  nitroLibs,
+  sidecarLibs,
   lib,
   pass,
   pkgs,
 }:
 
 let
-  helpLegend = nitroLibs.helpLegendDecorator;
-  theme = nitroLibs.themes.resolve {
+  helpLegend = sidecarLibs.helpLegendDecorator;
+  theme = sidecarLibs.themes.resolve {
     name = "nushell-inspired";
     enableColors = true;
   };
@@ -55,7 +55,7 @@ let
   };
 
   renderedHelp = lib.mapAttrs (_: renderHelp) helpLegend.libHelpLegendRenderer;
-  gitRepoState = nitroLibs.gitRepoState;
+  gitRepoState = sidecarLibs.gitRepoState;
 
   sources = {
     gitPosix = pkgs.writeText "git-state.sh" ''
@@ -121,9 +121,9 @@ in
     assert lib.hasInfix "native -h/--help" renderedHelp.nushell.check;
     assert lib.hasInfix "\\u{1b}[" renderedHelp.nushell.section.text;
     assert !(lib.hasInfix "\\e[" renderedHelp.nushell.section.text);
-    pass "nix-nitro-decorator-fixture";
+    pass "nix-sidecar-decorator-fixture";
 
-  renderer-runtime-fixture = pkgs.runCommand "nix-nitro-renderer-runtime-fixture" { } ''
+  renderer-runtime-fixture = pkgs.runCommand "nix-sidecar-renderer-runtime-fixture" { } ''
     ${pkgs.bash}/bin/bash -n ${sources.gitPosix}
     ${pkgs.bash}/bin/bash -n ${sources.helpPosix}
     ${pkgs.zsh}/bin/zsh -n ${sources.gitPosix}

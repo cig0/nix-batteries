@@ -1,7 +1,7 @@
 # Fixtures
 
 This directory contains lightweight fixture trees used by `flake.nix` checks.
-They are intentionally small, deterministic examples of public `nitroLibs`
+They are intentionally small, deterministic examples of public `sidecarLibs`
 behavior. A fixture should prove one narrow library contract without depending
 on consumer-specific configuration from another flake.
 
@@ -18,7 +18,7 @@ Current fixture directories:
   theme resolution through fixture-specific source trees.
 
 `fixtures/default.nix` aggregates the checks returned by focused fixture
-modules. The repository root `flake.nix` only passes `nitroLibs`, `lib`, and the
+modules. The repository root `flake.nix` only passes `sidecarLibs`, `lib`, and the
 system package set into that aggregator.
 
 ## Fixture Guidelines
@@ -30,7 +30,7 @@ Keep fixture files focused:
    `not-a-file.nix`.
 3. Avoid generated data, host paths, network access, timestamps, and other
    non-deterministic inputs.
-4. Keep fixtures tied to public `self.nitroLibs` behavior, not private
+4. Keep fixtures tied to public `self.sidecarLibs` behavior, not private
    implementation details.
 5. Run the focused flake check after changes:
 

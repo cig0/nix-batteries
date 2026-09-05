@@ -27,7 +27,7 @@ data module, a helper module, or a module you want to keep parked for later.
 
 ```nix
 let
-  moduleImporter = inputs.nix-nitro.nitroLibs.modulon;
+  moduleImporter = inputs.nix-sidecar.sidecarLibs.modulon;
 in {
   nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
     modules = [

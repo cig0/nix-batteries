@@ -1,11 +1,11 @@
 /*
-  nix-nitro public-library fixture coordinator.
+  nix-sidecar public-library fixture coordinator.
 
   flake.nix → checks.<system> → this file → focused fixture directories.
   It verifies public library contracts; each child fixture owns its own cases.
 */
 {
-  nitroLibs,
+  sidecarLibs,
   lib,
   pkgs,
 }:
@@ -25,24 +25,24 @@ let
     "nixOptionsToMd"
     "themes"
   ];
-  nitroLibNames = builtins.attrNames nitroLibs;
-  missingLibNames = builtins.filter (name: !(builtins.elem name nitroLibNames)) expectedLibNames;
-  unexpectedLibNames = builtins.filter (name: !(builtins.elem name expectedLibNames)) nitroLibNames;
+  sidecarLibNames = builtins.attrNames sidecarLibs;
+  missingLibNames = builtins.filter (name: !(builtins.elem name sidecarLibNames)) expectedLibNames;
+  unexpectedLibNames = builtins.filter (name: !(builtins.elem name expectedLibNames)) sidecarLibNames;
 
-  modulonFixture = nitroLibs.modulon {
+  modulonFixture = sidecarLibs.modulon {
     dirs = [ ./modulon/modules ];
     extraModules = [ ./modulon/extra-module.nix ];
   };
   modulonImports = map toString modulonFixture.imports;
 
-  moduletteFixture = nitroLibs.modulette.discoverModules {
+  moduletteFixture = sidecarLibs.modulette.discoverModules {
     mode = "flat";
     directory = ./modulette/modules;
     headerText = "# Modulette fixture module. Do not remove this header.";
     args.value = "loaded";
   };
 
-  moduletteDirectoryFixture = nitroLibs.modulette.discoverModules {
+  moduletteDirectoryFixture = sidecarLibs.modulette.discoverModules {
     mode = "directory";
     directory = ./modulette/hosts;
     targetFile = "host.nix";
@@ -50,13 +50,13 @@ let
     args.value = "loaded";
   };
 
-  missingInputGuard = nitroLibs.guardFlakeInput "missing-input" { };
+  missingInputGuard = sidecarLibs.guardFlakeInput "missing-input" { };
 
-  dynamicAliasNames = nitroLibs.dynamicAliases.discoverNixFileNames {
+  dynamicAliasNames = sidecarLibs.dynamicAliases.discoverNixFileNames {
     directory = ./dynamic-aliases/nix-files;
   };
-  dynamicAliasMkArgs = builtins.functionArgs nitroLibs.dynamicAliases.mk;
-  dynamicAliasProjectTasks = nitroLibs.dynamicAliases.mk {
+  dynamicAliasMkArgs = builtins.functionArgs sidecarLibs.dynamicAliases.mk;
+  dynamicAliasProjectTasks = sidecarLibs.dynamicAliases.mk {
     names = [
       "fmt"
       "test"
@@ -66,7 +66,7 @@ let
     legendFor = name: _: "Run project ${name}";
     groupName = "Project Tasks";
   };
-  dynamicAliasEntryTasks = nitroLibs.dynamicAliases.mk {
+  dynamicAliasEntryTasks = sidecarLibs.dynamicAliases.mk {
     entries.rust = {
       command = "nix develop";
       display = "nix develop .#rust";
@@ -75,14 +75,14 @@ let
     valueFor = name: entry: "${entry.command} /workspace#${name}";
     legendFor = _: entry: entry.display;
   };
-  dynamicAliasCompatTasks = nitroLibs.dynamicAliases.mk {
+  dynamicAliasCompatTasks = sidecarLibs.dynamicAliases.mk {
     names = [ "docs" ];
     metadata.owner = "external-caller";
     nameFor = name: _: "p-${name}";
     valueFor = name: _: "just ${name}";
   };
   dynamicAliasDuplicateCheck = builtins.tryEval (
-    nitroLibs.dynamicAliases.mk {
+    sidecarLibs.dynamicAliases.mk {
       names = [
         "one"
         "two"
@@ -94,12 +94,12 @@ let
 
   nixOptionsToMdFixtureResult = import ./nix-options-to-md {
     inherit lib;
-    nixOptionsToMd = nitroLibs.nixOptionsToMd;
+    nixOptionsToMd = sidecarLibs.nixOptionsToMd;
   };
 
   rendererChecks = import ./renderers {
     inherit
-      nitroLibs
+      sidecarLibs
       lib
       pass
       pkgs
@@ -107,28 +107,28 @@ let
   };
   themeChecks = import ./themes {
     inherit
-      nitroLibs
+      sidecarLibs
       lib
       pass
       ;
   };
 in
 {
-  nitroLibs-surface =
+  sidecarLibs-surface =
     assert missingLibNames == [ ];
     assert unexpectedLibNames == [ ];
-    pass "nix-nitro-nitroLibs-surface";
+    pass "nix-sidecar-sidecarLibs-surface";
 
   modulon-fixture =
     assert builtins.elem (toString ./modulon/modules/valid.nix) modulonImports;
     assert builtins.elem (toString ./modulon/extra-module.nix) modulonImports;
     assert !(builtins.elem (toString ./modulon/modules/skipped.nix) modulonImports);
-    pass "nix-nitro-modulon-fixture";
+    pass "nix-sidecar-modulon-fixture";
 
   modulette-fixture =
     assert builtins.attrNames moduletteFixture == [ "alpha" ];
     assert moduletteFixture.alpha.value == "loaded";
-    pass "nix-nitro-modulette-fixture";
+    pass "nix-sidecar-modulette-fixture";
 
   modulette-directory-fixture =
     assert
@@ -140,12 +140,12 @@ in
     assert moduletteDirectoryFixture.alpha.id == "alpha";
     assert moduletteDirectoryFixture.beta.value == "loaded";
     assert moduletteDirectoryFixture.beta.id == "beta";
-    pass "nix-nitro-modulette-directory-fixture";
+    pass "nix-sidecar-modulette-directory-fixture";
 
   guard-flake-input-fixture =
     assert missingInputGuard.has == false;
     assert missingInputGuard.input == null;
-    pass "nix-nitro-guard-flake-input-fixture";
+    pass "nix-sidecar-guard-flake-input-fixture";
 
   dynamic-aliases-fixture =
     assert
@@ -184,7 +184,7 @@ in
     assert dynamicAliasEntryTasks.group == null;
     assert dynamicAliasCompatTasks.aliases.p-docs == "just docs";
     assert dynamicAliasDuplicateCheck.success == false;
-    pass "nix-nitro-dynamic-aliases-fixture";
+    pass "nix-sidecar-dynamic-aliases-fixture";
 
   nix-options-to-md-fixture =
     assert nixOptionsToMdFixtureResult.hasHeader;
@@ -193,7 +193,7 @@ in
     assert nixOptionsToMdFixtureResult.hasNestedRow;
     assert nixOptionsToMdFixtureResult.customNamespace;
     assert nixOptionsToMdFixtureResult.customExcludesNested;
-    pass "nix-nitro-nix-options-to-md-fixture";
+    pass "nix-sidecar-nix-options-to-md-fixture";
 }
 // rendererChecks
 // themeChecks

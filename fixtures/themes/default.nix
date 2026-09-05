@@ -1,30 +1,30 @@
 /*
   Theme-library fixture boundary.
 
-  The public nitroLibs.themes result and fixture-only theme directories enter
+  The public sidecarLibs.themes result and fixture-only theme directories enter
   here. This file verifies raw colors, ANSI output, provenance, and rejection
   of invalid source contracts.
 */
 {
-  nitroLibs,
+  sidecarLibs,
   lib,
   pass,
 }:
 
 let
-  enabledTheme = nitroLibs.themes.resolve {
+  enabledTheme = sidecarLibs.themes.resolve {
     name = "nushell-inspired";
     enableColors = true;
   };
-  disabledTheme = nitroLibs.themes.resolve {
+  disabledTheme = sidecarLibs.themes.resolve {
     name = "nushell-inspired";
     enableColors = false;
   };
-  amberTheme = nitroLibs.themes.resolve {
+  amberTheme = sidecarLibs.themes.resolve {
     name = "311amber";
     enableColors = true;
   };
-  allThemesForced = builtins.deepSeq [ nitroLibs.themes.colors nitroLibs.themes.theme ] true;
+  allThemesForced = builtins.deepSeq [ sidecarLibs.themes.colors sidecarLibs.themes.theme ] true;
   requiredSlots = [
     "zero"
     "one"
@@ -50,7 +50,7 @@ let
     builtins.all (
       slot: builtins.hasAttr slot theme && builtins.stringLength theme.${slot} > 0
     ) requiredSlots
-  ) (builtins.attrValues nitroLibs.themes.theme);
+  ) (builtins.attrValues sidecarLibs.themes.theme);
 
   mkThemeFixture =
     name:
@@ -58,7 +58,7 @@ let
       fixtureRoot = ./. + "/${name}";
     in
     import ../../libraries/themes/resolver.nix {
-      flakeRoot = nitroLibs.flakeRoot;
+      flakeRoot = sidecarLibs.flakeRoot;
       inherit lib;
       themesDirectory = fixtureRoot + "/themes";
       themeModuleSourceDirectory = "fixtures/themes/${name}/themes";
@@ -102,11 +102,11 @@ in
     assert amberTheme.colors.selection.background == "#ffff00";
     assert amberTheme.colors.selection.foreground == "#000000";
     assert
-      nitroLibs.themes.themeMetadata."311amber" == {
-        provider = "nix-nitro";
+      sidecarLibs.themes.themeMetadata."311amber" == {
+        provider = "nix-sidecar";
         source = "libraries/themes/themes/311amber.nix";
       };
-    pass "nix-nitro-themes-fixture";
+    pass "nix-sidecar-themes-fixture";
 
   theme-validation-fixture =
     assert builtins.attrNames validThemeFixture.theme == [ "test" ];
@@ -118,9 +118,9 @@ in
     assert validThemeFixture.theme.test.dimmed_zero == "\\e[38;2;16;32;48m";
     assert
       validThemeFixture.themeMetadata.test == {
-        provider = "nix-nitro";
+        provider = "nix-sidecar";
         source = "fixtures/themes/valid/themes/test.nix";
       };
     assert builtins.all (result: result.success == false) invalidThemeFixtures;
-    pass "nix-nitro-theme-validation-fixture";
+    pass "nix-sidecar-theme-validation-fixture";
 }

@@ -13,7 +13,7 @@ Explicit project help screens still use the shared layout functions:
 
 ```nix
 let
-  L = nix-nitro.nitroLibs.helpLegendDecorator;
+  L = nix-sidecar.sidecarLibs.helpLegendDecorator;
   libHelpLegendRenderer = L.libHelpLegendRenderer.nushell;
 
   legend = {

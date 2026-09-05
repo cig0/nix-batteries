@@ -11,6 +11,6 @@
   themeModuleSourceDirectory,
 }:
 lib.mapAttrs (themeName: _discoveredTheme: {
-  provider = "nix-nitro";
+  provider = "nix-sidecar";
   source = "${themeModuleSourceDirectory}/${themeName}.nix";
 }) discoveredThemes
