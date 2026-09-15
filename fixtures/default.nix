@@ -1,7 +1,7 @@
 /*
   nix-sidecar public-library fixture coordinator.
 
-  flake.nix → checks.<system> → this file → focused fixture directories.
+  modules/checks.nix → this file → checks.<system>.
   It verifies public library contracts; each child fixture owns its own cases.
 */
 {
