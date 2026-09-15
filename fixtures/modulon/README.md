@@ -4,7 +4,7 @@ This fixture proves that `sidecarLibs.modulon` builds an `imports` list from a
 module directory, ignores files marked with `@MODULON_SKIP`, and preserves
 modules passed through `extraModules`.
 
-The `modulon-fixture` check in `fixtures/default.nix` (wired via `modules/checks.nix`) builds the fixture with:
+The `modulon-fixture` check in `fixtures/default.nix` (wired via `flake.nix`) builds the fixture with:
 
 ```nix
 sidecarLibs.modulon {

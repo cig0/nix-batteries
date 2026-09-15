@@ -1,8 +1,8 @@
 /*
   A standalone consumer with only a sidecar input.
 
-  The smoke output exercises public helpers without flake-parts in the
-  consumer. modules/checks.nix also evaluates this output in the fixture suite.
+  The smoke output exercises public helpers directly, with no framework in
+  the consumer. flake.nix also evaluates this output in the fixture suite.
 */
 {
   inputs.sidecar.url = "path:../..";
