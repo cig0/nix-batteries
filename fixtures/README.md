@@ -20,11 +20,9 @@ Current fixture directories:
   theme resolution through fixture-specific source trees.
 
 `fixtures/default.nix` aggregates the checks returned by focused fixture
-modules. [`modules/checks.nix`](../modules/checks.nix) passes the merged
-`sidecarLibs`, the shared nixpkgs `lib`, and each system's package set into that
-aggregator. Fixture files are outside the auto-imported flake-module tree.
-The checks module also evaluates the consumer's `smoke` output with the public
-flake as its input. A separate Nix invocation verifies input resolution through
+modules. [`flake.nix`](../flake.nix) passes `sidecarLibs`, the shared nixpkgs
+`lib`, and each system's package set into that aggregator. The flake also
+evaluates the consumer's `smoke` output with the public flake as its input. A separate Nix invocation verifies input resolution through
 the consumer's own entry point:
 
 ```shell

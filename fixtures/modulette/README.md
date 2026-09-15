@@ -9,7 +9,7 @@ first line matches the requested header, ignores directories with `.nix`
 suffixes, passes `args` through to the imported module, and returns an attrset
 keyed by filename without `.nix`.
 
-The `modulette-fixture` check in `fixtures/default.nix` (wired via `modules/checks.nix`) scans `modules/` with:
+The `modulette-fixture` check in `fixtures/default.nix` (wired via `flake.nix`) scans `modules/` with:
 
 ```nix
 sidecarLibs.modulette.discoverModules {
@@ -35,7 +35,7 @@ It then asserts that the discovered attrset contains only `alpha` and that `alph
 
 The `hosts/` fixture proves that discovery can scan subdirectories, import a target file from each one, and return an attrset keyed by directory name.
 
-The `modulette-directory-fixture` check in `fixtures/default.nix` (wired via `modules/checks.nix`) scans `hosts/` with:
+The `modulette-directory-fixture` check in `fixtures/default.nix` (wired via `flake.nix`) scans `hosts/` with:
 
 ```nix
 sidecarLibs.modulette.discoverModules {
