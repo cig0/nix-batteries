@@ -1,5 +1,5 @@
 /*
-  nix-sidecar flake entry point.
+  nix-batteries flake entry point.
 
   Plain outputs over a single nixpkgs input. sidecarLibs is a static
   attribute set mapping each public export directly onto its implementation
@@ -47,7 +47,7 @@
           consumer-fixture =
             # Exercise the consumer through the public flake output boundary.
             assert ((import ./fixtures/consumer/flake.nix).outputs { sidecar = self; }).smoke;
-            pkgs.runCommand "nix-sidecar-consumer-fixture" { } "touch $out";
+            pkgs.runCommand "nix-batteries-consumer-fixture" { } "touch $out";
         }
       );
       formatter = forSystems (pkgs: pkgs.nixfmt);

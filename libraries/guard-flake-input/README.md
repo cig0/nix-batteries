@@ -46,7 +46,7 @@ After — degrades gracefully:
 { _inputs, ... }:
 
 let
-  rust = _inputs.nix-sidecar.sidecarLibs.guardFlakeInput "rust-overlay" _inputs;
+  rust = _inputs.nix-batteries.sidecarLibs.guardFlakeInput "rust-overlay" _inputs;
 in
 {
   nixpkgs.overlays = rust.apply (input: [ input.overlays.default ]) [ ];
@@ -62,7 +62,7 @@ If `rust-overlay` is missing → overlay is skipped, trace message is emitted.
 { _inputs, lib, ... }:
 
 let
-  nixvim = _inputs.nix-sidecar.sidecarLibs.guardFlakeInput "nixvim" _inputs;
+  nixvim = _inputs.nix-batteries.sidecarLibs.guardFlakeInput "nixvim" _inputs;
 in
 {
   imports = lib.optional nixvim.has [
@@ -79,7 +79,7 @@ in
 { _inputs, lib, ... }:
 
 let
-  guard = _inputs.nix-sidecar.sidecarLibs.guardFlakeInput;
+  guard = _inputs.nix-batteries.sidecarLibs.guardFlakeInput;
   nixIndex = guard "nix-index-database" _inputs;
   nixvim = guard "nixvim" _inputs;
 in
@@ -101,7 +101,7 @@ When you don't need the input value itself, just whether it exists:
 { _inputs, lib, ... }:
 
 let
-  disko = _inputs.nix-sidecar.sidecarLibs.guardFlakeInput "disko" _inputs;
+  disko = _inputs.nix-batteries.sidecarLibs.guardFlakeInput "disko" _inputs;
 in
 {
   # Only show disk formatting commands if disko is available
@@ -117,7 +117,7 @@ in
 { _inputs, ... }:
 
 let
-  guard = _inputs.nix-sidecar.sidecarLibs.guardFlakeInput;
+  guard = _inputs.nix-batteries.sidecarLibs.guardFlakeInput;
   rust = guard "rust-overlay" _inputs;
   lanzaboote = guard "lanzaboote" _inputs;
 in
@@ -135,7 +135,7 @@ To make `guard-flake-input` available as a module argument, add it to `_module.a
 ```nix
 _module.args = {
   _inputs = inputs;
-  guard = name: inputs.nix-sidecar.sidecarLibs.guardFlakeInput name inputs;
+  guard = name: inputs.nix-batteries.sidecarLibs.guardFlakeInput name inputs;
 };
 ```
 

@@ -103,10 +103,10 @@ in
     assert amberTheme.colors.selection.foreground == "#000000";
     assert
       sidecarLibs.themes.themeMetadata."311amber" == {
-        provider = "nix-sidecar";
+        provider = "nix-batteries";
         source = "libraries/themes/themes/311amber.nix";
       };
-    pass "nix-sidecar-themes-fixture";
+    pass "nix-batteries-themes-fixture";
 
   theme-validation-fixture =
     assert builtins.attrNames validThemeFixture.theme == [ "test" ];
@@ -118,9 +118,9 @@ in
     assert validThemeFixture.theme.test.dimmed_zero == "\\e[38;2;16;32;48m";
     assert
       validThemeFixture.themeMetadata.test == {
-        provider = "nix-sidecar";
+        provider = "nix-batteries";
         source = "fixtures/themes/valid/themes/test.nix";
       };
     assert builtins.all (result: result.success == false) invalidThemeFixtures;
-    pass "nix-sidecar-theme-validation-fixture";
+    pass "nix-batteries-theme-validation-fixture";
 }

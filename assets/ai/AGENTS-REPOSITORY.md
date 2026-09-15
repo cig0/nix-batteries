@@ -1,7 +1,7 @@
 # Repository Agent Guidelines
 
 This file supplements the reusable `AGENTS.md` baseline and skills with
-nix-sidecar-specific architecture, compatibility, Git, and validation policy.
+nix-batteries-specific architecture, compatibility, Git, and validation policy.
 
 ## Nix Ecosystem Baseline
 

@@ -1,6 +1,6 @@
 # Testing Modulon
 
-This `nix-sidecar` tree validates Modulon through focused flake checks, fixture
+This `nix-batteries` tree validates Modulon through focused flake checks, fixture
 evaluation, and direct parser checks.
 
 Start with the standard flake command:

@@ -49,7 +49,7 @@ Callers supply the option tree and decide where the result goes.
 
 ```nix
 let
-  nixOptionsToMd = inputs.nix-sidecar.sidecarLibs.nixOptionsToMd;
+  nixOptionsToMd = inputs.nix-batteries.sidecarLibs.nixOptionsToMd;
   optionTree = {
     programs.git = {
       enable = lib.mkEnableOption "Git configuration";
