@@ -9,12 +9,12 @@ first line matches the requested header, ignores directories with `.nix`
 suffixes, passes `args` through to the imported module, and returns an attrset
 keyed by filename without `.nix`.
 
-The root `flake.nix` check scans `modules/` with:
+The `modulette-fixture` check in `fixtures/default.nix` (wired via `modules/checks.nix`) scans `modules/` with:
 
 ```nix
-self.sidecarLibs.modulette.discoverModules {
+sidecarLibs.modulette.discoverModules {
   mode = "flat";
-  directory = ./fixtures/modulette/modules;
+  directory = ./modulette/modules;
   headerText = "# Modulette fixture module. Do not remove this header.";
   args = {
     value = "loaded";
@@ -35,12 +35,12 @@ It then asserts that the discovered attrset contains only `alpha` and that `alph
 
 The `hosts/` fixture proves that discovery can scan subdirectories, import a target file from each one, and return an attrset keyed by directory name.
 
-The root `flake.nix` check scans `hosts/` with:
+The `modulette-directory-fixture` check in `fixtures/default.nix` (wired via `modules/checks.nix`) scans `hosts/` with:
 
 ```nix
-self.sidecarLibs.modulette.discoverModules {
+sidecarLibs.modulette.discoverModules {
   mode = "directory";
-  directory = ./fixtures/modulette/hosts;
+  directory = ./modulette/hosts;
   targetFile = "host.nix";
   headerText = "# Modulette fixture module. Do not remove this header.";
   args = {
@@ -64,8 +64,8 @@ Use this path when changing Modulette discovery behavior:
 2. Give loadable files the exact header used by the check:
    `# Modulette fixture module. Do not remove this header.`
 3. Leave intentionally ignored files without that exact first line.
-4. Return a tiny attrset from the fixture module. If the behavior needs input, read it from the `args` passed in `flake.nix`.
-5. Update the relevant `modulette-fixture` or `modulette-directory-fixture` assertions in the root `flake.nix` so they prove the new expectation.
+4. Return a tiny attrset from the fixture module. If the behavior needs input, read it from the `args` passed in `fixtures/default.nix`.
+5. Update the relevant `modulette-fixture` or `modulette-directory-fixture` assertions in `fixtures/default.nix` so they prove the new expectation.
 6. Run:
 
 ```shell

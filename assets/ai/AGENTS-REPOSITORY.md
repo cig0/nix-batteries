@@ -16,8 +16,8 @@ nix-sidecar-specific architecture, compatibility, Git, and validation policy.
 
 ## Project Context
 
-- This repository is a reusable Nix flake library toolkit. It is commonly
-  consumed by nix-v8, but library code must remain useful outside that consumer.
+- This repository is a reusable Nix flake library toolkit. It is currently
+  consumed by hoagie, but library code must remain useful outside that consumer.
 - `flake.nix` assembles flake-parts through import-tree over `modules/`.
   Feature modules under `modules/libraries/` contribute public `self.sidecarLibs`
   exports; `modules/sidecar-libs.nix` declares the shared option contract.

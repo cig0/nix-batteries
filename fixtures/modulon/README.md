@@ -4,12 +4,12 @@ This fixture proves that `sidecarLibs.modulon` builds an `imports` list from a
 module directory, ignores files marked with `@MODULON_SKIP`, and preserves
 modules passed through `extraModules`.
 
-The root `flake.nix` check builds the fixture with:
+The `modulon-fixture` check in `fixtures/default.nix` (wired via `modules/checks.nix`) builds the fixture with:
 
 ```nix
-self.sidecarLibs.modulon {
-  dirs = [ ./fixtures/modulon/modules ];
-  extraModules = [ ./fixtures/modulon/extra-module.nix ];
+sidecarLibs.modulon {
+  dirs = [ ./modulon/modules ];
+  extraModules = [ ./modulon/extra-module.nix ];
 }
 ```
 
@@ -40,7 +40,7 @@ Use this path when changing Modulon discovery behavior:
    `options.`, or `config.`.
 4. Put `# @MODULON_SKIP` in files that should remain near the fixture without
    appearing in the generated `imports` list.
-5. Update the `modulon-fixture` assertions in the root `flake.nix` so they prove
+5. Update the `modulon-fixture` assertions in `fixtures/default.nix` so they prove
    exactly which paths are included or excluded.
 6. Run:
 
