@@ -6,10 +6,10 @@
   disabled and a trace message is emitted to stderr — no build breakage,
   no manual comment-chasing.
 
-  Flake inputs are normalized by channel-inputs.nix (stripping -unstable
-  and -stable suffixes), so the guard works uniformly across channels:
-  referencing "rust-overlay" matches whether the host is on stable or
-  unstable.
+  The guard performs an exact-name lookup in the given inputs attrset, so it
+  works uniformly for any consumer: referencing "rust-overlay" matches whenever
+  that key is present. Consumers that normalize keys across channels (for
+  example by stripping -unstable suffixes) pass the normalized set.
 
   Exports:
 

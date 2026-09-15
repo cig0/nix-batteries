@@ -16,7 +16,7 @@ This is fragile. `guard-flake-input` makes the relationship explicit in code: if
 
 ## How It Works
 
-The guard function takes a flake input name and the `_inputs` attrset (normalized by `channel-inputs.nix`), then returns a record with:
+The guard function takes a flake input name and an inputs attrset (conventionally `_inputs` in consumers), then returns a record with:
 
 | Field   | Type                 | Description                                                                            |
 | ------- | -------------------- | -------------------------------------------------------------------------------------- |
@@ -24,7 +24,7 @@ The guard function takes a flake input name and the `_inputs` attrset (normalize
 | `input` | `a or null`          | The input value, or `null` if missing                                                  |
 | `apply` | `(a -> b) -> b -> b` | Call a function with the input if present, else return a fallback with a trace warning |
 
-Because `_inputs` keys are already normalized (suffixes like `-unstable` are stripped by `channel-inputs.nix`), referencing `"rust-overlay"` works uniformly across channels.
+The lookup is by exact attribute name, so referencing `"rust-overlay"` works whenever that key is present in the given set. Consumers that normalize keys across channels (for example by stripping `-unstable` suffixes) pass the normalized set.
 
 ## Examples
 
@@ -130,14 +130,16 @@ in
 
 ## Integration
 
-To make `guard-flake-input` available as a module argument, add it to `_module.args` in the same place where `_inputs` is already passed:
+To make `guard-flake-input` available as a module argument, add it to `_module.args` in the same place where the inputs set is already passed:
 
 ```nix
 _module.args = {
-  _inputs = releaseChannel._inputs;
-  guard = name: releaseChannel._inputs.nix-sidecar.sidecarLibs.guardFlakeInput name releaseChannel._inputs;
+  _inputs = inputs;
+  guard = name: inputs.nix-sidecar.sidecarLibs.guardFlakeInput name inputs;
 };
 ```
+
+Consumers that normalize input keys pass the normalized set instead of raw `inputs`.
 
 Then modules can use it without importing:
 
