@@ -85,10 +85,10 @@ Themes may add specialized slots. `311amber`, for example, also provides
 
 Themes may also define a complete `selection` pair for interactive menus:
 
-| Selection field | Role |
-| --- | --- |
-| `background` | Selected-row background |
-| `foreground` | Text displayed on the selected-row background |
+| Selection field | Role                                          |
+| --------------- | --------------------------------------------- |
+| `background`    | Selected-row background                       |
+| `foreground`    | Text displayed on the selected-row background |
 
 The pair is optional so themes can adopt it independently, but neither field
 may appear alone. `311amber` currently provides the pair; other bundled themes
@@ -157,7 +157,7 @@ name and the complete missing-slot list.
 Add the flake and obtain the public theme library:
 
 ```nix
-inputs.sidecar.url = "github:your-org/nix-sidecar";
+inputs.sidecar.url = "github:your-org/nix-batteries";
 
 outputs = { sidecar, ... }:
 let
@@ -228,9 +228,9 @@ with the list of available themes.
 | Attribute                        | Description                                                  |
 | -------------------------------- | ------------------------------------------------------------ |
 | `colors.*`                       | Validated raw colors for every bundled theme                 |
-| `colors.*.selection`             | Optional interactive selection foreground/background pair   |
+| `colors.*.selection`             | Optional interactive selection foreground/background pair    |
 | `theme.*`                        | Rendered flat slot constants for every bundled theme         |
-| `themeMetadata.*`               | Provider and source path for every discovered theme          |
+| `themeMetadata.*`                | Provider and source path for every discovered theme          |
 | `mode.blink`                     | Blinking text                                                |
 | `mode.dim`                       | Dim or faint text                                            |
 | `mode.italic`                    | Italic text                                                  |

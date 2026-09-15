@@ -121,9 +121,9 @@ in
     assert lib.hasInfix "native -h/--help" renderedHelp.nushell.check;
     assert lib.hasInfix "\\u{1b}[" renderedHelp.nushell.section.text;
     assert !(lib.hasInfix "\\e[" renderedHelp.nushell.section.text);
-    pass "nix-sidecar-decorator-fixture";
+    pass "nix-batteries-decorator-fixture";
 
-  renderer-runtime-fixture = pkgs.runCommand "nix-sidecar-renderer-runtime-fixture" { } ''
+  renderer-runtime-fixture = pkgs.runCommand "nix-batteries-renderer-runtime-fixture" { } ''
     ${pkgs.bash}/bin/bash -n ${sources.gitPosix}
     ${pkgs.bash}/bin/bash -n ${sources.helpPosix}
     ${pkgs.zsh}/bin/zsh -n ${sources.gitPosix}

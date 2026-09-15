@@ -37,7 +37,7 @@ public export onto its implementation under `libraries/`; `checks` and
 
 `libraries/` retains the reusable implementations and their direct-import
 paths. `fixtures/` retains test cases and data. Public helpers remain available
-through `inputs.nix-sidecar.sidecarLibs`.
+through `inputs.nix-batteries.sidecarLibs`.
 
 The public catalogue is a plain lazy attribute set with one definition per
 export. Individual helper values retain their existing function and

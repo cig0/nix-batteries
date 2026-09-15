@@ -1,5 +1,5 @@
 /*
-  nix-sidecar public-library fixture coordinator.
+  nix-batteries public-library fixture coordinator.
 
    flake.nix → this file → checks.<system>.
   It verifies public library contracts; each child fixture owns its own cases.
@@ -117,18 +117,18 @@ in
   sidecarLibs-surface =
     assert missingLibNames == [ ];
     assert unexpectedLibNames == [ ];
-    pass "nix-sidecar-sidecarLibs-surface";
+    pass "nix-batteries-sidecarLibs-surface";
 
   modulon-fixture =
     assert builtins.elem (toString ./modulon/modules/valid.nix) modulonImports;
     assert builtins.elem (toString ./modulon/extra-module.nix) modulonImports;
     assert !(builtins.elem (toString ./modulon/modules/skipped.nix) modulonImports);
-    pass "nix-sidecar-modulon-fixture";
+    pass "nix-batteries-modulon-fixture";
 
   modulette-fixture =
     assert builtins.attrNames moduletteFixture == [ "alpha" ];
     assert moduletteFixture.alpha.value == "loaded";
-    pass "nix-sidecar-modulette-fixture";
+    pass "nix-batteries-modulette-fixture";
 
   modulette-directory-fixture =
     assert
@@ -140,12 +140,12 @@ in
     assert moduletteDirectoryFixture.alpha.id == "alpha";
     assert moduletteDirectoryFixture.beta.value == "loaded";
     assert moduletteDirectoryFixture.beta.id == "beta";
-    pass "nix-sidecar-modulette-directory-fixture";
+    pass "nix-batteries-modulette-directory-fixture";
 
   guard-flake-input-fixture =
     assert missingInputGuard.has == false;
     assert missingInputGuard.input == null;
-    pass "nix-sidecar-guard-flake-input-fixture";
+    pass "nix-batteries-guard-flake-input-fixture";
 
   dynamic-aliases-fixture =
     assert
@@ -184,7 +184,7 @@ in
     assert dynamicAliasEntryTasks.group == null;
     assert dynamicAliasCompatTasks.aliases.p-docs == "just docs";
     assert dynamicAliasDuplicateCheck.success == false;
-    pass "nix-sidecar-dynamic-aliases-fixture";
+    pass "nix-batteries-dynamic-aliases-fixture";
 
   nix-options-to-md-fixture =
     assert nixOptionsToMdFixtureResult.hasHeader;
@@ -193,7 +193,7 @@ in
     assert nixOptionsToMdFixtureResult.hasNestedRow;
     assert nixOptionsToMdFixtureResult.customNamespace;
     assert nixOptionsToMdFixtureResult.customExcludesNested;
-    pass "nix-sidecar-nix-options-to-md-fixture";
+    pass "nix-batteries-nix-options-to-md-fixture";
 }
 // rendererChecks
 // themeChecks
