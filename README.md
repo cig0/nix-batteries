@@ -29,3 +29,28 @@ file should stay out of the module graph.
 | `libraries/auto-discover/modulon/`   | Plug-and-play module management framework for NixOS and Nix flakes |
 | `libraries/themes/`                  | Theme option module and themes modules                             |
 | `libraries/toolbox/`                 | Small reusable shell/runtime code generators                       |
+
+### Flake structure
+
+The flake uses [flake-parts](https://flake.parts/) and
+[import-tree](https://github.com/denful/import-tree) for dendritic composition.
+`flake.nix` declares inputs and loads `modules/`; every Nix file in that tree is
+a flake-parts module. Import-tree recursively discovers `.nix` files and skips
+paths containing `/_`.
+
+- `modules/libraries/` owns the feature-level `sidecarLibs` exports.
+- `modules/sidecar-libs.nix` declares their shared option contract and flake root.
+- `modules/systems.nix`, `modules/checks.nix`, and `modules/formatter.nix` own
+  the supported systems, fixture wiring, and formatter respectively.
+
+`libraries/` retains the reusable implementations and their direct-import
+paths. `fixtures/` retains test cases and data. Both trees sit outside automatic
+flake-module discovery. Public helpers remain available through
+`inputs.nix-sidecar.sidecarLibs`; consumers do not need flake-parts.
+
+The public catalogue is a lazy attribute set with one definition per export.
+Feature modules merge at the export-name boundary; individual helper values
+retain their existing function and attribute-set contracts.
+
+Checks and formatters cover `x86_64-linux`, `aarch64-linux`, `x86_64-darwin`, and
+`aarch64-darwin`. [Fixtures](fixtures/README.md) documents the validation boundary.

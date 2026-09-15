@@ -1,12 +1,14 @@
 # Fixtures
 
-This directory contains lightweight fixture trees used by `flake.nix` checks.
+This directory contains lightweight fixture trees used by the flake checks.
 They are intentionally small, deterministic examples of public `sidecarLibs`
 behavior. A fixture should prove one narrow library contract without depending
 on consumer-specific configuration from another flake.
 
 Current fixture directories:
 
+- `consumer/` is a standalone flake using only a sidecar input. It exercises
+  public helper calls, theme resolution, and a direct import through `flakeRoot`.
 - `dynamic-aliases/` checks generic alias, legend, group, and name discovery.
 - `modulette/` checks header-validated data-module discovery.
 - `modulon/` checks Nix module auto-discovery, skip markers, and explicit extra
@@ -18,8 +20,19 @@ Current fixture directories:
   theme resolution through fixture-specific source trees.
 
 `fixtures/default.nix` aggregates the checks returned by focused fixture
-modules. The repository root `flake.nix` only passes `sidecarLibs`, `lib`, and the
-system package set into that aggregator.
+modules. [`modules/checks.nix`](../modules/checks.nix) passes the merged
+`sidecarLibs`, the shared nixpkgs `lib`, and each system's package set into that
+aggregator. Fixture files are outside the auto-imported flake-module tree.
+The checks module also evaluates the consumer's `smoke` output with the public
+flake as its input. A separate Nix invocation verifies input resolution through
+the consumer's own entry point:
+
+```shell
+nix eval ./fixtures/consumer#smoke --json --no-write-lock-file
+```
+
+The consumer resolves `sidecar` from the repository root and reuses its locked
+dependencies. Its transient lock graph is not saved in the fixture tree.
 
 ## Fixture Guidelines
 

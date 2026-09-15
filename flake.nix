@@ -1,60 +1,22 @@
 /*
-  nix-sidecar public flake surface.
+  nix-sidecar flake entry point.
 
-  libraries/* → self.sidecarLibs
-  fixtures/*  → checks.<system>
-
-  This file wires reusable libraries and their focused fixtures. Library
-  implementation and validation ownership remain in those adjacent directories.
+  inputs → flake-parts → modules/* → public outputs.
+  Only modules/ is auto-imported; libraries/ and fixtures/ retain their own
+  import contracts.
 */
 {
   description = "Sidecar - A Nix flake toolkit with reusable building blocks";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      # Module evaluation and public libraries share the pinned nixpkgs lib.
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
+    import-tree.url = "github:denful/import-tree";
   };
 
-  outputs =
-    { nixpkgs, self }:
-    let
-      lib = nixpkgs.lib;
-      supportedSystems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "aarch64-darwin"
-      ];
-      forAllSystems = lib.genAttrs supportedSystems;
-    in
-    {
-      sidecarLibs = rec {
-        flakeRoot = self.outPath;
-
-        guardFlakeInput = import "${self.outPath}/libraries/guard-flake-input" { inherit lib; };
-        mkGitRepoState = args: import (self.outPath + "/libraries/toolbox/git-repo-state") args;
-        gitRepoState = mkGitRepoState { };
-        dynamicAliases = import "${self.outPath}/libraries/toolbox/dynamic-aliases" { inherit lib; };
-        helpLegendDecorator = import "${self.outPath}/libraries/decorators/help-legend" { };
-        modulette = import "${self.outPath}/libraries/auto-discover/modulette" { inherit lib; };
-        nixOptionsToMd = import "${self.outPath}/libraries/toolbox/nix-options-to-md";
-        modulon =
-          collectorArgs:
-          import "${self.outPath}/libraries/auto-discover/modulon" { inherit lib; } collectorArgs;
-        themes = import "${self.outPath}/libraries/themes/resolver.nix" {
-          flakeRoot = self.outPath;
-          inherit lib;
-        };
-      };
-
-      checks = forAllSystems (
-        system:
-        import ./fixtures {
-          sidecarLibs = self.sidecarLibs;
-          inherit lib;
-          pkgs = nixpkgs.legacyPackages.${system};
-        }
-      );
-
-      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
-    };
+  outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 }
