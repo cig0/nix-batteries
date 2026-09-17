@@ -5,9 +5,9 @@
   It verifies public library contracts; each child fixture owns its own cases.
 */
 {
-  sidecarLibs,
-  lib,
-  pkgs,
+  sidecarLibs, # flake.nix → sidecarLibs
+  lib, # flake.nix → nixpkgs.lib
+  pkgs, # flake.nix → per-system package set
 }:
 
 let

@@ -8,8 +8,8 @@
   provenance construction remain owned by their adjacent atomic modules.
 */
 {
-  flakeRoot,
-  lib,
+  flakeRoot, # flake.nix → self.outPath
+  lib, # flake.nix → nixpkgs.lib
   # Supports focused fixture source trees without changing discovery behavior.
   themesDirectory ? ./themes,
   # Logical provider path published by provenance.nix; fixtures override it.
@@ -78,8 +78,8 @@ rec {
 
   resolve =
     {
-      name,
-      enableColors ? true,
+      name, # consumer → selected theme name
+      enableColors ? true, # consumer → theme colors policy
     }:
     let
       selectedTheme = select name;

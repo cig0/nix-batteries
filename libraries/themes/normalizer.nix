@@ -6,8 +6,8 @@
   receive one predictable shape regardless of optional source fields.
 */
 {
-  themeAssertions,
-  themeContract,
+  themeAssertions, # resolver.nix → assertions.nix
+  themeContract, # resolver.nix → contract.nix
 }:
 themeName: discoveredTheme:
 let

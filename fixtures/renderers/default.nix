@@ -5,10 +5,10 @@
   shell snippets and checks their rendered contracts and native shell syntax.
 */
 {
-  sidecarLibs,
-  lib,
-  pass,
-  pkgs,
+  sidecarLibs, # fixtures/default.nix → sidecarLibs
+  lib, # fixtures/default.nix → nixpkgs.lib
+  pass, # fixtures/default.nix → fixture pass command
+  pkgs, # fixtures/default.nix → per-system package set
 }:
 
 let

@@ -6,8 +6,8 @@
   and publishes the theme-independent terminal mode codes.
 */
 {
-  colorOperations,
-  lib,
+  colorOperations, # resolver.nix → colors.nix
+  lib, # resolver.nix → nixpkgs.lib
 }:
 let
   renderForegroundColor =

@@ -1,8 +1,8 @@
 # Nix Options to Markdown fixture
 
 {
-  lib,
-  nixOptionsToMd,
+  lib, # fixtures/default.nix → nixpkgs.lib
+  nixOptionsToMd, # fixtures/default.nix → sidecarLibs.nixOptionsToMd
 }:
 
 let

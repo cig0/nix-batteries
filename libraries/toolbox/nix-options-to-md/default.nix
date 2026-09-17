@@ -6,9 +6,9 @@
   read files; callers supply the option tree.
 */
 {
-  lib,
-  options,
-  namespace ? "myOptions",
+  lib, # caller args → nixpkgs.lib
+  options, # caller args → option declaration tree
+  namespace ? "myOptions", # caller args → rendered option prefix
 }:
 
 let
@@ -108,9 +108,9 @@ in
 
   markdownForNamespace =
     {
-      newNamespace,
-      includeHeader ? true,
-      exclude ? [ ],
+      newNamespace, # caller args → rendered option prefix
+      includeHeader ? true, # caller args → table header toggle
+      exclude ? [ ], # caller args → path prefixes to omit
     }:
     let
       entries = filterEntries exclude allEntries;

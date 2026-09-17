@@ -6,9 +6,9 @@
   of invalid source contracts.
 */
 {
-  sidecarLibs,
-  lib,
-  pass,
+  sidecarLibs, # fixtures/default.nix → sidecarLibs
+  lib, # fixtures/default.nix → nixpkgs.lib
+  pass, # fixtures/default.nix → fixture pass command
 }:
 
 let

@@ -6,8 +6,8 @@
   defaults nor renders consumer-facing values.
 */
 {
-  lib,
-  themeContract,
+  lib, # resolver.nix → nixpkgs.lib
+  themeContract, # resolver.nix → contract.nix
 }:
 let
   # Slot and selection colors are always raw #RRGGBB source data.
