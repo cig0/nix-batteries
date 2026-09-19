@@ -6,9 +6,9 @@
   names consumed by resolver.nix.
 */
 {
-  flakeRoot,
-  lib,
-  themesDirectory,
+  flakeRoot, # resolver.nix → flake checkout root
+  lib, # resolver.nix → nixpkgs.lib
+  themesDirectory, # resolver.nix → theme module source directory
 }:
 let
   modulette = import (flakeRoot + "/libraries/auto-discover/modulette") { inherit lib; };

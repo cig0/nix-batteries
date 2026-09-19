@@ -15,8 +15,8 @@ in
 {
   discoverNixFileNames =
     {
-      directory,
-      excludeFiles ? [ "default.nix" ],
+      directory, # caller args → nix file directory
+      excludeFiles ? [ "default.nix" ], # caller args → filenames to skip
     }:
     let
       entries = builtins.readDir directory;
@@ -29,12 +29,12 @@ in
 
   mk =
     rawArgs@{
-      names ? if builtins.hasAttr "entries" rawArgs then builtins.attrNames entries else null,
-      entries ? if builtins.hasAttr "names" rawArgs then lib.genAttrs names (_: null) else null,
-      nameFor,
-      valueFor,
-      legendFor ? valueFor,
-      groupName ? null,
+      names ? if builtins.hasAttr "entries" rawArgs then builtins.attrNames entries else null, # caller args → alias source names
+      entries ? if builtins.hasAttr "names" rawArgs then lib.genAttrs names (_: null) else null, # caller args → alias source entries
+      nameFor, # caller args → alias name renderer
+      valueFor, # caller args → alias command renderer
+      legendFor ? valueFor, # caller args → help legend renderer
+      groupName ? null, # caller args → help section group label
       ...
     }:
     let

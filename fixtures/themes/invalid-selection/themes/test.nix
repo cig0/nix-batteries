@@ -6,7 +6,7 @@ in
 validTheme
 // {
   selection = {
-    background = validTheme.slots.seven;
+    background = validTheme.roles.context;
     foreground = "black";
   };
 }

@@ -84,12 +84,12 @@ let
   */
   isValidHeader =
     {
-      directory,
-      entryName,
-      headerText ? null,
-      headerPrefix ? null,
-      isDirectory ? false,
-      targetFile ? "host.nix",
+      directory, # discoverModules → scan root
+      entryName, # discoverModules → file or subdirectory name
+      headerText ? null, # discoverModules → exact first-line contract
+      headerPrefix ? null, # discoverModules → first-line prefix contract
+      isDirectory ? false, # discoverModules → directory-mode flag
+      targetFile ? "host.nix", # discoverModules → directory-mode import target
     }:
     let
       filePath =
@@ -139,13 +139,13 @@ let
   */
   discoverModules =
     {
-      args ? { },
-      directory,
-      exclude ? [ ],
-      headerPrefix ? null,
-      headerText ? null,
-      mode,
-      targetFile ? "host.nix",
+      args ? { }, # caller args → forwarded module arguments
+      directory, # caller args → scan root
+      exclude ? [ ], # caller args → names to skip
+      headerPrefix ? null, # caller args → first-line prefix contract
+      headerText ? null, # caller args → exact first-line contract
+      mode, # caller args → flat or directory discovery
+      targetFile ? "host.nix", # caller args → directory-mode import target
     }:
     let
       entryTypes = builtins.readDir directory;

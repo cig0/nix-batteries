@@ -34,7 +34,7 @@ The Nix side should look almost identical for every renderer:
 
 ```nix
 let
-  L = nix-batteries.sidecarLibs.helpLegendDecorator;
+  L = nix-batteries.batteriesLib.helpLegendDecorator;
   libHelpLegendRenderer = L.libHelpLegendRenderer.posix; # or fish / nushell
 
   layout = L.sectionLayout {
@@ -58,12 +58,12 @@ function body. Nushell uses its native custom-command help and uses the renderer
 only for explicitly rendered titles and sections.
 
 You might also want to check [themes](../../../themes/README.md) for semantic
-color slots and terminal escape generation.
+color roles and terminal escape generation.
 
 ## Where to look next
 
 - `../README.md` - shared help-legend contract
-- [`themes`](../../../themes/README.md) - semantic color slots and bundled palettes
+- [`themes`](../../../themes/README.md) - semantic color roles and bundled palettes
 - `README-posix.md` - POSIX usage pattern
 - `README-fish.md` - Fish usage pattern
 - `README-nushell.md` - Nushell usage pattern

@@ -5,7 +5,7 @@ let
 in
 validTheme
 // {
-  slots = validTheme.slots // {
-    zero = "#20xz60";
+  roles = validTheme.roles // {
+    accent = "#20xz60";
   };
 }

@@ -1,5 +1,7 @@
 # Modulette fixture module. Do not remove this header.
-{ value }:
+{
+  value, # fixtures/default.nix → modulette discovery args
+}:
 {
   inherit value;
   id = "beta";

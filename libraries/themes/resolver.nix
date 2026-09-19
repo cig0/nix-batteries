@@ -8,8 +8,8 @@
   provenance construction remain owned by their adjacent atomic modules.
 */
 {
-  flakeRoot,
-  lib,
+  flakeRoot, # flake.nix → self.outPath
+  lib, # flake.nix → nixpkgs.lib
   # Supports focused fixture source trees without changing discovery behavior.
   themesDirectory ? ./themes,
   # Logical provider path published by provenance.nix; fixtures override it.
@@ -37,9 +37,11 @@ let
   renderedThemes = lib.mapAttrs (_themeName: ansiRenderer.renderTheme) normalizedThemes;
 
   # Raw colors serve tools such as fzf that accept #RRGGBB but not ANSI codes.
+  # Only authored role hexes and the optional selection pair appear here; the
+  # scaled bold and dim variants exist solely as ANSI presentations.
   rawThemeColors = lib.mapAttrs (
     _themeName: normalizedTheme:
-    normalizedTheme.slots
+    normalizedTheme.roles
     // lib.optionalAttrs (normalizedTheme.selection != null) {
       inherit (normalizedTheme) selection;
     }
@@ -78,8 +80,8 @@ rec {
 
   resolve =
     {
-      name,
-      enableColors ? true,
+      name, # consumer → selected theme name
+      enableColors ? true, # consumer → theme colors policy
     }:
     let
       selectedTheme = select name;

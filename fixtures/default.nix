@@ -5,9 +5,9 @@
   It verifies public library contracts; each child fixture owns its own cases.
 */
 {
-  sidecarLibs,
-  lib,
-  pkgs,
+  batteriesLib, # flake.nix → batteriesLib
+  lib, # flake.nix → nixpkgs.lib
+  pkgs, # flake.nix → per-system package set
 }:
 
 let
@@ -25,24 +25,26 @@ let
     "nixOptionsToMd"
     "themes"
   ];
-  sidecarLibNames = builtins.attrNames sidecarLibs;
-  missingLibNames = builtins.filter (name: !(builtins.elem name sidecarLibNames)) expectedLibNames;
-  unexpectedLibNames = builtins.filter (name: !(builtins.elem name expectedLibNames)) sidecarLibNames;
+  batteriesLibNames = builtins.attrNames batteriesLib;
+  missingLibNames = builtins.filter (name: !(builtins.elem name batteriesLibNames)) expectedLibNames;
+  unexpectedLibNames = builtins.filter (
+    name: !(builtins.elem name expectedLibNames)
+  ) batteriesLibNames;
 
-  modulonFixture = sidecarLibs.modulon {
+  modulonFixture = batteriesLib.modulon {
     dirs = [ ./modulon/modules ];
     extraModules = [ ./modulon/extra-module.nix ];
   };
   modulonImports = map toString modulonFixture.imports;
 
-  moduletteFixture = sidecarLibs.modulette.discoverModules {
+  moduletteFixture = batteriesLib.modulette.discoverModules {
     mode = "flat";
     directory = ./modulette/modules;
     headerText = "# Modulette fixture module. Do not remove this header.";
     args.value = "loaded";
   };
 
-  moduletteDirectoryFixture = sidecarLibs.modulette.discoverModules {
+  moduletteDirectoryFixture = batteriesLib.modulette.discoverModules {
     mode = "directory";
     directory = ./modulette/hosts;
     targetFile = "host.nix";
@@ -50,13 +52,13 @@ let
     args.value = "loaded";
   };
 
-  missingInputGuard = sidecarLibs.guardFlakeInput "missing-input" { };
+  missingInputGuard = batteriesLib.guardFlakeInput "missing-input" { };
 
-  dynamicAliasNames = sidecarLibs.dynamicAliases.discoverNixFileNames {
+  dynamicAliasNames = batteriesLib.dynamicAliases.discoverNixFileNames {
     directory = ./dynamic-aliases/nix-files;
   };
-  dynamicAliasMkArgs = builtins.functionArgs sidecarLibs.dynamicAliases.mk;
-  dynamicAliasProjectTasks = sidecarLibs.dynamicAliases.mk {
+  dynamicAliasMkArgs = builtins.functionArgs batteriesLib.dynamicAliases.mk;
+  dynamicAliasProjectTasks = batteriesLib.dynamicAliases.mk {
     names = [
       "fmt"
       "test"
@@ -66,7 +68,7 @@ let
     legendFor = name: _: "Run project ${name}";
     groupName = "Project Tasks";
   };
-  dynamicAliasEntryTasks = sidecarLibs.dynamicAliases.mk {
+  dynamicAliasEntryTasks = batteriesLib.dynamicAliases.mk {
     entries.rust = {
       command = "nix develop";
       display = "nix develop .#rust";
@@ -75,14 +77,14 @@ let
     valueFor = name: entry: "${entry.command} /workspace#${name}";
     legendFor = _: entry: entry.display;
   };
-  dynamicAliasCompatTasks = sidecarLibs.dynamicAliases.mk {
+  dynamicAliasCompatTasks = batteriesLib.dynamicAliases.mk {
     names = [ "docs" ];
     metadata.owner = "external-caller";
     nameFor = name: _: "p-${name}";
     valueFor = name: _: "just ${name}";
   };
   dynamicAliasDuplicateCheck = builtins.tryEval (
-    sidecarLibs.dynamicAliases.mk {
+    batteriesLib.dynamicAliases.mk {
       names = [
         "one"
         "two"
@@ -94,12 +96,12 @@ let
 
   nixOptionsToMdFixtureResult = import ./nix-options-to-md {
     inherit lib;
-    nixOptionsToMd = sidecarLibs.nixOptionsToMd;
+    nixOptionsToMd = batteriesLib.nixOptionsToMd;
   };
 
   rendererChecks = import ./renderers {
     inherit
-      sidecarLibs
+      batteriesLib
       lib
       pass
       pkgs
@@ -107,17 +109,17 @@ let
   };
   themeChecks = import ./themes {
     inherit
-      sidecarLibs
+      batteriesLib
       lib
       pass
       ;
   };
 in
 {
-  sidecarLibs-surface =
+  batteriesLib-surface =
     assert missingLibNames == [ ];
     assert unexpectedLibNames == [ ];
-    pass "nix-batteries-sidecarLibs-surface";
+    pass "nix-batteries-batteriesLib-surface";
 
   modulon-fixture =
     assert builtins.elem (toString ./modulon/modules/valid.nix) modulonImports;

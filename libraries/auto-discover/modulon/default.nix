@@ -7,9 +7,9 @@
 */
 { lib }:
 {
-  dirs ? [ ],
-  excludePaths ? [ ],
-  extraModules ? [ ],
+  dirs ? [ ], # caller args → module directories
+  excludePaths ? [ ], # caller args → paths to skip
+  extraModules ? [ ], # caller args → explicit module additions
   ...
 }:
 let

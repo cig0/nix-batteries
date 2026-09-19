@@ -31,13 +31,13 @@ file should stay out of the module graph.
 ### Flake structure
 
 `flake.nix` takes one input (`nixpkgs`) and produces three outputs directly,
-with no framework inputs. `sidecarLibs` is a static attribute set mapping each
+with no framework inputs. `batteriesLib` is a static attribute set mapping each
 public export onto its implementation under `libraries/`; `checks` and
 `formatter` fan out per supported system through a small `forSystems` helper.
 
 `libraries/` retains the reusable implementations and their direct-import
 paths. `fixtures/` retains test cases and data. Public helpers remain available
-through `inputs.nix-batteries.sidecarLibs`.
+through `inputs.nix-batteries.batteriesLib`.
 
 The public catalogue is a plain lazy attribute set with one definition per
 export. Individual helper values retain their existing function and

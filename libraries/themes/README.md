@@ -2,19 +2,19 @@
 
 Self-contained true-color themes for terminal output and interactive selectors.
 Each theme owns its `#RRGGBB` values. An atomic pipeline discovers and validates
-that source data, preserves raw colors, and renders numbered slots as 24-bit
-foreground escape codes. `resolver.nix` coordinates the pipeline and exposes
-its public API.
+that source data, preserves raw role colors, and renders every declared
+semantic role as 24-bit foreground escape codes. `resolver.nix` coordinates the
+pipeline and exposes its public API.
 
 Theme files are auto-discovered via Modulette. Add a `.nix` file with the
-required header and it becomes available through `sidecarLibs.themes`.
+required header and it becomes available through `batteriesLib.themes`.
 
 ## Architecture
 
 The system has four ownership layers:
 
-1. **Theme** (`themes/*.nix`) — owns slot colors, optional selection colors,
-   `boldFactor`, and `dimFactor`.
+1. **Theme** (`themes/*.nix`) — owns semantic role colors, optional selection
+   colors, `boldFactor`, and `dimFactor`.
 2. **Theme pipeline** — `discovery.nix`, `assertions.nix`, `normalizer.nix`,
    `colors.nix`, `ansi-renderer.nix`, and `provenance.nix` each own one concern.
 3. **Resolver** — coordinates the pipeline and exposes raw colors, rendered
@@ -23,13 +23,13 @@ The system has four ownership layers:
 
 ```mermaid
 graph LR
-    A["themes/*.nix<br/>(raw colors + factors)"] --> B["discovery.nix"]
+    A["themes/*.nix<br/>(role colors + factors)"] --> B["discovery.nix"]
     B --> C["assertions.nix → normalizer.nix"]
     C --> D["colors.nix → ansi-renderer.nix"]
     B --> E["provenance.nix"]
     D --> F["resolver.nix"]
     E --> F
-    F --> G["sidecarLibs.themes"]
+    F --> G["batteriesLib.themes"]
 ```
 
 There is no shared palette or fallback color source. A theme is complete and
@@ -37,13 +37,15 @@ readable in isolation.
 
 ## Rendering rules
 
-Slot names declare their rendering behavior:
+A theme declares one hex color per role. The renderer derives three
+presentations from that color without inspecting the role name, so every
+declared role — required or optional — produces the same three keys:
 
-| Name pattern  | Rendering                                                                  |
+| Generated key | Rendering                                                                  |
 | ------------- | -------------------------------------------------------------------------- |
-| `zero`        | Original RGB rendered as a regular 24-bit foreground                       |
-| `bold_zero`   | RGB multiplied by `boldFactor`, clamped to 255, and rendered with SGR bold |
-| `dimmed_zero` | RGB multiplied by `dimFactor` and rendered as a regular 24-bit foreground  |
+| `accent`      | Original RGB rendered as a regular 24-bit foreground                       |
+| `bold_accent` | RGB multiplied by `boldFactor`, clamped to 255, and rendered with SGR bold |
+| `dim_accent`  | RGB multiplied by `dimFactor` and rendered as a regular 24-bit foreground  |
 
 Both factors are non-negative numbers. Their defaults are:
 
@@ -55,33 +57,37 @@ dimFactor = 0.55;
 The scaling formula for each RGB channel is
 `min 255 (floor (channel * factor))`.
 
-Dimmed slots use scaled RGB instead of the SGR faint attribute. Faint rendering
-varies across terminals and can shift 24-bit colors unpredictably.
+`dim_*` keys use scaled RGB instead of the SGR faint attribute. Faint rendering
+varies across terminals and can shift 24-bit colors unpredictably. `mode.dim`
+remains the separate terminal faint mode.
 
-## Slot contract
+## Role contract
 
-Every bundled theme defines the regular and bold forms of slots zero through
-seven, plus the two common dimmed slots:
+Every theme declares these nine required semantic roles:
 
-| Slot family | Role                                          |
-| ----------- | --------------------------------------------- |
-| `zero`      | Primary accent, success, headers, positive    |
-| `one`       | Text emphasis                                 |
-| `two`       | Tertiary accent, section highlight            |
-| `three`     | Callout or alternative highlight              |
-| `four`      | Warning or important highlight                |
-| `five`      | Error or danger                               |
-| `six`       | State change, dirty state, or secondary alert |
-| `seven`     | Location, host, path, or contextual accent    |
+| Role       | Meaning                                                           |
+| ---------- | ----------------------------------------------------------------- |
+| `accent`   | Headings, section titles, banners                                 |
+| `emphasis` | Command names, literal input, examples, inline emphasis           |
+| `option`   | Flags and keyboard chords                                         |
+| `success`  | Completed successful outcomes                                     |
+| `value`    | Values, counts, durations, timestamps, placeholders, model names  |
+| `warning`  | Cautions and potentially hazardous conditions                     |
+| `error`    | Failures, invalid or missing required input, reported conflicts   |
+| `notice`   | Progress, skipped operations, state changes, dirty-state notices  |
+| `context`  | Source identity, repository or host metadata, locations and paths |
 
-Required rendered keys are:
+The nine required roles therefore generate 27 keys under `theme.<name>`:
+`<role>`, `bold_<role>`, and `dim_<role>` for each one.
 
-- `zero` through `seven`
-- `bold_zero` through `bold_seven`
-- `dimmed_zero` and `dimmed_one`
+Two roles may share a hex value; the bundled themes do. `colors.<name>`
+publishes only the authored role hexes and the optional selection pair, never a
+derived presentation.
 
-Themes may add specialized slots. `311amber`, for example, also provides
-`two_light` and `bold_two_light`.
+A theme may declare extra roles, and each one gains its own three presentations
+with no library change. Role names may not be `selection` or begin with `bold_`
+or `dim_`: those forms are reserved for generated presentations and for the raw
+selection pair.
 
 Themes may also define a complete `selection` pair for interactive menus:
 
@@ -107,50 +113,39 @@ Mode codes remain theme-independent:
 
 ## Theme format
 
-Theme values are flat and use the same names exported to consumers. A
-recursive slot attrset lets variants reuse a prime color without repeating its
-hex value:
+A theme file declares raw role colors only. Presentations are generated, so a
+theme never repeats a color to describe its bold or dim form:
 
 ```nix
 # Theme module. Do not remove this header.
 { }:
-rec {
+{
   boldFactor = 1.0;
   dimFactor = 0.55;
 
   selection = {
-    background = slots.seven;
+    background = "#ffff00";
     foreground = "#000000";
   };
 
-  slots = rec {
-    zero = "#4a6fa5";
-    one = "#f8fafc";
-    two = "#06b6d4";
-    three = "#d946ef";
-    four = "#f59e0b";
-    five = "#ef4444";
-    six = "#ff6600";
-    seven = "#22c55e";
-
-    bold_zero = zero;
-    bold_one = one;
-    bold_two = two;
-    bold_three = three;
-    bold_four = four;
-    bold_five = five;
-    bold_six = six;
-    bold_seven = seven;
-
-    dimmed_zero = zero;
-    dimmed_one = one;
+  roles = {
+    accent = "#4a6fa5";
+    emphasis = "#f8fafc";
+    option = "#06b6d4";
+    success = "#22c55e";
+    value = "#f59e0b";
+    warning = "#f59e0b";
+    error = "#ef4444";
+    notice = "#ff6600";
+    context = "#22c55e";
   };
 }
 ```
 
-Every slot and selection value must use the exact `#RRGGBB` form. Factors and
-colors are validated before rendering. Missing required slots report the theme
-name and the complete missing-slot list.
+Every role and selection value must use the exact `#RRGGBB` form. Factors and
+colors are validated before rendering. Missing required roles report the theme
+name and the complete missing-role list; reserved role names report the theme
+name and the offending keys.
 
 ## Quick start
 
@@ -161,7 +156,7 @@ inputs.sidecar.url = "github:your-org/nix-batteries";
 
 outputs = { sidecar, ... }:
 let
-  libThemes = sidecar.sidecarLibs.themes;
+  libThemes = sidecar.batteriesLib.themes;
 in
 {
   # ...
@@ -178,13 +173,13 @@ let
   };
 in
 ''
-  printf '%b' "${resolvedTheme.theme.bold_zero}OK${resolvedTheme.mode.reset}"
-  printf '%b' "\n${resolvedTheme.theme.bold_four}WARN${resolvedTheme.mode.reset}"
-  printf '%b' "\n${resolvedTheme.theme.bold_five}ERROR${resolvedTheme.mode.reset}"
+  printf '%b' "${resolvedTheme.theme.bold_success}OK${resolvedTheme.mode.reset}"
+  printf '%b' "\n${resolvedTheme.theme.bold_warning}WARN${resolvedTheme.mode.reset}"
+  printf '%b' "\n${resolvedTheme.theme.bold_error}ERROR${resolvedTheme.mode.reset}"
 ''
 ```
 
-When `enableColors = false`, all theme slots and mode codes resolve to empty
+When `enableColors = false`, all generated theme keys and mode codes resolve to empty
 strings and `colors` resolves to `null`. Raw colors cannot express disabled
 styling, so consumers can use this explicit absence instead of interpreting an
 empty hex value.
@@ -227,9 +222,9 @@ with the list of available themes.
 
 | Attribute                        | Description                                                  |
 | -------------------------------- | ------------------------------------------------------------ |
-| `colors.*`                       | Validated raw colors for every bundled theme                 |
+| `colors.*`                       | Validated raw role colors for every bundled theme            |
 | `colors.*.selection`             | Optional interactive selection foreground/background pair    |
-| `theme.*`                        | Rendered flat slot constants for every bundled theme         |
+| `theme.*`                        | Rendered flat presentation constants for every bundled theme |
 | `themeMetadata.*`                | Provider and source path for every discovered theme          |
 | `mode.blink`                     | Blinking text                                                |
 | `mode.dim`                       | Dim or faint text                                            |

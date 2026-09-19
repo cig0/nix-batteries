@@ -69,7 +69,7 @@ the consumer owns the `git-` display prefix, colors, and separators:
 
 ```nix
 let
-  gitRepoState = _inputs.nix-batteries.sidecarLibs.gitRepoState;
+  gitRepoState = _inputs.nix-batteries.batteriesLib.gitRepoState;
 in
 ''
   ${gitRepoState.revisionFunction.posix}
@@ -81,7 +81,7 @@ in
 
   __dirty="$(${gitRepoState.dirtyStateCall.posix})"
   if [[ -n "$__dirty" ]]; then
-    printf '%b' "${libThemes.theme.bold_three}-"
+    printf '%b' "${libThemes.theme.bold_notice}-"
     printf '%s' "$__dirty"
   fi
   unset __dirty

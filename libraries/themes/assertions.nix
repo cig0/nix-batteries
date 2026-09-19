@@ -6,11 +6,11 @@
   defaults nor renders consumer-facing values.
 */
 {
-  lib,
-  themeContract,
+  lib, # resolver.nix → nixpkgs.lib
+  themeContract, # resolver.nix → contract.nix
 }:
 let
-  # Slot and selection colors are always raw #RRGGBB source data.
+  # Role and selection colors are always raw #RRGGBB source data.
   # ANSI conversion is deliberately owned by ansi-renderer.nix.
   validateHexColors =
     context:
@@ -23,7 +23,7 @@ let
           actualValue =
             if builtins.isString colorValue then builtins.toJSON colorValue else builtins.typeOf colorValue;
         in
-        throw "Invalid ${context} slot '${colorName}': expected #RRGGBB, got ${actualValue}"
+        throw "Invalid ${context} color '${colorName}': expected #RRGGBB, got ${actualValue}"
     );
 
   # boldFactor and dimFactor tune presentation, but themes own their values.
@@ -44,19 +44,51 @@ let
       in
       throw "Invalid ${context}: expected a non-negative number, got ${actualValue}";
 
-  # contract.nix is authoritative for the shared terminal-slot schema.
-  # Report every omission together so a theme author can correct it in one pass.
-  validateRequiredSlots =
-    themeName: slots:
-    let
-      missingSlots = builtins.filter (
-        requiredSlot: !(builtins.hasAttr requiredSlot slots)
-      ) themeContract.requiredSlots;
-    in
-    if missingSlots == [ ] then
-      slots
+  # A theme declares its semantic roles in one attribute set. Themes written
+  # against the removed ordinal-slot contract fail here rather than silently
+  # resolving to an empty palette.
+  validateRoleSource =
+    themeName: discoveredTheme:
+    if !(builtins.hasAttr "roles" discoveredTheme) then
+      throw "Theme '${themeName}' does not declare 'roles'"
+    else if !(builtins.isAttrs discoveredTheme.roles) then
+      throw "Invalid theme '${themeName}' roles: expected an attribute set, got ${builtins.typeOf discoveredTheme.roles}"
     else
-      throw "Theme '${themeName}' is missing required slots: ${lib.concatStringsSep ", " missingSlots}";
+      discoveredTheme.roles;
+
+  # contract.nix is authoritative for the shared semantic role vocabulary.
+  # Report every omission together so a theme author can correct it in one pass.
+  validateRequiredRoles =
+    themeName: roles:
+    let
+      missingRoles = builtins.filter (
+        requiredRole: !(builtins.hasAttr requiredRole roles)
+      ) themeContract.requiredRoles;
+    in
+    if missingRoles == [ ] then
+      roles
+    else
+      throw "Theme '${themeName}' is missing required roles: ${lib.concatStringsSep ", " missingRoles}";
+
+  /*
+    ansi-renderer.nix publishes <role>, bold_<role> and dim_<role> for every
+    declared role, and resolver.nix publishes raw roles beside the optional
+    selection pair. Authored names that reuse those reserved forms would make
+    one entry overwrite another, so reject them with the offending keys named.
+  */
+  validateRoleNames =
+    themeName: roles:
+    let
+      reservedNames = builtins.filter (
+        roleName:
+        builtins.elem roleName themeContract.reservedRoleNames
+        || builtins.any (prefix: lib.hasPrefix prefix roleName) themeContract.reservedRolePrefixes
+      ) (builtins.attrNames roles);
+    in
+    if reservedNames == [ ] then
+      roles
+    else
+      throw "Theme '${themeName}' uses reserved role names: ${lib.concatStringsSep ", " reservedNames}";
 
   # Selection colors are optional, but a supplied pair must be complete and
   # use only the explicit UI roles from contract.nix; consumers never infer one.
@@ -87,7 +119,9 @@ in
   # normalizer.nix composes these checks with contract defaults into one theme.
   inherit
     validateHexColors
-    validateRequiredSlots
+    validateRequiredRoles
+    validateRoleNames
+    validateRoleSource
     validateScaleFactor
     validateSelectionColors
     ;

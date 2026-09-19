@@ -6,11 +6,11 @@
   Consumers own snippet installation and display decisions.
 */
 {
-  revisionFunctionName ? "_gitRevision",
-  dirtyStateFunctionName ? "_gitDirtyState",
-  unknownRevisionText ? "unknown",
-  dirtyStateText ? "dirty",
-  repositoryPathEnvVar ? "GIT_REPO_PATH",
+  revisionFunctionName ? "_gitRevision", # consumer → revision shell function name
+  dirtyStateFunctionName ? "_gitDirtyState", # consumer → dirty-state shell function name
+  unknownRevisionText ? "unknown", # consumer → unknown-revision fallback label
+  dirtyStateText ? "dirty", # consumer → dirty-state fallback label
+  repositoryPathEnvVar ? "GIT_REPO_PATH", # consumer → repository path environment variable
 }:
 let
   posixRepositoryPath = "$" + "{${repositoryPathEnvVar}:-.}";

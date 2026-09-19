@@ -103,7 +103,7 @@ Inside your flake or module:
 
 ```nix
 let
-  dynamicAliases = inputs.nix-batteries.sidecarLibs.dynamicAliases;
+  dynamicAliases = inputs.nix-batteries.batteriesLib.dynamicAliases;
   flakeSrcPath = "/home/me/work/my-flake";
 in
 ...

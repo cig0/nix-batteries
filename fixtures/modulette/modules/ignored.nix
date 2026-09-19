@@ -1,5 +1,7 @@
 # Not a matching header.
-{ value }:
+{
+  value, # fixtures/default.nix → modulette discovery args
+}:
 {
   inherit value;
 }

@@ -1,7 +1,7 @@
 # Fixtures
 
 This directory contains lightweight fixture trees used by the flake checks.
-They are intentionally small, deterministic examples of public `sidecarLibs`
+They are intentionally small, deterministic examples of public `batteriesLib`
 behavior. A fixture should prove one narrow library contract without depending
 on consumer-specific configuration from another flake.
 
@@ -20,7 +20,7 @@ Current fixture directories:
   theme resolution through fixture-specific source trees.
 
 `fixtures/default.nix` aggregates the checks returned by focused fixture
-modules. [`flake.nix`](../flake.nix) passes `sidecarLibs`, the shared nixpkgs
+modules. [`flake.nix`](../flake.nix) passes `batteriesLib`, the shared nixpkgs
 `lib`, and each system's package set into that aggregator. The flake also
 evaluates the consumer's `smoke` output with the public flake as its input. A separate Nix invocation verifies input resolution through
 the consumer's own entry point:
@@ -41,7 +41,7 @@ Keep fixture files focused:
    `not-a-file.nix`.
 3. Avoid generated data, host paths, network access, timestamps, and other
    non-deterministic inputs.
-4. Keep fixtures tied to public `self.sidecarLibs` behavior, not private
+4. Keep fixtures tied to public `self.batteriesLib` behavior, not private
    implementation details.
 5. Run the focused flake check after changes:
 

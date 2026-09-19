@@ -6,8 +6,8 @@
   receive one predictable shape regardless of optional source fields.
 */
 {
-  themeAssertions,
-  themeContract,
+  themeAssertions, # resolver.nix → assertions.nix
+  themeContract, # resolver.nix → contract.nix
 }:
 themeName: discoveredTheme:
 let
@@ -17,8 +17,12 @@ let
   dimFactor = themeAssertions.validateScaleFactor "theme '${themeName}' dimFactor" (
     discoveredTheme.dimFactor or themeContract.defaultDimFactor
   );
-  slots = themeAssertions.validateHexColors "theme '${themeName}'" (
-    themeAssertions.validateRequiredSlots themeName discoveredTheme.slots
+  roles = themeAssertions.validateHexColors "theme '${themeName}'" (
+    themeAssertions.validateRoleNames themeName (
+      themeAssertions.validateRequiredRoles themeName (
+        themeAssertions.validateRoleSource themeName discoveredTheme
+      )
+    )
   );
   selection = themeAssertions.validateSelectionColors themeName (discoveredTheme.selection or null);
 in
@@ -27,14 +31,14 @@ builtins.deepSeq
   [
     boldFactor
     dimFactor
-    slots
+    roles
     selection
   ]
   {
     inherit
       boldFactor
       dimFactor
+      roles
       selection
-      slots
       ;
   }

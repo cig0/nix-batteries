@@ -14,24 +14,28 @@
     "foreground"
   ];
 
-  requiredSlots = [
-    "zero"
-    "one"
-    "two"
-    "three"
-    "four"
-    "five"
-    "six"
-    "seven"
-    "bold_zero"
-    "bold_one"
-    "bold_two"
-    "bold_three"
-    "bold_four"
-    "bold_five"
-    "bold_six"
-    "bold_seven"
-    "dimmed_zero"
-    "dimmed_one"
+  /*
+    Semantic roles every theme must declare. Themes may add further roles;
+    ansi-renderer.nix derives each role's presentations mechanically, so this
+    list is the authored vocabulary, not the rendered one.
+  */
+  requiredRoles = [
+    "accent"
+    "emphasis"
+    "option"
+    "success"
+    "value"
+    "warning"
+    "error"
+    "notice"
+    "context"
+  ];
+
+  # Role names that would collide with generated presentations or with the
+  # raw selection pair once roles and selection share one colors attribute set.
+  reservedRoleNames = [ "selection" ];
+  reservedRolePrefixes = [
+    "bold_"
+    "dim_"
   ];
 }
