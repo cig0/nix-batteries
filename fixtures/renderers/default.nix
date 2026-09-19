@@ -1,19 +1,19 @@
 /*
   Renderer fixture for the public help-legend and git-state libraries.
 
-  fixtures/default.nix supplies nixpkgs and sidecarLibs. This fixture generates
+  fixtures/default.nix supplies nixpkgs and batteriesLib. This fixture generates
   shell snippets and checks their rendered contracts and native shell syntax.
 */
 {
-  sidecarLibs, # fixtures/default.nix → sidecarLibs
+  batteriesLib, # fixtures/default.nix → batteriesLib
   lib, # fixtures/default.nix → nixpkgs.lib
   pass, # fixtures/default.nix → fixture pass command
   pkgs, # fixtures/default.nix → per-system package set
 }:
 
 let
-  helpLegend = sidecarLibs.helpLegendDecorator;
-  theme = sidecarLibs.themes.resolve {
+  helpLegend = batteriesLib.helpLegendDecorator;
+  theme = batteriesLib.themes.resolve {
     name = "nushell-inspired";
     enableColors = true;
   };
@@ -34,20 +34,20 @@ let
         layout
         libHelpLegendRenderer
         ;
-      cmdColor = theme.theme.bold_zero;
-      headerColor = theme.theme.bold_four;
+      cmdColor = theme.theme.bold_emphasis;
+      headerColor = theme.theme.bold_accent;
       reset = theme.mode.reset;
     };
     check = helpLegend.mkHelpCheck {
       inherit layout libHelpLegendRenderer;
       cmd = "check";
       desc = descFn "check";
-      cmdColor = theme.theme.bold_zero;
+      cmdColor = theme.theme.bold_emphasis;
       reset = theme.mode.reset;
     };
     title = helpLegend.mkCenteredTitle {
       inherit libHelpLegendRenderer;
-      color = theme.theme.bold_zero;
+      color = theme.theme.bold_accent;
       reset = theme.mode.reset;
       title = "Fixture Help";
       width = layout.width;
@@ -55,7 +55,7 @@ let
   };
 
   renderedHelp = lib.mapAttrs (_: renderHelp) helpLegend.libHelpLegendRenderer;
-  gitRepoState = sidecarLibs.gitRepoState;
+  gitRepoState = batteriesLib.gitRepoState;
 
   sources = {
     gitPosix = pkgs.writeText "git-state.sh" ''

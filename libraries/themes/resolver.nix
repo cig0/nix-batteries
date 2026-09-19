@@ -37,9 +37,11 @@ let
   renderedThemes = lib.mapAttrs (_themeName: ansiRenderer.renderTheme) normalizedThemes;
 
   # Raw colors serve tools such as fzf that accept #RRGGBB but not ANSI codes.
+  # Only authored role hexes and the optional selection pair appear here; the
+  # scaled bold and dim variants exist solely as ANSI presentations.
   rawThemeColors = lib.mapAttrs (
     _themeName: normalizedTheme:
-    normalizedTheme.slots
+    normalizedTheme.roles
     // lib.optionalAttrs (normalizedTheme.selection != null) {
       inherit (normalizedTheme) selection;
     }

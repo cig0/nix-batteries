@@ -51,7 +51,7 @@ for generated shell functions.
 
 ```nix
 let
-  L = nix-batteries.sidecarLibs.helpLegendDecorator;
+  L = nix-batteries.batteriesLib.helpLegendDecorator;
   libHelpLegendRenderer = L.libHelpLegendRenderer.posix;
 in
 ...

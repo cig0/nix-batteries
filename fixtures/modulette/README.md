@@ -1,6 +1,6 @@
 # Modulette Fixtures
 
-This directory contains focused fixtures for both scanning modes of `sidecarLibs.modulette.discoverModules`.
+This directory contains focused fixtures for both scanning modes of `batteriesLib.modulette.discoverModules`.
 
 ## Flat mode fixture
 
@@ -12,7 +12,7 @@ keyed by filename without `.nix`.
 The `modulette-fixture` check in `fixtures/default.nix` (wired via `flake.nix`) scans `modules/` with:
 
 ```nix
-sidecarLibs.modulette.discoverModules {
+batteriesLib.modulette.discoverModules {
   mode = "flat";
   directory = ./modulette/modules;
   headerText = "# Modulette fixture module. Do not remove this header.";
@@ -38,7 +38,7 @@ The `hosts/` fixture proves that discovery can scan subdirectories, import a tar
 The `modulette-directory-fixture` check in `fixtures/default.nix` (wired via `flake.nix`) scans `hosts/` with:
 
 ```nix
-sidecarLibs.modulette.discoverModules {
+batteriesLib.modulette.discoverModules {
   mode = "directory";
   directory = ./modulette/hosts;
   targetFile = "host.nix";

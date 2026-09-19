@@ -13,7 +13,7 @@ Explicit project help screens still use the shared layout functions:
 
 ```nix
 let
-  L = nix-batteries.sidecarLibs.helpLegendDecorator;
+  L = nix-batteries.batteriesLib.helpLegendDecorator;
   libHelpLegendRenderer = L.libHelpLegendRenderer.nushell;
 
   legend = {
@@ -64,4 +64,4 @@ runtime checks should find byte `0x1B`.
 
 - `../README.md` - shared layout and renderer API
 - `README.md` - runtime adapter boundary
-- `../../../themes/README.md` - semantic color slots and escape generation
+- `../../../themes/README.md` - semantic color roles and escape generation

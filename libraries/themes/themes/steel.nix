@@ -5,26 +5,15 @@
   boldFactor = 1.0;
   dimFactor = 0.55;
 
-  slots = rec {
-    zero = "#4a6fa5";
-    one = "#f8fafc";
-    two = "#06b6d4";
-    three = "#d946ef";
-    four = "#f59e0b";
-    five = "#ef4444";
-    six = "#ff6600";
-    seven = "#22c55e";
-
-    bold_zero = zero;
-    bold_one = one;
-    bold_two = two;
-    bold_three = three;
-    bold_four = four;
-    bold_five = five;
-    bold_six = six;
-    bold_seven = seven;
-
-    dimmed_zero = zero;
-    dimmed_one = one;
+  roles = {
+    accent = "#4a6fa5";
+    emphasis = "#f8fafc";
+    option = "#06b6d4";
+    success = "#22c55e";
+    value = "#f59e0b";
+    warning = "#f59e0b";
+    error = "#ef4444";
+    notice = "#ff6600";
+    context = "#22c55e";
   };
 }

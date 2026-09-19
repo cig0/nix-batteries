@@ -5,5 +5,5 @@ let
 in
 validTheme
 // {
-  slots = builtins.removeAttrs validTheme.slots [ "seven" ];
+  roles = builtins.removeAttrs validTheme.roles [ "context" ];
 }

@@ -27,7 +27,7 @@ helpCheck =
   L.mkHelpCheck {
     inherit cmd layout libHelpLegendRenderer;
     desc = legend.${cmd};
-    cmdColor = libThemes.theme.bold_zero;
+    cmdColor = libThemes.theme.bold_emphasis;
     reset = libThemes.mode.reset;
   };
 ```
@@ -40,7 +40,7 @@ ackBeforeRun =
   cmd:
   ''
     ${helpCheck cmd}
-    _ack "${libThemes.theme.bold_zero}===> ${legend.${cmd}}${libThemes.mode.reset}" "''${x}" || return
+    _ack "${libThemes.theme.bold_emphasis}===> ${legend.${cmd}}${libThemes.mode.reset}" "''${x}" || return
   '';
 ```
 
@@ -55,7 +55,7 @@ Use this when a Nix module generates shell functions for bash or zsh.
 
 ```nix
 let
-  L = nix-batteries.sidecarLibs.helpLegendDecorator;
+  L = nix-batteries.batteriesLib.helpLegendDecorator;
   libHelpLegendRenderer = L.libHelpLegendRenderer.posix;
 in
 ...

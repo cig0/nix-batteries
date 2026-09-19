@@ -17,7 +17,7 @@ derivations, use:
 nix flake check --all-systems --no-build
 ```
 
-Nix still reports `sidecarLibs` as an unchecked flake output because custom
+Nix still reports `batteriesLib` as an unchecked flake output because custom
 library outputs are not standard buildable output types. The committed `checks`
 exercise the public library surface and focused fixtures directly.
 
@@ -35,7 +35,7 @@ The check set includes a Modulon fixture that verifies:
 For a fast library-surface check:
 
 ```shell
-nix eval --no-write-lock-file --json '.#sidecarLibs' --apply builtins.attrNames
+nix eval --no-write-lock-file --json '.#batteriesLib' --apply builtins.attrNames
 ```
 
 Expected output includes `modulon`:

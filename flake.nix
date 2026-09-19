@@ -1,7 +1,7 @@
 /*
   nix-batteries flake entry point.
 
-  Plain outputs over a single nixpkgs input. sidecarLibs is a static
+  Plain outputs over a single nixpkgs input. batteriesLib is a static
   attribute set mapping each public export directly onto its implementation
   under libraries/; checks and formatter fan out per supported system.
 */
@@ -22,7 +22,7 @@
       ];
       forSystems = f: lib.genAttrs systems (system: f (import nixpkgs { inherit system; }));
       mkGitRepoState = args: import ./libraries/toolbox/git-repo-state args;
-      sidecarLibs = {
+      batteriesLib = {
         dynamicAliases = import ./libraries/toolbox/dynamic-aliases { inherit lib; };
         flakeRoot = self.outPath;
         gitRepoState = mkGitRepoState { };
@@ -39,10 +39,10 @@
       };
     in
     {
-      inherit sidecarLibs;
+      inherit batteriesLib;
       checks = forSystems (
         pkgs:
-        import ./fixtures { inherit sidecarLibs lib pkgs; }
+        import ./fixtures { inherit batteriesLib lib pkgs; }
         // {
           consumer-fixture =
             # Exercise the consumer through the public flake output boundary.
