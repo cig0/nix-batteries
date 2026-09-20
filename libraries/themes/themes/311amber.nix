@@ -9,8 +9,8 @@
   # Interactive selectors use a high-contrast theme-owned pair instead of
   # inferring UI roles from semantic roles. Consumers receive raw #RRGGBB.
   selection = {
-    background = "#ffff00";
-    foreground = "#000000";
+    background = "#ffff00"; # Yellow
+    foreground = "#000000"; # Black
   };
 
   roles = {
