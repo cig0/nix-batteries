@@ -16,7 +16,7 @@
   roles = {
     accent = "#ffb343"; # Vibrant orange
     emphasis = "#f8fafc"; # Muted-ish white
-    option = "#0080ff"; # Pale-ish blue
+    option = "#0080ff"; # Azure
     success = "#00ff7f"; # Vibrant green
     value = "#ffff00"; # Yellow
     warning = "#ffff00"; # Yellow

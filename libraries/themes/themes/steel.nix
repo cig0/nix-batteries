@@ -6,14 +6,14 @@
   dimFactor = 0.55;
 
   roles = {
-    accent = "#4a6fa5";
-    emphasis = "#f8fafc";
-    option = "#06b6d4";
-    success = "#22c55e";
-    value = "#f59e0b";
-    warning = "#f59e0b";
-    error = "#ef4444";
-    notice = "#ff6600";
-    context = "#22c55e";
+    accent = "#4a6fa5"; # Muted blue
+    emphasis = "#f8fafc"; # Near-white
+    option = "#06b6d4"; # Cyan
+    success = "#22c55e"; # Green
+    value = "#f59e0b"; # Amber
+    warning = "#f59e0b"; # Amber
+    error = "#ef4444"; # Red
+    notice = "#ff6600"; # Orange
+    context = "#22c55e"; # Green
   };
 }
