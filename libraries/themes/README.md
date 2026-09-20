@@ -39,13 +39,14 @@ readable in isolation.
 
 A theme declares one hex color per role. The renderer derives three
 presentations from that color without inspecting the role name, so every
-declared role — required or optional — produces the same three keys:
+declared role — required or optional — produces the same key in each of the
+`base`, `bold`, and `dim` presentation groups:
 
 | Generated key | Rendering                                                                  |
 | ------------- | -------------------------------------------------------------------------- |
-| `accent`      | Original RGB rendered as a regular 24-bit foreground                       |
-| `bold_accent` | RGB multiplied by `boldFactor`, clamped to 255, and rendered with SGR bold |
-| `dim_accent`  | RGB multiplied by `dimFactor` and rendered as a regular 24-bit foreground  |
+| `base.accent` | Original RGB rendered as a regular 24-bit foreground                       |
+| `bold.accent` | RGB multiplied by `boldFactor`, clamped to 255, and rendered with SGR bold |
+| `dim.accent`  | RGB multiplied by `dimFactor` and rendered as a regular 24-bit foreground  |
 
 Both factors are non-negative numbers. Their defaults are:
 
@@ -57,7 +58,7 @@ dimFactor = 0.55;
 The scaling formula for each RGB channel is
 `min 255 (floor (channel * factor))`.
 
-`dim_*` keys use scaled RGB instead of the SGR faint attribute. Faint rendering
+`dim.*` keys use scaled RGB instead of the SGR faint attribute. Faint rendering
 varies across terminals and can shift 24-bit colors unpredictably. `mode.dim`
 remains the separate terminal faint mode.
 
@@ -77,17 +78,18 @@ Every theme declares these nine required semantic roles:
 | `notice`   | Progress, skipped operations, state changes, dirty-state notices  |
 | `context`  | Source identity, repository or host metadata, locations and paths |
 
-The nine required roles therefore generate 27 keys under `theme.<name>`:
-`<role>`, `bold_<role>`, and `dim_<role>` for each one.
+The nine required roles therefore generate three groups of nine keys under
+`theme.<name>`: `base.<role>`, `bold.<role>`, and `dim.<role>` for each one.
 
 Two roles may share a hex value; the bundled themes do. `colors.<name>`
 publishes only the authored role hexes and the optional selection pair, never a
 derived presentation.
 
-A theme may declare extra roles, and each one gains its own three presentations
-with no library change. Role names may not be `selection` or begin with `bold_`
-or `dim_`: those forms are reserved for generated presentations and for the raw
-selection pair.
+A theme may declare extra roles, and each one gains its own presentation in
+each of the three groups with no library change. A role name may not be
+`selection`: that name is reserved for the raw selection pair, which is
+published beside the authored roles in `colors`. The generated presentation
+groups cannot collide with a role name.
 
 Themes may also define a complete `selection` pair for interactive menus:
 
@@ -173,9 +175,9 @@ let
   };
 in
 ''
-  printf '%b' "${resolvedTheme.theme.bold_success}OK${resolvedTheme.mode.reset}"
-  printf '%b' "\n${resolvedTheme.theme.bold_warning}WARN${resolvedTheme.mode.reset}"
-  printf '%b' "\n${resolvedTheme.theme.bold_error}ERROR${resolvedTheme.mode.reset}"
+  printf '%b' "${resolvedTheme.theme.bold.success}OK${resolvedTheme.mode.reset}"
+  printf '%b' "\n${resolvedTheme.theme.bold.warning}WARN${resolvedTheme.mode.reset}"
+  printf '%b' "\n${resolvedTheme.theme.bold.error}ERROR${resolvedTheme.mode.reset}"
 ''
 ```
 
@@ -220,21 +222,21 @@ with the list of available themes.
 
 ## API
 
-| Attribute                        | Description                                                  |
-| -------------------------------- | ------------------------------------------------------------ |
-| `colors.*`                       | Validated raw role colors for every bundled theme            |
-| `colors.*.selection`             | Optional interactive selection foreground/background pair    |
-| `theme.*`                        | Rendered flat presentation constants for every bundled theme |
-| `themeMetadata.*`                | Provider and source path for every discovered theme          |
-| `mode.blink`                     | Blinking text                                                |
-| `mode.dim`                       | Dim or faint text                                            |
-| `mode.italic`                    | Italic text                                                  |
-| `mode.reset`                     | Reset all text attributes                                    |
-| `mode.reverse`                   | Reverse foreground and background                            |
-| `mode.underline`                 | Underlined text                                              |
-| `select name`                    | Return one theme as `{ colors, theme, mode }`                |
-| `withoutColors libThemes`        | Set `colors = null` and replace rendered codes with `""`     |
-| `resolve { name, enableColors }` | Select a theme and optionally strip all color and mode codes |
+| Attribute                        | Description                                                    |
+| -------------------------------- | -------------------------------------------------------------- |
+| `colors.*`                       | Validated raw role colors for every bundled theme              |
+| `colors.*.selection`             | Optional interactive selection foreground/background pair      |
+| `theme.*`                        | Rendered presentation groups (`base`, `bold`, `dim`) per theme |
+| `themeMetadata.*`                | Provider and source path for every discovered theme            |
+| `mode.blink`                     | Blinking text                                                  |
+| `mode.dim`                       | Dim or faint text                                              |
+| `mode.italic`                    | Italic text                                                    |
+| `mode.reset`                     | Reset all text attributes                                      |
+| `mode.reverse`                   | Reverse foreground and background                              |
+| `mode.underline`                 | Underlined text                                                |
+| `select name`                    | Return one theme as `{ colors, theme, mode }`                  |
+| `withoutColors libThemes`        | Set `colors = null` and replace rendered codes with `""`       |
+| `resolve { name, enableColors }` | Select a theme and optionally strip all color and mode codes   |
 
 ## Where to look next
 

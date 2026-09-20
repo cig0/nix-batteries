@@ -27,7 +27,7 @@ helpCheck =
   L.mkHelpCheck {
     inherit cmd layout libHelpLegendRenderer;
     desc = legend.${cmd};
-    cmdColor = libThemes.theme.bold_emphasis;
+    cmdColor = libThemes.theme.bold.emphasis;
     reset = libThemes.mode.reset;
   };
 ```
@@ -40,7 +40,7 @@ ackBeforeRun =
   cmd:
   ''
     ${helpCheck cmd}
-    _ack "${libThemes.theme.bold_emphasis}===> ${legend.${cmd}}${libThemes.mode.reset}" "''${x}" || return
+    _ack "${libThemes.theme.bold.emphasis}===> ${legend.${cmd}}${libThemes.mode.reset}" "''${x}" || return
   '';
 ```
 

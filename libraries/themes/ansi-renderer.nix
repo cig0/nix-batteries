@@ -4,6 +4,10 @@
   normalizer.nix guarantees the input shape. This module renders every
   declared role into its three presentations and publishes the
   theme-independent terminal mode codes.
+
+  Presentations are grouped by presentation name. `base`, `bold`, and `dim`
+  each hold one entry per declared role, so a consumer reads
+  `theme.bold.context` instead of a prefixed flat key.
 */
 {
   colorOperations, # resolver.nix → colors.nix
@@ -24,21 +28,8 @@ let
     dim scales the channels instead of emitting SGR 2, so mode.dim remains the
     distinct terminal dim mode.
   */
-  renderRolePresentations =
-    {
-      boldFactor,
-      dimFactor,
-      hexColor,
-      roleName,
-    }:
-    let
-      sourceRgb = colorOperations.hexColorToRgb hexColor;
-    in
-    {
-      "${roleName}" = renderForegroundColor sourceRgb;
-      "bold_${roleName}" = renderBoldForegroundColor (colorOperations.scaleRgb boldFactor sourceRgb);
-      "dim_${roleName}" = renderForegroundColor (colorOperations.scaleRgb dimFactor sourceRgb);
-    };
+  renderPresentation =
+    renderRgb: lib.mapAttrs (_roleName: hexColor: renderRgb (colorOperations.hexColorToRgb hexColor));
 in
 {
   terminalModes = {
@@ -51,12 +42,19 @@ in
   };
 
   renderTheme =
-    normalizedTheme:
-    lib.concatMapAttrs (
-      roleName: hexColor:
-      renderRolePresentations {
-        inherit (normalizedTheme) boldFactor dimFactor;
-        inherit hexColor roleName;
-      }
-    ) normalizedTheme.roles;
+    {
+      boldFactor,
+      dimFactor,
+      roles,
+      ...
+    }:
+    {
+      base = renderPresentation renderForegroundColor roles;
+      bold = renderPresentation (
+        rgb: renderBoldForegroundColor (colorOperations.scaleRgb boldFactor rgb)
+      ) roles;
+      dim = renderPresentation (
+        rgb: renderForegroundColor (colorOperations.scaleRgb dimFactor rgb)
+      ) roles;
+    };
 }

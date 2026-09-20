@@ -34,20 +34,20 @@ let
         layout
         libHelpLegendRenderer
         ;
-      cmdColor = theme.theme.bold_emphasis;
-      headerColor = theme.theme.bold_accent;
+      cmdColor = theme.theme.bold.emphasis;
+      headerColor = theme.theme.bold.accent;
       reset = theme.mode.reset;
     };
     check = helpLegend.mkHelpCheck {
       inherit layout libHelpLegendRenderer;
       cmd = "check";
       desc = descFn "check";
-      cmdColor = theme.theme.bold_emphasis;
+      cmdColor = theme.theme.bold.emphasis;
       reset = theme.mode.reset;
     };
     title = helpLegend.mkCenteredTitle {
       inherit libHelpLegendRenderer;
-      color = theme.theme.bold_accent;
+      color = theme.theme.bold.accent;
       reset = theme.mode.reset;
       title = "Fixture Help";
       width = layout.width;

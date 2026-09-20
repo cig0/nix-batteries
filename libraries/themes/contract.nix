@@ -31,11 +31,7 @@
     "context"
   ];
 
-  # Role names that would collide with generated presentations or with the
-  # raw selection pair once roles and selection share one colors attribute set.
+  # Role names that would collide once raw roles and the optional selection
+  # pair are published in one colors attribute set.
   reservedRoleNames = [ "selection" ];
-  reservedRolePrefixes = [
-    "bold_"
-    "dim_"
-  ];
 }
