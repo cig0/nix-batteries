@@ -23,6 +23,7 @@ let
     "modulette"
     "modulon"
     "nixOptionsToMd"
+    "themeOptionModule"
     "themes"
   ];
   batteriesLibNames = builtins.attrNames batteriesLib;
@@ -52,7 +53,23 @@ let
     args.value = "loaded";
   };
 
+  # A scanned subdirectory without the target file must fail with a Modulette
+  # error rather than a bare import or read error.
+  moduletteMissingTargetFixture = builtins.tryEval (
+    builtins.deepSeq (batteriesLib.modulette.discoverModules {
+      mode = "directory";
+      directory = ./modulette/hosts-missing-target;
+      targetFile = "host.nix";
+      args.value = "loaded";
+    }) true
+  );
+
   missingInputGuard = batteriesLib.guardFlakeInput "missing-input" { };
+
+  # The exported theme option module is a real module function: applied with a
+  # lib, it declares the selection options consumers configure per host.
+  themeOptionFixture = batteriesLib.themeOptionModule { inherit lib; };
+  themeOptionNames = builtins.attrNames themeOptionFixture.options.myOptions.hm.data.theme;
 
   dynamicAliasNames = batteriesLib.dynamicAliases.discoverNixFileNames {
     directory = ./dynamic-aliases/nix-files;
@@ -119,6 +136,14 @@ in
   batteriesLib-surface =
     assert missingLibNames == [ ];
     assert unexpectedLibNames == [ ];
+    assert builtins.isFunction batteriesLib.themeOptionModule;
+    assert
+      themeOptionNames == [
+        "enableColors"
+        "name"
+      ];
+    assert themeOptionFixture.options.myOptions.hm.data.theme.name.default == "nushell-inspired";
+    assert themeOptionFixture.options.myOptions.hm.data.theme.enableColors.default == null;
     pass "nix-batteries-batteriesLib-surface";
 
   modulon-fixture =
@@ -142,6 +167,7 @@ in
     assert moduletteDirectoryFixture.alpha.id == "alpha";
     assert moduletteDirectoryFixture.beta.value == "loaded";
     assert moduletteDirectoryFixture.beta.id == "beta";
+    assert moduletteMissingTargetFixture.success == false;
     pass "nix-batteries-modulette-directory-fixture";
 
   guard-flake-input-fixture =
@@ -193,6 +219,7 @@ in
     assert nixOptionsToMdFixtureResult.hasEnableRow;
     assert nixOptionsToMdFixtureResult.hasPortRow;
     assert nixOptionsToMdFixtureResult.hasNestedRow;
+    assert nixOptionsToMdFixtureResult.hasStringDefaultRow;
     assert nixOptionsToMdFixtureResult.customNamespace;
     assert nixOptionsToMdFixtureResult.customExcludesNested;
     pass "nix-batteries-nix-options-to-md-fixture";

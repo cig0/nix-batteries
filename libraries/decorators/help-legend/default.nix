@@ -90,9 +90,14 @@ let
       allCmds = builtins.concatLists (map (g: g.cmds) groups);
       maxDescLen = maxStringLength (map descFn allCmds);
       width = layout.descCol + maxDescLen;
+      # Command names and descriptions are caller-authored text. The renderer
+      # escapes them for its shell before they enter the printed payload.
+      escape = libHelpLegendRenderer.escape;
       row =
-        cmd: libHelpLegendRenderer.print "\\n  ${cmdColor}${cmd}${reset}${layout.padCmd cmd}${descFn cmd}";
-      group = g: [ (libHelpLegendRenderer.print "\\n${headerColor}${g.name}${reset}") ] ++ map row g.cmds;
+        cmd:
+        libHelpLegendRenderer.print "\\n  ${cmdColor}${escape cmd}${reset}${layout.padCmd cmd}${escape (descFn cmd)}";
+      group =
+        g: [ (libHelpLegendRenderer.print "\\n${headerColor}${escape g.name}${reset}") ] ++ map row g.cmds;
       bodyLines =
         let
           gs = map group groups;
@@ -129,7 +134,7 @@ let
       pad = centerIn width title;
       leading = builtins.concatStringsSep "" (builtins.genList (_: "\\n") (leadingLines + 1));
     in
-    libHelpLegendRenderer.print "${leading}${color}${pad}${title}${reset}";
+    libHelpLegendRenderer.print "${leading}${color}${pad}${libHelpLegendRenderer.escape title}${reset}";
 
   mkHelpCheck =
     {

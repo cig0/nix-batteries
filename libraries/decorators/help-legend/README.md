@@ -277,7 +277,15 @@ reset, closing ? [ ] }` renders grouped rows.
 Renderer contract:
 
 - `print :: string -> string`
+- `escape :: string -> string` — make one literal text value safe inside the
+  renderer's printed payload
 - `helpCheck :: { cmd, cmdColor, desc, pad, reset } -> string`
+
+`mkHelpSection`, `mkCenteredTitle`, and `mkHelpCheck` escape caller-authored
+command names, descriptions, section names, and titles with the renderer's
+`escape` before they reach `print`. Shell metacharacters (`$`, quotes, and
+backticks) and literal backslashes therefore survive into the printed output
+instead of being expanded or reinterpreted by the target shell.
 
 <br>
 

@@ -13,6 +13,9 @@ during Nix evaluation.
 | `dirtyStateFunction.{posix,fish,nushell}` | Define a shell-native `_gitDirtyState` helper |
 | `dirtyStateCall.{posix,fish,nushell}`     | Call `_gitDirtyState` in shell-native syntax  |
 
+The `posix` variants use POSIX shell grammar, so `dash`, `bash`, and `zsh`
+all execute them as generated.
+
 ## Parameters
 
 ```nix
@@ -80,7 +83,7 @@ in
   ${gitRepoState.revisionCall.posix}
 
   __dirty="$(${gitRepoState.dirtyStateCall.posix})"
-  if [[ -n "$__dirty" ]]; then
+  if [ -n "$__dirty" ]; then
     printf '%b' "${libThemes.theme.bold.notice}-"
     printf '%s' "$__dirty"
   fi
@@ -111,14 +114,14 @@ in
     printf "revision=git-"
     ${gitRepoState.revisionCall.posix}
     dirty="$(${gitRepoState.dirtyStateCall.posix})"
-    if [[ -n "$dirty" ]]; then
+    if [ -n "$dirty" ]; then
       printf -- "-%s" "$dirty"
     fi
     printf "\n"
   ''
 NIX
 nix eval --impure --raw --file "$expr" > "$tmp"
-bash "$tmp"
+sh "$tmp"
 rm -f "$tmp" "$expr"
 ```
 

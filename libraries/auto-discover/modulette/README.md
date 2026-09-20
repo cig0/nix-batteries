@@ -6,18 +6,18 @@ Lightweight Nix module discovery — scans directories, validates optional heade
 
 Modulette operates in two modes, selected by the required `mode` parameter:
 
-| Mode | Scans | Keys by | Imports |
-|---|---|---|---|
-| `"flat"` | `.nix` files in a directory | Filename without extension | Each matching file |
-| `"directory"` | Subdirectories in a directory | Directory name | `targetFile` inside each subdirectory |
+| Mode          | Scans                         | Keys by                    | Imports                               |
+| ------------- | ----------------------------- | -------------------------- | ------------------------------------- |
+| `"flat"`      | `.nix` files in a directory   | Filename without extension | Each matching file                    |
+| `"directory"` | Subdirectories in a directory | Directory name             | `targetFile` inside each subdirectory |
 
 ## Exports
 
-| Function | Description |
-|---|---|
+| Function          | Description                                                    |
+| ----------------- | -------------------------------------------------------------- |
 | `discoverModules` | Scan directory, filter by header, import, collect into attrset |
-| `hasValidHeader` | Exact first-line match (string or list of strings) |
-| `hasHeaderPrefix` | Prefix match (allows comments after the header) |
+| `hasValidHeader`  | Exact first-line match (string or list of strings)             |
+| `hasHeaderPrefix` | Prefix match (allows comments after the header)                |
 
 ## Function Reference
 
@@ -42,7 +42,7 @@ modulette.discoverModules {
 
 #### Directory mode
 
-Scans for subdirectories inside the directory. Each subdirectory is treated as a named entry; the file specified by `targetFile` (default: `"host.nix"`) inside each subdirectory is imported. Keys by directory name.
+Scans for subdirectories inside the directory. Each subdirectory is treated as a named entry; the file specified by `targetFile` (default: `"host.nix"`) inside each subdirectory is imported. Keys by directory name. Every candidate subdirectory must contain `targetFile`; a subdirectory without it fails evaluation with a Modulette error that names the directory and the expected file.
 
 ```nix
 modulette.discoverModules {
@@ -67,15 +67,15 @@ Directory mode returns `{ maru = <imported>; tenten = <imported>; }`.
 
 #### Parameters
 
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `mode` | `"flat"` or `"directory"` | (required) | Scanning mode |
-| `directory` | path | (required) | Path to scan |
-| `args` | attrset | `{ }` | Attrset passed to each imported module |
-| `exclude` | list of strings | `[ ]` | Names to skip (filenames in flat mode, directory names in directory mode) |
-| `headerPrefix` | string | `null` | Prefix that the first line must start with |
-| `headerText` | string or list of strings | `null` | Exact first-line string(s) to match |
-| `targetFile` | string | `"host.nix"` | Filename to import inside each subdirectory (directory mode only) |
+| Parameter      | Type                      | Default      | Description                                                               |
+| -------------- | ------------------------- | ------------ | ------------------------------------------------------------------------- |
+| `mode`         | `"flat"` or `"directory"` | (required)   | Scanning mode                                                             |
+| `directory`    | path                      | (required)   | Path to scan                                                              |
+| `args`         | attrset                   | `{ }`        | Attrset passed to each imported module                                    |
+| `exclude`      | list of strings           | `[ ]`        | Names to skip (filenames in flat mode, directory names in directory mode) |
+| `headerPrefix` | string                    | `null`       | Prefix that the first line must start with                                |
+| `headerText`   | string or list of strings | `null`       | Exact first-line string(s) to match                                       |
+| `targetFile`   | string                    | `"host.nix"` | Filename to import inside each subdirectory (directory mode only)         |
 
 When both `headerText` and `headerPrefix` are `null`, all entries are accepted.
 
@@ -280,6 +280,7 @@ modulette.discoverModules {
 ```
 
 Matches:
+
 - `# Theme module.` ✅
 - `# Theme module. Nushell-inspired color scheme.` ✅
 - `# Some other header` ❌

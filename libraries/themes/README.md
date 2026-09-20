@@ -188,6 +188,17 @@ empty hex value.
 
 ## Home Manager integration
 
+The option module is exported as `batteriesLib.themeOptionModule`, so consumers
+add it through `imports` or a discovery helper instead of importing a
+source-tree path:
+
+```nix
+{ inputs, ... }:
+{
+  imports = [ inputs.nix-batteries.batteriesLib.themeOptionModule ];
+}
+```
+
 Select the theme through the host profile:
 
 ```nix

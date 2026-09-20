@@ -13,7 +13,7 @@
 
   Exports:
 
-    guard — check a flake input and return a record with:
+    guardFlakeInput — check a flake input and return a record with:
       has    — bool, whether the input exists in _inputs
       input  — the input value, or null if missing
       apply  — call a function with the input if present, else return

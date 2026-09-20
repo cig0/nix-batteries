@@ -69,6 +69,8 @@ let
     else
       "unknown";
 
+  # Literal defaults are serialized with builtins.toJSON: a string keeps its
+  # quotes (`"fast"`) and structured values render in JSON syntax.
   defaultValue =
     option:
     if option ? defaultText then

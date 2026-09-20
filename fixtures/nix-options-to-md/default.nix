@@ -24,6 +24,10 @@ let
             default = 30;
           };
         };
+        mode = lib.mkOption {
+          type = lib.types.str;
+          default = "fast";
+        };
       };
     };
   };
@@ -45,6 +49,8 @@ in
   hasEnableRow = lib.hasInfix "| `myOptions.services.example.enable` | boolean | `false` |" markdown;
   hasPortRow = lib.hasInfix "| `myOptions.services.example.port` | 16 bit unsigned integer; between 0 and 65535 (both inclusive) | `8080` | Listening port. Second line should collapse. |" markdown;
   hasNestedRow = lib.hasInfix "| `myOptions.services.example.nested.timeout` | positive integer, meaning >0 | `30` |" markdown;
+  # String literals keep their quotes, matching nixpkgs option-doc rendering.
+  hasStringDefaultRow = lib.hasInfix "| `myOptions.services.example.mode` | string | `\"fast\"` |" markdown;
   customNamespace = lib.hasInfix "| `config.services.example.enable` |" customMarkdown;
   customExcludesNested = !(lib.hasInfix "config.services.example.nested" customMarkdown);
 }

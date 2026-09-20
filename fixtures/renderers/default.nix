@@ -2,7 +2,8 @@
   Renderer fixture for the public help-legend and git-state libraries.
 
   fixtures/default.nix supplies nixpkgs and batteriesLib. This fixture generates
-  shell snippets and checks their rendered contracts and native shell syntax.
+  shell snippets and checks their rendered contracts, native shell syntax, and
+  runtime output when a caller-authored payload contains shell metacharacters.
 */
 {
   batteriesLib, # fixtures/default.nix → batteriesLib
@@ -17,6 +18,7 @@ let
     name = "nushell-inspired";
     enableColors = true;
   };
+
   groups = [
     {
       name = "Fixture";
@@ -26,35 +28,76 @@ let
   descFn = _: "Run fixture check";
   layout = helpLegend.sectionLayout { inherit groups descFn; };
 
-  renderHelp = libHelpLegendRenderer: {
-    section = helpLegend.mkHelpSection {
-      inherit
-        descFn
-        groups
-        layout
-        libHelpLegendRenderer
-        ;
-      cmdColor = theme.theme.bold.emphasis;
-      headerColor = theme.theme.bold.accent;
-      reset = theme.mode.reset;
-    };
-    check = helpLegend.mkHelpCheck {
-      inherit layout libHelpLegendRenderer;
-      cmd = "check";
-      desc = descFn "check";
-      cmdColor = theme.theme.bold.emphasis;
-      reset = theme.mode.reset;
-    };
-    title = helpLegend.mkCenteredTitle {
-      inherit libHelpLegendRenderer;
-      color = theme.theme.bold.accent;
-      reset = theme.mode.reset;
-      title = "Fixture Help";
-      width = layout.width;
-    };
-  };
+  # Caller-authored payload holding every character a renderer must neutralize:
+  # shell expansion (`$`), quoting, command substitution (backtick), and a
+  # literal backslash that must survive both the shell and `printf '%b'`.
+  trickyText = ''cost $5 and say "hi" and tick` and back\slash'';
+  trickyGroupName = "Tricky $group";
+  trickyTitle = ''Title $1 "quoted" `tick` back\slash'';
+  trickyGroups = [
+    {
+      name = trickyGroupName;
+      cmds = [ "check" ];
+    }
+  ];
+  trickyDescFn = _: trickyText;
 
-  renderedHelp = lib.mapAttrs (_: renderHelp) helpLegend.libHelpLegendRenderer;
+  # One renderer over one payload set. Layout is recomputed because column
+  # padding depends on the description length.
+  mkRenderedHelp =
+    {
+      descFn,
+      groups,
+      title,
+    }:
+    libHelpLegendRenderer:
+    let
+      layout = helpLegend.sectionLayout { inherit groups descFn; };
+    in
+    {
+      section = helpLegend.mkHelpSection {
+        inherit
+          descFn
+          groups
+          layout
+          libHelpLegendRenderer
+          ;
+        cmdColor = theme.theme.bold.emphasis;
+        headerColor = theme.theme.bold.accent;
+        reset = theme.mode.reset;
+      };
+      check = helpLegend.mkHelpCheck {
+        inherit layout libHelpLegendRenderer;
+        cmd = "check";
+        desc = descFn "check";
+        cmdColor = theme.theme.bold.emphasis;
+        reset = theme.mode.reset;
+      };
+      title = helpLegend.mkCenteredTitle {
+        inherit libHelpLegendRenderer;
+        color = theme.theme.bold.accent;
+        reset = theme.mode.reset;
+        inherit title;
+        width = layout.width;
+      };
+    };
+
+  renderedHelp = lib.mapAttrs (
+    _:
+    mkRenderedHelp {
+      inherit descFn groups;
+      title = "Fixture Help";
+    }
+  ) (helpLegend.libHelpLegendRenderer);
+  trickyHelp = lib.mapAttrs (
+    _:
+    mkRenderedHelp {
+      descFn = trickyDescFn;
+      groups = trickyGroups;
+      title = trickyTitle;
+    }
+  ) (helpLegend.libHelpLegendRenderer);
+
   gitRepoState = batteriesLib.gitRepoState;
 
   sources = {
@@ -102,6 +145,37 @@ let
 
       fixture-help
     '';
+    # The function prints the one-line guard when called with --help and the full
+    # screen otherwise, so one invocation of each source exercises both paths.
+    trickyPosix = pkgs.writeText "tricky-help-legend.sh" ''
+      fixture_tricky_help() {
+        ${trickyHelp.posix.check}
+        ${trickyHelp.posix.title}
+        ${trickyHelp.posix.section.text}
+      }
+
+      fixture_tricky_help --help
+      fixture_tricky_help
+    '';
+    trickyFish = pkgs.writeText "tricky-help-legend.fish" ''
+      function fixture_tricky_help
+        ${trickyHelp.fish.check}
+        ${trickyHelp.fish.title}
+        ${trickyHelp.fish.section.text}
+      end
+
+      fixture_tricky_help --help
+      fixture_tricky_help
+    '';
+    trickyNu = pkgs.writeText "tricky-help-legend.nu" ''
+      def fixture-tricky-help [] {
+        ${trickyHelp.nushell.check}
+        ${trickyHelp.nushell.title}
+        ${trickyHelp.nushell.section.text}
+      }
+
+      fixture-tricky-help
+    '';
   };
 in
 {
@@ -114,7 +188,52 @@ in
     assert lib.hasInfix "Fixture Help" renderedHelp.posix.title;
     assert lib.hasInfix "Fixture Help" renderedHelp.fish.title;
     assert lib.hasInfix "Fixture Help" renderedHelp.nushell.title;
+    # The POSIX guard stays inside the POSIX shell grammar.
+    assert !(lib.hasInfix "[[" renderedHelp.posix.check);
+    assert lib.hasInfix "[ \"$1\" = \"-h\" ]" renderedHelp.posix.check;
+    # `printf '%b'` understands `\e` only on bash/zsh; colours use `\033` so
+    # dash renders them too, and a payload backslash cannot forge that sequence.
+    assert lib.hasInfix "\\033[" renderedHelp.posix.section.text;
+    assert !(lib.hasInfix "\\e[" renderedHelp.posix.section.text);
+    assert lib.hasInfix "\\033[" renderedHelp.posix.check;
+    assert !(lib.hasInfix "\\e[" renderedHelp.posix.check);
+    assert !(lib.hasInfix "\\e[" trickyHelp.posix.section.text);
+    # Escaping rules per renderer: only expansion characters the shell owns.
+    assert helpLegend.libHelpLegendRenderer.posix.escape "$" == "\\$";
+    assert helpLegend.libHelpLegendRenderer.posix.escape "`" == "\\`";
+    assert helpLegend.libHelpLegendRenderer.posix.escape "\"" == "\\\"";
+    assert helpLegend.libHelpLegendRenderer.posix.escape "a\\b" == "a\\0134b";
+    assert helpLegend.libHelpLegendRenderer.fish.escape "$" == "\\$";
+    assert helpLegend.libHelpLegendRenderer.fish.escape "`" == "`";
+    assert helpLegend.libHelpLegendRenderer.fish.escape "a\\b" == "a\\\\\\\\b";
+    assert helpLegend.libHelpLegendRenderer.nushell.escape "$" == "$";
+    assert helpLegend.libHelpLegendRenderer.nushell.escape "`" == "`";
+    assert helpLegend.libHelpLegendRenderer.nushell.escape "\"" == "\\\"";
+    assert helpLegend.libHelpLegendRenderer.nushell.escape "a\\b" == "a\\u{5c}b";
+    # Public layout helpers that no other fixture exercises.
+    assert helpLegend.repeat 3 "ab" == "ababab";
+    assert
+      helpLegend.maxStringLength [
+        "a"
+        "bb"
+        "ccc"
+      ] == 3;
+    assert
+      helpLegend.maxInt [
+        4
+        1
+        9
+        2
+      ] == 9;
+    assert helpLegend.centerIn 11 "abc" == helpLegend.repeat 4 " ";
+    assert
+      helpLegend.enabledWidth [
+        { width = 5; }
+        { width = 12; }
+      ] == 12;
     assert lib.hasInfix "_gitRevision" gitRepoState.revisionFunction.posix;
+    assert !(lib.hasInfix "[[" gitRepoState.revisionFunction.posix);
+    assert !(lib.hasInfix "[[" gitRepoState.dirtyStateFunction.posix);
     assert lib.hasInfix "function _gitRevision" gitRepoState.revisionFunction.fish;
     assert lib.hasInfix "def _gitRevision" gitRepoState.revisionFunction.nushell;
     assert !(lib.hasInfix "$args" renderedHelp.nushell.check);
@@ -126,14 +245,21 @@ in
   renderer-runtime-fixture = pkgs.runCommand "nix-batteries-renderer-runtime-fixture" { } ''
     ${pkgs.bash}/bin/bash -n ${sources.gitPosix}
     ${pkgs.bash}/bin/bash -n ${sources.helpPosix}
+    ${pkgs.bash}/bin/bash -n ${sources.trickyPosix}
     ${pkgs.zsh}/bin/zsh -n ${sources.gitPosix}
     ${pkgs.zsh}/bin/zsh -n ${sources.helpPosix}
+    ${pkgs.zsh}/bin/zsh -n ${sources.trickyPosix}
+    ${pkgs.dash}/bin/dash -n ${sources.gitPosix}
+    ${pkgs.dash}/bin/dash -n ${sources.helpPosix}
+    ${pkgs.dash}/bin/dash -n ${sources.trickyPosix}
 
     ${pkgs.fish}/bin/fish --no-execute ${sources.gitFish}
     ${pkgs.fish}/bin/fish --no-execute ${sources.helpFish}
+    ${pkgs.fish}/bin/fish --no-execute ${sources.trickyFish}
 
     ${pkgs.nushell}/bin/nu --commands 'if (nu-check ${sources.gitNu}) == false { exit 1 }'
     ${pkgs.nushell}/bin/nu --commands 'if (nu-check ${sources.helpNu}) == false { exit 1 }'
+    ${pkgs.nushell}/bin/nu --commands 'if (nu-check ${sources.trickyNu}) == false { exit 1 }'
 
     ${pkgs.gnugrep}/bin/grep --fixed-strings '\u{1b}[' ${sources.helpNu}
     if ${pkgs.gnugrep}/bin/grep --fixed-strings --quiet '\e[' ${sources.helpNu}; then
@@ -147,6 +273,26 @@ in
     ${pkgs.coreutils}/bin/od -An -tx1 help-nu.out \
       | ${pkgs.coreutils}/bin/tr -d ' \n' \
       | ${pkgs.gnugrep}/bin/grep --quiet '1b5b'
+
+    # A caller-authored payload must survive execution, not only parsing.
+    ${pkgs.bash}/bin/bash ${sources.trickyPosix} > tricky-bash.out
+    ${pkgs.zsh}/bin/zsh ${sources.trickyPosix} > tricky-zsh.out
+    ${pkgs.dash}/bin/dash ${sources.trickyPosix} > tricky-dash.out
+    ${pkgs.fish}/bin/fish ${sources.trickyFish} > tricky-fish.out
+    ${pkgs.nushell}/bin/nu ${sources.trickyNu} > tricky-nu.out
+    for outfile in tricky-bash.out tricky-zsh.out tricky-dash.out tricky-fish.out tricky-nu.out; do
+      ${pkgs.gnugrep}/bin/grep --fixed-strings '${trickyText}' "$outfile"
+      ${pkgs.gnugrep}/bin/grep --fixed-strings '${trickyGroupName}' "$outfile"
+      ${pkgs.gnugrep}/bin/grep --fixed-strings '${trickyTitle}' "$outfile"
+    done
+
+    # dash's printf does not understand `\e`; the POSIX renderer must emit `\033`.
+    ${pkgs.coreutils}/bin/od -An -tx1 tricky-dash.out \
+      | ${pkgs.coreutils}/bin/tr -d ' \n' \
+      | ${pkgs.gnugrep}/bin/grep --quiet '1b5b'
+    if ${pkgs.gnugrep}/bin/grep --fixed-strings --quiet '\e[' tricky-dash.out; then
+      exit 1
+    fi
 
     touch "$out"
   '';

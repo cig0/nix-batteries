@@ -29,7 +29,7 @@ in
       ${revisionFunctionName}() {
         local shortHash
         shortHash="$(git -C "${posixRepositoryPath}" rev-parse --short HEAD 2>/dev/null)" || shortHash=""
-        if [[ -z "''${shortHash}" ]]; then
+        if [ -z "''${shortHash}" ]; then
           printf '%s' "${unknownRevisionText}"
         else
           printf '%s' "''${shortHash}"
@@ -80,7 +80,7 @@ in
   dirtyStateFunction = {
     posix = ''
       ${dirtyStateFunctionName}() {
-        if [[ -n "$(git -C "${posixRepositoryPath}" status --porcelain 2>/dev/null)" ]]; then
+        if [ -n "$(git -C "${posixRepositoryPath}" status --porcelain 2>/dev/null)" ]; then
           printf '%s' "${dirtyStateText}"
         fi
       }
