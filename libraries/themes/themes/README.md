@@ -47,8 +47,8 @@ rendering do not belong in theme files.
 ```
 
 A theme declares one color per role and nothing else. `ansi-renderer.nix`
-derives `<role>`, `bold_<role>`, and `dim_<role>` from that color, so a theme
-never writes a presentation name.
+derives `base.<role>`, `bold.<role>`, and `dim.<role>` from that color, so a
+theme never writes a presentation name.
 
 ## Roles
 
@@ -86,11 +86,11 @@ consumers to infer contrast or UI roles from output roles. Both values must use
 
 ## Factors
 
-- `boldFactor` scales the RGB source for `bold_*` output before applying SGR
+- `boldFactor` scales the RGB source for the `bold` group before applying SGR
   bold.
-- `dimFactor` scales the RGB source for `dim_*` output before regular
+- `dimFactor` scales the RGB source for the `dim` group before regular
   true-color rendering.
-- The plain role key renders its RGB source without scaling.
+- The `base` group renders each RGB source without scaling.
 - Scaled channels are floored and clamped to 255.
 
 Factors default to `1.0` and `0.55`, respectively, and must be non-negative
@@ -102,9 +102,9 @@ visible beside their colors.
 Every theme must define all nine roles listed above under `roles`. Every role
 and selection color must be a string in the exact `#RRGGBB` form.
 
-Extra roles are allowed and receive the same three presentations. A role may
-not be named `selection` or start with `bold_` or `dim_`, because those names
-are reserved for the generated presentations and the raw selection pair.
+Extra roles are allowed and receive the same presentation in each of the three
+groups. A role may not be named `selection`, because that name is reserved for
+the raw selection pair published beside the roles in `colors`.
 
 Theme files are evaluated lazily by Nix, so fixture checks force all bundled
 themes to ensure invalid colors, factors, reserved names, or missing roles fail

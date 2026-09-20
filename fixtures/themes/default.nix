@@ -25,13 +25,19 @@ let
     "notice"
     "context"
   ];
-  presentationsOf = roleName: [
-    roleName
-    "bold_${roleName}"
-    "dim_${roleName}"
+  presentationNames = [
+    "base"
+    "bold"
+    "dim"
   ];
   sortNames = builtins.sort (left: right: left < right);
-  requiredPresentations = sortNames (lib.concatMap presentationsOf requiredRoles);
+  sortedRequiredRoles = sortNames requiredRoles;
+  sortedPresentationNames = sortNames presentationNames;
+  allPresentationsEmpty =
+    renderedTheme:
+    builtins.all (
+      presentation: builtins.all (escapeCode: escapeCode == "") (builtins.attrValues presentation)
+    ) (builtins.attrValues renderedTheme);
 
   enabledTheme = batteriesLib.themes.resolve {
     name = "nushell-inspired";
@@ -57,20 +63,27 @@ let
     batteriesLib.themes.theme
   ] true;
 
-  # Bundled themes declare exactly the required roles, so their generated key
-  # set is exactly three presentations per required role.
+  # Bundled themes declare exactly the required roles, so their generated shape
+  # is the three presentation groups, each holding exactly the required roles.
   bundledPresentationsComplete = builtins.all (
-    renderedTheme: builtins.attrNames renderedTheme == requiredPresentations
+    renderedTheme:
+    sortNames (builtins.attrNames renderedTheme) == sortedPresentationNames
+    && builtins.all (presentation: sortNames (builtins.attrNames presentation) == sortedRequiredRoles) (
+      builtins.attrValues renderedTheme
+    )
   ) (builtins.attrValues batteriesLib.themes.theme);
   bundledPresentationsPrintable = builtins.all (
     renderedTheme:
-    builtins.all (escapeCode: lib.hasPrefix "\\e[" escapeCode) (builtins.attrValues renderedTheme)
+    builtins.all (
+      presentation:
+      builtins.all (escapeCode: lib.hasPrefix "\\e[" escapeCode) (builtins.attrValues presentation)
+    ) (builtins.attrValues renderedTheme)
   ) (builtins.attrValues batteriesLib.themes.theme);
 
   # Raw colors publish authored role hexes only; presentations live in theme.
   bundledColorsAreRoles = builtins.all (
     themeColors:
-    builtins.attrNames (builtins.removeAttrs themeColors [ "selection" ]) == sortNames requiredRoles
+    builtins.attrNames (builtins.removeAttrs themeColors [ "selection" ]) == sortedRequiredRoles
   ) (builtins.attrValues batteriesLib.themes.colors);
   themesWithSelection = builtins.filter (
     themeName: batteriesLib.themes.colors.${themeName} ? selection
@@ -108,8 +121,6 @@ let
         "ordinal-slots"
         "roles-not-attrs"
         "reserved-selection"
-        "reserved-bold"
-        "reserved-dim"
       ];
 in
 {
@@ -120,15 +131,15 @@ in
     assert bundledColorsAreRoles;
     assert bundledSuccessDiffersFromError;
     assert themesWithSelection == [ "311amber" ];
-    assert disabledTheme.theme.bold_accent == "";
-    assert disabledTheme.theme.context == "";
-    assert builtins.all (value: value == "") (builtins.attrValues disabledTheme.theme);
-    assert builtins.attrNames disabledTheme.theme == requiredPresentations;
+    assert disabledTheme.theme.bold.accent == "";
+    assert disabledTheme.theme.base.context == "";
+    assert allPresentationsEmpty disabledTheme.theme;
+    assert sortNames (builtins.attrNames disabledTheme.theme) == sortedPresentationNames;
     assert disabledTheme.colors == null;
     assert builtins.all (value: value == "") (builtins.attrValues disabledTheme.mode);
     assert unknownThemeResult.success == false;
-    assert builtins.stringLength enabledTheme.theme.bold_accent > 0;
-    assert builtins.stringLength enabledTheme.theme.accent > 0;
+    assert builtins.stringLength enabledTheme.theme.bold.accent > 0;
+    assert builtins.stringLength enabledTheme.theme.base.accent > 0;
     assert enabledTheme.mode.blink == "\\e[5m";
     assert enabledTheme.mode.dim == "\\e[2m";
     assert enabledTheme.mode.italic == "\\e[3m";
@@ -137,13 +148,13 @@ in
     assert enabledTheme.mode.underline == "\\e[4m";
     assert enabledTheme.colors.accent == "#00cd00";
     assert !(enabledTheme.colors ? selection);
-    assert !(enabledTheme.colors ? bold_accent);
-    assert !(enabledTheme.colors ? dim_accent);
+    assert !(enabledTheme.colors ? bold);
+    assert !(enabledTheme.colors ? dim);
     # The role refactor preserves the existing 311amber rendering.
-    assert amberTheme.theme.accent == "\\e[38;2;255;179;67m";
-    assert amberTheme.theme.bold_accent == "\\e[1;38;2;255;179;67m";
-    assert amberTheme.theme.dim_accent == "\\e[38;2;140;98;36m";
-    assert amberTheme.theme.bold_accent != enabledTheme.theme.bold_accent;
+    assert amberTheme.theme.base.accent == "\\e[38;2;255;179;67m";
+    assert amberTheme.theme.bold.accent == "\\e[1;38;2;255;179;67m";
+    assert amberTheme.theme.dim.accent == "\\e[38;2;140;98;36m";
+    assert amberTheme.theme.bold.accent != enabledTheme.theme.bold.accent;
     assert amberTheme.colors.accent == "#ffb343";
     assert amberTheme.colors.selection.background == "#ffff00";
     assert amberTheme.colors.selection.foreground == "#000000";
@@ -160,31 +171,33 @@ in
     assert builtins.attrNames validThemeFixture.theme == [ "test" ];
     assert validThemeFixture.colors.test.accent == "#204060";
     assert !(validThemeFixture.colors.test ? selection);
-    assert validThemeFixture.theme.test.accent == "\\e[38;2;32;64;96m";
-    assert validThemeFixture.theme.test.bold_accent == "\\e[1;38;2;48;96;144m";
-    assert validThemeFixture.theme.test.dim_accent == "\\e[38;2;16;32;48m";
+    assert validThemeFixture.theme.test.base.accent == "\\e[38;2;32;64;96m";
+    assert validThemeFixture.theme.test.bold.accent == "\\e[1;38;2;48;96;144m";
+    assert validThemeFixture.theme.test.dim.accent == "\\e[38;2;16;32;48m";
     # boldFactor 1.5 clamps every channel of a light role at 255.
-    assert validThemeFixture.theme.test.bold_warning == "\\e[1;38;2;255;255;255m";
+    assert validThemeFixture.theme.test.bold.warning == "\\e[1;38;2;255;255;255m";
     # An optional extra role gains its three presentations with no library edit.
     assert validThemeFixture.colors.test.spotlight == "#123456";
-    assert validThemeFixture.theme.test.spotlight == "\\e[38;2;18;52;86m";
-    assert validThemeFixture.theme.test.bold_spotlight == "\\e[1;38;2;27;78;129m";
-    assert validThemeFixture.theme.test.dim_spotlight == "\\e[38;2;9;26;43m";
-    assert
-      builtins.attrNames validThemeFixture.theme.test
-      == sortNames (requiredPresentations ++ presentationsOf "spotlight");
+    assert validThemeFixture.theme.test.base.spotlight == "\\e[38;2;18;52;86m";
+    assert validThemeFixture.theme.test.bold.spotlight == "\\e[1;38;2;27;78;129m";
+    assert validThemeFixture.theme.test.dim.spotlight == "\\e[38;2;9;26;43m";
+    assert sortNames (builtins.attrNames validThemeFixture.theme.test) == sortedPresentationNames;
+    assert builtins.all (
+      presentation:
+      sortNames (builtins.attrNames presentation) == sortNames (requiredRoles ++ [ "spotlight" ])
+    ) (builtins.attrValues validThemeFixture.theme.test);
     assert
       validThemeFixture.themeMetadata.test == {
         provider = "nix-batteries";
         source = "fixtures/themes/valid/themes/test.nix";
       };
-    # Zero factors scale every channel to zero; plain output is unaffected.
-    assert zeroFactorFixture.theme.test.accent == "\\e[38;2;32;64;96m";
-    assert zeroFactorFixture.theme.test.bold_accent == "\\e[1;38;2;0;0;0m";
-    assert zeroFactorFixture.theme.test.dim_accent == "\\e[38;2;0;0;0m";
+    # Zero factors scale every channel to zero; base output is unaffected.
+    assert zeroFactorFixture.theme.test.base.accent == "\\e[38;2;32;64;96m";
+    assert zeroFactorFixture.theme.test.bold.accent == "\\e[1;38;2;0;0;0m";
+    assert zeroFactorFixture.theme.test.dim.accent == "\\e[38;2;0;0;0m";
     # Omitted factors fall back to contract defaults 1.0 and 0.55.
-    assert defaultFactorsFixture.theme.test.bold_accent == "\\e[1;38;2;32;64;96m";
-    assert defaultFactorsFixture.theme.test.dim_accent == "\\e[38;2;17;35;52m";
+    assert defaultFactorsFixture.theme.test.bold.accent == "\\e[1;38;2;32;64;96m";
+    assert defaultFactorsFixture.theme.test.dim.accent == "\\e[38;2;17;35;52m";
     assert builtins.all (result: result.success == false) invalidThemeFixtures;
     pass "nix-batteries-theme-validation-fixture";
 }

@@ -27,7 +27,7 @@ helpCheck =
   L.mkHelpCheck {
     inherit cmd layout libHelpLegendRenderer;
     desc = legend.${cmd};
-    cmdColor = libThemes.theme.bold_emphasis;
+    cmdColor = libThemes.theme.bold.emphasis;
     reset = libThemes.mode.reset;
   };
 ```

@@ -81,7 +81,7 @@ in
 
   __dirty="$(${gitRepoState.dirtyStateCall.posix})"
   if [[ -n "$__dirty" ]]; then
-    printf '%b' "${libThemes.theme.bold_notice}-"
+    printf '%b' "${libThemes.theme.bold.notice}-"
     printf '%s' "$__dirty"
   fi
   unset __dirty

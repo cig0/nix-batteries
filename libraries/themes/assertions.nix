@@ -71,19 +71,18 @@ let
       throw "Theme '${themeName}' is missing required roles: ${lib.concatStringsSep ", " missingRoles}";
 
   /*
-    ansi-renderer.nix publishes <role>, bold_<role> and dim_<role> for every
-    declared role, and resolver.nix publishes raw roles beside the optional
-    selection pair. Authored names that reuse those reserved forms would make
-    one entry overwrite another, so reject them with the offending keys named.
+    resolver.nix publishes raw roles beside the optional selection pair in one
+    colors attribute set, so an authored role named `selection` would overwrite
+    the pair. Generated presentations live in their own `base`, `bold`, and
+    `dim` groups and cannot collide with a role name. Reject the offending keys
+    by name.
   */
   validateRoleNames =
     themeName: roles:
     let
-      reservedNames = builtins.filter (
-        roleName:
-        builtins.elem roleName themeContract.reservedRoleNames
-        || builtins.any (prefix: lib.hasPrefix prefix roleName) themeContract.reservedRolePrefixes
-      ) (builtins.attrNames roles);
+      reservedNames = builtins.filter (roleName: builtins.elem roleName themeContract.reservedRoleNames) (
+        builtins.attrNames roles
+      );
     in
     if reservedNames == [ ] then
       roles
