@@ -19,7 +19,7 @@
     option = "#0080ff"; # Azure
     success = "#00ff7f"; # Vibrant green
     value = "#ffff00"; # Yellow
-    warning = "#ffff00"; # Yellow
+    warning = "#ff00ff"; # Magenta
     error = "#ff0000"; # Red
     notice = "#ffc0cb"; # Pink
     context = "#00ff7f"; # Vibrant green
