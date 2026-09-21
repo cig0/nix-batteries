@@ -10,8 +10,8 @@ The renderer maps the common help-legend contract to POSIX shell snippets:
   characters are backslash-escaped and a literal backslash becomes `\0134`.
 - Theme colour and mode values are rewritten from `\e` to `\033`, because
   dash's `printf '%b'` prints `\e` literally while `\033` is ESC everywhere.
-- `helpCheck` checks `$1` for `-h` or `--help`, prints one aligned legend row,
-  and returns `0`.
+- `helpCheck` checks `${1-}` for `-h` or `--help`, prints one aligned legend row,
+  and returns `0`. Missing arguments are safe with unset-variable checking.
 
 Expected function shape:
 
@@ -115,7 +115,7 @@ in
 For `build`, the renderer emits POSIX-compatible shell code shaped like this:
 
 ```sh
-{ [ "$1" = "-h" ] || [ "$1" = "--help" ]; } && {
+{ [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ]; } && {
   printf '%b' "\n  build  Build the project output"
   printf '%b' "\n"
   return 0

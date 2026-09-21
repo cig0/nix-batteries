@@ -34,11 +34,12 @@ in
       cmdColor,
       desc,
       pad,
+      indent ? "  ",
       reset,
     }:
     ''
       if test "$argv[1]" = "-h"; or test "$argv[1]" = "--help"
-        printf '%b' "\n  ${cmdColor}${escape cmd}${reset}${pad}${escape desc}"
+        printf '%b' "\n${indent}${cmdColor}${escape cmd}${reset}${pad}${escape desc}"
         printf '%b' "\n"
         return 0
       end

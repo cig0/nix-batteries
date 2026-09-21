@@ -100,6 +100,77 @@ let
 
   gitRepoState = batteriesLib.gitRepoState;
 
+  wideIndentLayout = helpLegend.sectionLayout {
+    inherit groups descFn;
+    indent = 6;
+  };
+  layoutSources = lib.mapAttrs (
+    shell: renderer:
+    let
+      section = helpLegend.mkHelpSection {
+        inherit groups descFn;
+        layout = wideIndentLayout;
+        libHelpLegendRenderer = renderer;
+        cmdColor = "";
+        headerColor = "";
+        reset = "";
+      };
+      emptySection = helpLegend.mkHelpSection {
+        groups = [ ];
+        inherit descFn;
+        libHelpLegendRenderer = renderer;
+        cmdColor = "";
+        headerColor = "";
+        reset = "";
+      };
+      title = helpLegend.mkCenteredTitle {
+        libHelpLegendRenderer = renderer;
+        color = "";
+        reset = "";
+        title = "A long title";
+        width = 2;
+        leadingNewlines = 0;
+      };
+      guard = helpLegend.mkHelpCheck {
+        layout = wideIndentLayout;
+        libHelpLegendRenderer = renderer;
+        cmd = "check";
+        desc = descFn "check";
+        cmdColor = "";
+        reset = "";
+      };
+    in
+    pkgs.writeText "layout-${shell}" (
+      ''
+        ${title}
+        ${section.text}
+        ${emptySection.text}
+      ''
+      + (
+        if shell == "posix" then
+          ''
+            guarded() {
+              ${guard}
+              printf '%s' UNREACHABLE
+            }
+            guarded --help
+          ''
+        else if shell == "fish" then
+          ''
+            function guarded
+              ${guard}
+              printf '%s' UNREACHABLE
+            end
+            guarded --help
+          ''
+        else
+          ""
+      )
+    )
+  ) helpLegend.libHelpLegendRenderer;
+  layoutExpected = pkgs.writeText "layout-expected" "A long title\nFixture\n      check  Run fixture check\n      check  Run fixture check\n";
+  layoutNuExpected = pkgs.writeText "layout-nu-expected" "A long title\nFixture\n      check  Run fixture check";
+
   sources = {
     gitPosix = pkgs.writeText "git-state.sh" ''
       ${gitRepoState.revisionFunction.posix}
@@ -148,6 +219,7 @@ let
     # The function prints the one-line guard when called with --help and the full
     # screen otherwise, so one invocation of each source exercises both paths.
     trickyPosix = pkgs.writeText "tricky-help-legend.sh" ''
+      set -u
       fixture_tricky_help() {
         ${trickyHelp.posix.check}
         ${trickyHelp.posix.title}
@@ -190,7 +262,7 @@ in
     assert lib.hasInfix "Fixture Help" renderedHelp.nushell.title;
     # The POSIX guard stays inside the POSIX shell grammar.
     assert !(lib.hasInfix "[[" renderedHelp.posix.check);
-    assert lib.hasInfix "[ \"$1\" = \"-h\" ]" renderedHelp.posix.check;
+    assert lib.hasInfix "[ \"\${1-}\" = \"-h\" ]" renderedHelp.posix.check;
     # `printf '%b'` understands `\e` only on bash/zsh; colours use `\033` so
     # dash renders them too, and a payload backslash cannot forge that sequence.
     assert lib.hasInfix "\\033[" renderedHelp.posix.section.text;
@@ -226,6 +298,26 @@ in
         2
       ] == 9;
     assert helpLegend.centerIn 11 "abc" == helpLegend.repeat 4 " ";
+    assert helpLegend.centerIn 2 "A long title" == "";
+    assert wideIndentLayout.descCol == 13;
+    assert wideIndentLayout.indentText == "      ";
+    assert helpLegend.enabledWidth [ ] == 0;
+    assert
+      helpLegend.mkCenteredTitle {
+        color = "";
+        reset = "";
+        title = "T";
+        width = 1;
+        leadingLines = 0;
+      } == ''printf '%b' "\nT"'';
+    assert
+      helpLegend.mkCenteredTitle {
+        color = "";
+        reset = "";
+        title = "T";
+        width = 1;
+        leadingNewlines = 0;
+      } == ''printf '%b' "T"'';
     assert
       helpLegend.enabledWidth [
         { width = 5; }
@@ -243,6 +335,15 @@ in
     pass "nix-batteries-decorator-fixture";
 
   renderer-runtime-fixture = pkgs.runCommand "nix-batteries-renderer-runtime-fixture" { } ''
+    ${pkgs.bash}/bin/bash ${layoutSources.posix} > layout-bash.out
+    ${pkgs.zsh}/bin/zsh ${layoutSources.posix} > layout-zsh.out
+    ${pkgs.dash}/bin/dash ${layoutSources.posix} > layout-dash.out
+    ${pkgs.fish}/bin/fish ${layoutSources.fish} > layout-fish.out
+    ${pkgs.nushell}/bin/nu ${layoutSources.nushell} > layout-nu.out
+    for outfile in layout-bash.out layout-zsh.out layout-dash.out layout-fish.out; do
+      ${pkgs.diffutils}/bin/cmp ${layoutExpected} "$outfile"
+    done
+    ${pkgs.diffutils}/bin/cmp ${layoutNuExpected} layout-nu.out
     ${pkgs.bash}/bin/bash -n ${sources.gitPosix}
     ${pkgs.bash}/bin/bash -n ${sources.helpPosix}
     ${pkgs.bash}/bin/bash -n ${sources.trickyPosix}

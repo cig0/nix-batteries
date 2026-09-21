@@ -43,8 +43,44 @@ let
     includeHeader = true;
     exclude = [ "services.example.nested" ];
   };
+  edgeDocs = nixOptionsToMd {
+    inherit lib;
+    namespace = "edge|`";
+    options = {
+      untyped = lib.mkOption { default = 1; };
+      expression = lib.mkOption { defaultText = lib.literalExpression "pkgs.`a``|b`"; };
+      special = lib.mkOption {
+        type = {
+          description = "a|b";
+        };
+        default = "a|b``c\n";
+        description = lib.literalMD "line one|two\nline three";
+      };
+      unsupported = lib.mkOption { default = _: null; };
+      storeValue = lib.mkOption {
+        default = {
+          type = "derivation";
+          outPath = "/nix/store/fixture";
+          unused = _: null;
+        };
+      };
+      spaces = lib.mkOption { default = "two  spaces"; };
+    };
+  };
+  edgeMarkdown = edgeDocs.markdownForNamespace {
+    newNamespace = "edge|`";
+    exclude = [ "unsupported" ];
+  };
+  unsupported = builtins.tryEval (builtins.deepSeq (edgeDocs.markdown edgeDocs.allEntries) true);
 in
 {
+  missingType = lib.hasInfix "untyped`` | unknown | `1` |" edgeMarkdown;
+  literalExpression = lib.hasInfix "``` pkgs.`a``\\|b` ```" edgeMarkdown;
+  controlCharacters = lib.hasInfix "| a\\|b | ```\"a\\|b``c\\n\"``` | line one\\|two line three |" edgeMarkdown;
+  escapedNamespace = lib.hasInfix "``edge\\|`.special``" edgeMarkdown;
+  rejectsUnsupportedDefault = !unsupported.success;
+  preservesStoreValue = lib.hasInfix "`\"/nix/store/fixture\"`" edgeMarkdown;
+  preservesLiteralSpaces = lib.hasInfix "`\"two  spaces\"`" edgeMarkdown;
   hasHeader = lib.hasPrefix "| Option | Type | Default | Description |" markdown;
   hasEnableRow = lib.hasInfix "| `myOptions.services.example.enable` | boolean | `false` |" markdown;
   hasPortRow = lib.hasInfix "| `myOptions.services.example.port` | 16 bit unsigned integer; between 0 and 65535 (both inclusive) | `8080` | Listening port. Second line should collapse. |" markdown;

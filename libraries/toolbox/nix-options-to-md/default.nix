@@ -58,11 +58,72 @@ let
         ) exclude
       ) entries;
 
-  sanitizeDescription = text: replaceStrings [ "\n" "  " ] [ " " " " ] (lib.trim text);
+  # Preserve caller Markdown, but keep every value inside one GFM table cell.
+  escapeCell = replaceStrings [ "\r" "\n" "\t" "|" ] [ " " " " " " "\\|" ];
+  sanitizeDescription = text: escapeCell (replaceStrings [ "  " ] [ " " ] (lib.trim text));
+
+  literalText =
+    value:
+    if builtins.isString value then
+      value
+    else if
+      builtins.isAttrs value
+      && builtins.elem (value._type or "") [
+        "literalExpression"
+        "literalMD"
+      ]
+      && builtins.isString (value.text or null)
+    then
+      value.text
+    else
+      throw "nixOptionsToMd: expected a string or nixpkgs literalExpression/literalMD record";
+
+  # Backticks cannot be backslash-escaped inside code spans. A longer delimiter
+  # and boundary padding preserve embedded runs and leading/trailing backticks.
+  codeSpan =
+    text:
+    let
+      runs = builtins.filter builtins.isList (builtins.split "(`+)" text);
+      longestRun = builtins.foldl' (
+        maximum: run: lib.max maximum (builtins.stringLength (builtins.head run))
+      ) 0 runs;
+      delimiter = lib.concatStrings (builtins.genList (_: "`") (longestRun + 1));
+      padding =
+        if
+          lib.hasPrefix "`" text || lib.hasSuffix "`" text || lib.hasPrefix " " text || lib.hasSuffix " " text
+        then
+          " "
+        else
+          "";
+    in
+    "${delimiter}${padding}${escapeCell text}${padding}${delimiter}";
+
+  isJsonValue =
+    value:
+    if builtins.isList value then
+      builtins.all isJsonValue value
+    else if builtins.isAttrs value then
+      # toJSON serializes store-backed values through outPath, without walking
+      # derivation builders or their function-valued metadata.
+      if value ? outPath then
+        isJsonValue value.outPath
+      else
+        builtins.all isJsonValue (builtins.attrValues value)
+    else
+      builtins.elem (builtins.typeOf value) [
+        "null"
+        "bool"
+        "int"
+        "float"
+        "string"
+        "path"
+      ];
 
   typeDescription =
     option:
-    if option.type ? description then
+    if !(option ? type) || option.type == null then
+      "unknown"
+    else if option.type ? description then
       option.type.description
     else if option.type ? name then
       option.type.name
@@ -75,26 +136,36 @@ let
     option:
     if option ? defaultText then
       let
-        text = sanitizeDescription option.defaultText;
+        text = literalText option.defaultText;
       in
-      if text == "" then "(expression)" else "${text}"
+      if lib.trim text == "" then
+        "(expression)"
+      else if builtins.isAttrs option.defaultText && option.defaultText._type == "literalExpression" then
+        codeSpan text
+      else
+        sanitizeDescription text
     else if option ? default then
       let
-        s = builtins.toJSON option.default;
+        serialized =
+          if isJsonValue option.default then
+            builtins.toJSON option.default
+          else
+            throw "nixOptionsToMd: unsupported default; provide defaultText for functions or other non-JSON values";
       in
-      if s == "\"\"" then "`\"\"`" else "`${s}`"
+      codeSpan serialized
     else
       "—";
 
   descriptionValue =
-    option: optionalString (option ? description) (sanitizeDescription option.description);
+    option:
+    optionalString (option ? description) (sanitizeDescription (literalText option.description));
 
   pathString = path: concatStringsSep "." path;
 
   formatRow =
     targetNamespace:
     { path, value }:
-    "| `${targetNamespace}.${pathString path}` | ${typeDescription value} | ${defaultValue value} | ${descriptionValue value} |";
+    "| ${codeSpan "${targetNamespace}.${pathString path}"} | ${sanitizeDescription (typeDescription value)} | ${defaultValue value} | ${descriptionValue value} |";
 
   allEntries = walk [ ] options;
 

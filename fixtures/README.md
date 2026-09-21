@@ -10,14 +10,18 @@ Current fixture directories:
 - `consumer/` is a standalone flake using only a sidecar input. It exercises
   public helper calls, theme resolution, and a direct import through `flakeRoot`.
 - `dynamic-aliases/` checks generic alias, legend, group, and name discovery.
+- `git-repo-state/` executes literal labels, clean/dirty repositories, and failed
+  lookups in Bash, Zsh, Dash, Fish, and Nushell; invalid identifiers fail at eval.
 - `modulette/` checks header-validated data-module discovery in flat and
   directory modes, including a subdirectory that lacks the target file.
-- `modulon/` checks Nix module auto-discovery, skip markers, and explicit extra
-  modules.
-- `nix-options-to-md/` checks option declarations rendered as Markdown rows.
+- `modulon/` checks both discovery modes, relocation beneath `tests`, exclusions,
+  skip markers, and explicit extra modules.
+- `nix-options-to-md/` checks missing types, literal expressions, Markdown control
+  characters, and explicit rejection of unsupported defaults.
 - `renderers/` checks generic Git-state helpers and help-legend output for
   POSIX, Fish, and Nushell, including runtime output for caller-authored
-  payloads containing shell metacharacters.
+  payloads containing shell metacharacters, unset positional arguments, custom
+  indentation, oversized titles, and exact leading-newline counts.
 - `themes/` checks palette entry filtering, strict `#RRGGBB` validation, and
   theme resolution through fixture-specific source trees.
 

@@ -167,9 +167,11 @@ let
             ) candidateFiles;
             keyFromName = name: builtins.substring 0 (builtins.stringLength name - 4) name;
           in
-          builtins.foldl' (a: b: a // b) { } (
+          # readDir keys are unique; removing one fixed suffix preserves uniqueness.
+          builtins.listToAttrs (
             map (name: {
-              ${keyFromName name} = import (directory + "/${name}") args;
+              name = keyFromName name;
+              value = import (directory + "/${name}") args;
             }) validFiles
           )
 
@@ -198,11 +200,7 @@ let
               }
             ) candidateDirs;
           in
-          builtins.foldl' (a: b: a // b) { } (
-            map (name: {
-              ${name} = import (directory + "/${name}/${targetFile}") args;
-            }) validDirs
-          )
+          lib.genAttrs validDirs (name: import (directory + "/${name}/${targetFile}") args)
 
         else
           throw "Modulette: mode must be \"flat\" or \"directory\", got \"${mode}\"";

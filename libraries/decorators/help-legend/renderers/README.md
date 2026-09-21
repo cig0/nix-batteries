@@ -19,7 +19,7 @@ The layout stays shared; the syntax does not.
 ## Real example
 
 All renderers implement `print`, `escape`, and `helpCheck`. `fish.nix` checks
-`$argv[1]`, `posix.nix` checks `$1`, and `nushell.nix` emits a comment because
+`$argv[1]`, `posix.nix` checks `${1-}`, and `nushell.nix` emits a comment because
 Nushell handles native help before a custom-command body runs. Each renderer's
 `escape` makes one literal text value safe inside that shell's printed payload;
 the shared composers apply it to caller-authored names and descriptions.

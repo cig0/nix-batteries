@@ -111,6 +111,28 @@ let
     }
   );
 
+  dynamicAliasSelection = batteriesLib.dynamicAliases.mk {
+    names = [
+      "second"
+      "first"
+    ];
+    entries = {
+      first = "one";
+      second = "two";
+      ignored = "unused";
+    };
+    nameFor = name: _: name;
+    valueFor = _: entry: entry;
+  };
+  dynamicAliasMissingEntry = builtins.tryEval (
+    builtins.deepSeq (batteriesLib.dynamicAliases.mk {
+      names = [ "absent" ];
+      entries = { };
+      nameFor = name: _: name;
+      valueFor = _: entry: entry;
+    }) true
+  );
+
   nixOptionsToMdFixtureResult = import ./nix-options-to-md {
     inherit lib;
     nixOptionsToMd = batteriesLib.nixOptionsToMd;
@@ -133,6 +155,8 @@ let
   };
 in
 {
+  modulon-boundaries = import ./modulon { inherit batteriesLib lib pass; };
+  git-state-runtime = import ./git-repo-state { inherit batteriesLib lib pkgs; };
   batteriesLib-surface =
     assert missingLibNames == [ ];
     assert unexpectedLibNames == [ ];
@@ -212,9 +236,21 @@ in
     assert dynamicAliasEntryTasks.group == null;
     assert dynamicAliasCompatTasks.aliases.p-docs == "just docs";
     assert dynamicAliasDuplicateCheck.success == false;
+    assert
+      dynamicAliasSelection.names == [
+        "second"
+        "first"
+      ];
+    assert
+      dynamicAliasSelection.aliases == {
+        first = "one";
+        second = "two";
+      };
+    assert !dynamicAliasMissingEntry.success;
     pass "nix-batteries-dynamic-aliases-fixture";
 
   nix-options-to-md-fixture =
+    assert builtins.all (result: result) (builtins.attrValues nixOptionsToMdFixtureResult);
     assert nixOptionsToMdFixtureResult.hasHeader;
     assert nixOptionsToMdFixtureResult.hasEnableRow;
     assert nixOptionsToMdFixtureResult.hasPortRow;

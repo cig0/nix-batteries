@@ -31,6 +31,10 @@ The check set includes a Modulon fixture that verifies:
 - a valid module in `fixtures/modulon/modules/` is discovered
 - a module marked with `@MODULON_SKIP` is ignored
 - an explicitly supplied `extraModules` entry is preserved
+- plain modules are selected in module-only mode, and the heuristic's false
+  positive/negative cases remain explicit
+- identical trees beneath ordinary and `tests` ancestors produce equal results
+- whole-component exclusions do not match partial filenames
 
 For a fast library-surface check:
 
@@ -69,6 +73,6 @@ If a consumer fails after adding a module, inspect these first:
 
 - The directory passed through `dirs` exists
 - The file ends in `.nix`
-- The file content matches at least two module detection patterns
+- In heuristic mode, the file content matches at least two detection patterns
 - The file does not contain `@MODULON_SKIP`
 - The path does not match `excludePaths` or default exclusions

@@ -42,10 +42,11 @@ in
       cmdColor,
       desc,
       pad,
+      indent ? "  ",
       reset,
     }:
     let
-      payload = "\\n  ${cmdColor}${escape cmd}${reset}${pad}${escape desc}";
+      payload = "\\n${indent}${cmdColor}${escape cmd}${reset}${pad}${escape desc}";
     in
-    ''{ [ "$1" = "-h" ] || [ "$1" = "--help" ]; } && { printf '%b' "${portableEscapes payload}"; printf '%b' "\n"; return 0; }'';
+    ''{ [ "''${1-}" = "-h" ] || [ "''${1-}" = "--help" ]; } && { printf '%b' "${portableEscapes payload}"; printf '%b' "\n"; return 0; }'';
 }

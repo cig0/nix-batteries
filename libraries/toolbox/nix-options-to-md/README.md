@@ -24,6 +24,19 @@ This library does not:
 
 Callers supply the option tree and decide where the result goes.
 
+Raw `mkOption` declarations and evaluated option declarations are accepted; the
+renderer reads declaration metadata, never the evaluated `value`. Missing types
+render as `unknown`. Descriptions and `defaultText` accept strings or nixpkgs
+`literalExpression`/`literalMD` records. Expression defaults use code spans;
+Markdown text stays Markdown. Descriptions and textual defaults collapse line
+breaks to spaces. Literal defaults retain JSON escaping and internal spacing.
+
+Defaults must be finite JSON-serializable values (paths and derivation output
+paths are serialized by Nix); functions require `defaultText` and otherwise
+fail explicitly.
+Every table cell escapes pipes. Code spans use a delimiter longer than any
+embedded backtick run. Option trees are traversed in attribute-name order.
+
 ## Inputs
 
 ```nix
@@ -56,12 +69,13 @@ let
       userName = lib.mkOption { type = lib.types.str; default = ""; };
     };
   };
+  docs = nixOptionsToMd {
+    inherit lib;
+    options = optionTree;
+    namespace = "myOptions.hm";
+  };
 in
-nixOptionsToMd {
-  inherit lib;
-  options = optionTree;
-  namespace = "myOptions.hm";
-}.markdown nixOptionsToMd.allEntries
+docs.markdown docs.allEntries
 ```
 
 ## REPL example
