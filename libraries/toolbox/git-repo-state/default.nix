@@ -14,7 +14,87 @@
 }:
 let
   posixRepositoryPath = "$" + "{${repositoryPathEnvVar}:-.}";
+  # A shared, conservative grammar keeps identifiers valid in all three shells.
+  reservedNames = [
+    "if"
+    "then"
+    "else"
+    "elif"
+    "fi"
+    "for"
+    "while"
+    "until"
+    "do"
+    "done"
+    "case"
+    "esac"
+    "in"
+    "function"
+    "end"
+    "switch"
+    "begin"
+    "return"
+    "break"
+    "continue"
+    "def"
+    "let"
+    "mut"
+    "const"
+    "export"
+    "try"
+    "catch"
+    "match"
+    "select"
+    "time"
+    "coproc"
+    "repeat"
+    "foreach"
+    "nocorrect"
+    "noglob"
+    "and"
+    "or"
+    "not"
+    "alias"
+    "source"
+    "use"
+    "module"
+    "overlay"
+    "hide"
+    "extern"
+    "loop"
+  ];
+  validIdentifier =
+    name: builtins.isString name && builtins.match "[a-zA-Z_][a-zA-Z0-9_]*" name != null;
+  validFunctionName =
+    name:
+    validIdentifier name
+    && !(builtins.elem name (
+      reservedNames
+      ++ [
+        "git"
+        "printf"
+        "test"
+        "set"
+        "count"
+        "print"
+        "error"
+      ]
+    ));
+  # These literals feed %s, not the help renderer's escape-interpreting %b.
+  posixLiteral = text: "'" + builtins.replaceStrings [ "'" ] [ "'\\''" ] text + "'";
+  fishLiteral = text: "'" + builtins.replaceStrings [ "\\" "'" ] [ "\\\\" "\\'" ] text + "'";
+  nuLiteral =
+    text:
+    "\""
+    + builtins.replaceStrings [ "\\" "\"" "\n" "\r" "\t" ] [ "\\\\" "\\\"" "\\n" "\\r" "\\t" ] text
+    + "\"";
 in
+assert validFunctionName revisionFunctionName || throw "gitRepoState: invalid revisionFunctionName";
+assert
+  validFunctionName dirtyStateFunctionName || throw "gitRepoState: invalid dirtyStateFunctionName";
+assert
+  revisionFunctionName != dirtyStateFunctionName || throw "gitRepoState: function names must differ";
+assert validIdentifier repositoryPathEnvVar || throw "gitRepoState: invalid repositoryPathEnvVar";
 {
   inherit
     dirtyStateFunctionName
@@ -25,28 +105,29 @@ in
     ;
 
   revisionFunction = {
+    # Subshell scope avoids leaking variables or shadowing a configured env name
+    # before reading its value, without depending on non-POSIX `local`.
     posix = ''
-      ${revisionFunctionName}() {
-        local shortHash
+      ${revisionFunctionName}() (
         shortHash="$(git -C "${posixRepositoryPath}" rev-parse --short HEAD 2>/dev/null)" || shortHash=""
-        if [[ -z "''${shortHash}" ]]; then
-          printf '%s' "${unknownRevisionText}"
+        if [ -z "''${shortHash}" ]; then
+          printf '%s' ${posixLiteral unknownRevisionText}
         else
           printf '%s' "''${shortHash}"
         fi
-      }
+      )
     '';
 
     fish = ''
       function ${revisionFunctionName}
-        set -l repository_path "."
-        if set -q ${repositoryPathEnvVar}
-          set repository_path "${"$"}${repositoryPathEnvVar}"
+        set -l repository_path "${"$"}${repositoryPathEnvVar}"
+        if test -z "$repository_path"
+          set repository_path "."
         end
 
         set -l short_hash (git -C "$repository_path" rev-parse --short HEAD 2>/dev/null)
         if test -z "$short_hash"
-          printf '%s' "${unknownRevisionText}"
+          printf '%s' ${fishLiteral unknownRevisionText}
         else
           printf '%s' "$short_hash"
         end
@@ -57,13 +138,14 @@ in
       def ${revisionFunctionName} [] {
         let repository_path = ($env.${repositoryPathEnvVar}? | default ".")
         let short_hash = try {
-          git -C $repository_path rev-parse --short HEAD | str trim
+          let result = (^git -C $repository_path rev-parse --short HEAD | complete)
+          if $result.exit_code == 0 { $result.stdout | str trim } else { "" }
         } catch {
           ""
         }
 
         if ($short_hash == "") {
-          "${unknownRevisionText}"
+          ${nuLiteral unknownRevisionText}
         } else {
           $short_hash
         }
@@ -79,38 +161,43 @@ in
 
   dirtyStateFunction = {
     posix = ''
-      ${dirtyStateFunctionName}() {
-        if [[ -n "$(git -C "${posixRepositoryPath}" status --porcelain 2>/dev/null)" ]]; then
-          printf '%s' "${dirtyStateText}"
+      ${dirtyStateFunctionName}() (
+        dirty="$(git -C "${posixRepositoryPath}" status --porcelain)" || return "$?"
+        if [ -n "$dirty" ]; then
+          printf '%s' ${posixLiteral dirtyStateText}
         fi
-      }
+      )
     '';
 
     fish = ''
       function ${dirtyStateFunctionName}
-        set -l repository_path "."
-        if set -q ${repositoryPathEnvVar}
-          set repository_path "${"$"}${repositoryPathEnvVar}"
+        set -l repository_path "${"$"}${repositoryPathEnvVar}"
+        if test -z "$repository_path"
+          set repository_path "."
         end
 
-        set -l dirty (git -C "$repository_path" status --porcelain 2>/dev/null)
-        if test (count $dirty) -gt 0
-          printf '%s' "${dirtyStateText}"
+        set -l dirty (git -C "$repository_path" status --porcelain)
+        set -l git_status $status
+        if test $git_status -ne 0
+          return $git_status
         end
+        if test (count $dirty) -gt 0
+          printf '%s' ${fishLiteral dirtyStateText}
+        end
+        return 0
       end
     '';
 
     nushell = ''
       def ${dirtyStateFunctionName} [] {
         let repository_path = ($env.${repositoryPathEnvVar}? | default ".")
-        let dirty = try {
-          git -C $repository_path status --porcelain | str trim
-        } catch {
-          ""
+        let result = (^git -C $repository_path status --porcelain | complete)
+        if $result.exit_code != 0 {
+          error make { msg: $"gitRepoState: git status failed: ($result.stderr | str trim)" }
         }
 
-        if ($dirty != "") {
-          "${dirtyStateText}"
+        if ($result.stdout != "") {
+          ${nuLiteral dirtyStateText}
         } else {
           ""
         }

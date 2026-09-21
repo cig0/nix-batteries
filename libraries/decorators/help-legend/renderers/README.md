@@ -5,7 +5,7 @@ The layout stays shared; the syntax does not.
 
 ## What belongs here
 
-- `posix.nix` for bash/zsh-compatible snippets
+- `posix.nix` for POSIX-compatible (dash, bash, zsh) snippets
 - `fish.nix` for Fish conditionals and argument handling
 - `nushell.nix` for Nushell printing; native custom-command help owns
   `-h` and `--help`
@@ -18,17 +18,25 @@ The layout stays shared; the syntax does not.
 
 ## Real example
 
-All renderers implement `print` and `helpCheck`. `fish.nix` checks `$argv[1]`,
-`posix.nix` checks `$1`, and `nushell.nix` emits a comment because Nushell
-handles native help before a custom-command body runs.
+All renderers implement `print`, `escape`, and `helpCheck`. `fish.nix` checks
+`$argv[1]`, `posix.nix` checks `${1-}`, and `nushell.nix` emits a comment because
+Nushell handles native help before a custom-command body runs. Each renderer's
+`escape` makes one literal text value safe inside that shell's printed payload;
+the shared composers apply it to caller-authored names and descriptions.
+
+Each renderer maps the theme's ANSI `\e` prefix onto what its printer
+understands. `posix.nix` rewrites it to the octal `\033` because dash's
+`printf '%b'` prints `\e` literally; `nushell.nix` rewrites it to `\u{1b}`; Fish
+understands `\e` as is. Because a POSIX payload backslash is emitted as `\0134`,
+that rewrite can never alter caller-authored text.
 
 ## Pick the renderer
 
-| Renderer                        | Use for               | Function shape          | Help argument          | Print primitive      | Validate with       |
-| ------------------------------- | --------------------- | ----------------------- | ---------------------- | -------------------- | ------------------- |
-| `libHelpLegendRenderer.posix`   | bash and zsh snippets | `name() { ... }`        | `$1`                   | `printf '%b'`        | `bash -n`, `zsh -n` |
-| `libHelpLegendRenderer.fish`    | Fish functions        | `function name ... end` | `$argv[1]`             | `printf '%b'`        | `fish --no-execute` |
-| `libHelpLegendRenderer.nushell` | Nushell commands      | `def name [] { ... }`   | native `-h` / `--help` | `print --no-newline` | `nu-check`          |
+| Renderer                        | Use for                 | Function shape          | Help argument          | Print primitive      | Validate with                  |
+| ------------------------------- | ----------------------- | ----------------------- | ---------------------- | -------------------- | ------------------------------ |
+| `libHelpLegendRenderer.posix`   | POSIX-compatible shells | `name() { ... }`        | `$1`                   | `printf '%b'`        | `bash -n`, `zsh -n`, `dash -n` |
+| `libHelpLegendRenderer.fish`    | Fish functions          | `function name ... end` | `$argv[1]`             | `printf '%b'`        | `fish --no-execute`            |
+| `libHelpLegendRenderer.nushell` | Nushell commands        | `def name [] { ... }`   | native `-h` / `--help` | `print --no-newline` | `nu-check`                     |
 
 The Nix side should look almost identical for every renderer:
 

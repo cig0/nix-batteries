@@ -28,9 +28,9 @@ in
     map stripNixSuffix (builtins.filter isDiscoverableNixFile fileNames);
 
   mk =
-    rawArgs@{
-      names ? if builtins.hasAttr "entries" rawArgs then builtins.attrNames entries else null, # caller args → alias source names
-      entries ? if builtins.hasAttr "names" rawArgs then lib.genAttrs names (_: null) else null, # caller args → alias source entries
+    {
+      names ? null, # caller args → ordered selection of source names
+      entries ? null, # caller args → source values, keyed by name
       nameFor, # caller args → alias name renderer
       valueFor, # caller args → alias command renderer
       legendFor ? valueFor, # caller args → help legend renderer
@@ -39,13 +39,15 @@ in
     }:
     let
       resolvedNames =
-        if names == null then throw "dynamicAliases.mk requires either `names` or `entries`." else names;
-
-      resolvedEntries =
-        if entries == null then
-          throw "dynamicAliases.mk requires either `names` or `entries`."
+        if names != null then
+          names
+        else if entries != null then
+          builtins.attrNames entries
         else
-          entries;
+          throw "dynamicAliases.mk requires either `names` or `entries`.";
+
+      # With both arguments, names selects/orders entries; missing keys fail below.
+      resolvedEntries = if entries != null then entries else lib.genAttrs resolvedNames (_: null);
 
       rows = map (
         name:

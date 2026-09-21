@@ -1,9 +1,8 @@
 # How Modulon Works
 
-Modulon solves a stubborn Nix configuration problem: module trees grow, but
-`imports = [ ... ]` lists stay manual unless you build your own loader. It
-auto-discovers modules by reading file content, not just filenames, so users can
-drop a module into a scanned directory and trust that it will be loaded.
+Modulon builds an import list from declared roots. Module-only mode selects
+regular `.nix` files after exclusions; the default heuristic mode additionally
+checks source text. Neither mode evaluates files or proves they are modules.
 
 When a nearby file should not be imported, add `@MODULON_SKIP`. That keeps data
 modules, helper modules, and parked work-in-progress files close to the code
@@ -30,7 +29,9 @@ graph TD
     %% Content analysis
     H --> I{Contains @MODULON_SKIP?}
     I -->|Yes| F
-    I -->|No| J{Matches 2+ patterns?}
+    I -->|No| N{Module-only mode?}
+    N -->|Yes| K[Add to imports list]
+    N -->|No| J{Matches 2+ patterns?}
     J -->|No| F
     J -->|Yes| K[Add to imports list]
 
@@ -56,7 +57,7 @@ graph TD
 
 - **Automatic Discovery** — Add new modules without updating import lists
 - **Drop-in Scaling** — Grow a module tree by adding files, not by maintaining a second registry
-- **Content-Based Detection** — Identifies real modules by analyzing content patterns, avoiding accidental imports of non-module `.nix` files
+- **Explicit Discovery Mode** — Module-only roots avoid source guessing; heuristic mode remains available for mixed-tree compatibility
 - **Local Skips** — Use `@MODULON_SKIP` to keep non-imported files beside related modules
 - **Flexible Configuration** — Easily specify directories to scan and paths/patterns to exclude
 - **Works Everywhere** — Compatible with NixOS, Home Manager, and other Nix module systems
@@ -67,14 +68,14 @@ The core of Modulon is exposed as `nix-batteries.batteriesLib.modulon`. When cal
 function:
 
 1. Recursively scans the directories specified in the `dirs` option for files ending in `.nix`
-2. Excludes files matching patterns in `excludePaths`, default excluded filenames, or `@MODULON_SKIP`
+2. Prunes excluded directory components before recursion and excludes matching files and default filenames
 3. Reads the content of the remaining `.nix` files
-4. Checks if the file content contains at least **2 or more** common module definition patterns
-5. Returns an attribute set `{ imports = [ ... ]; }` containing the paths to the files identified as modules
+4. Excludes `@MODULON_SKIP` files; in heuristic mode, requires at least two source patterns
+5. Returns `{ imports = [ ... ]; }` with candidate paths and explicit additions
 
 ## Module Detection Patterns
 
-Modulon identifies modules by looking for these patterns in file content:
+The compatibility heuristic looks for these patterns, including inside comments:
 
 ```nix
 modulePatterns = [
@@ -92,7 +93,11 @@ modulePatterns = [
 ];
 ```
 
-A file must match **at least 2 patterns** to be considered a module. This reduces false positives from files that happen to contain a single pattern.
+A file must match at least two patterns in heuristic mode. A plain attrset module
+may be missed, while a comment containing `config, lib,` can admit a non-module.
+Module-only mode skips this classifier; one invalid selected file then causes
+module evaluation to fail. Exclusion matching uses whole components below each
+root; ancestors and partial directory names never affect the result.
 
 ## Error Handling
 

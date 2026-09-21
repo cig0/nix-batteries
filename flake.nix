@@ -32,6 +32,7 @@
         modulette = import ./libraries/auto-discover/modulette { inherit lib; };
         modulon = collectorArgs: import ./libraries/auto-discover/modulon { inherit lib; } collectorArgs;
         nixOptionsToMd = import ./libraries/toolbox/nix-options-to-md;
+        themeOptionModule = import ./libraries/themes/default.nix;
         themes = import ./libraries/themes/resolver.nix {
           flakeRoot = self.outPath;
           inherit lib;
