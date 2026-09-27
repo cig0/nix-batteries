@@ -5,6 +5,9 @@ nix-batteries-specific architecture, compatibility, Git, and validation policy.
 
 ## Nix Ecosystem Baseline
 
+- During development, do not treat a missing, stale, or changed `flake.lock` as
+  a blocker. Do not change it unless the task requires it; report checks that
+  cannot run without it.
 - Apply `assets/ai/skills/nix/SKILL.md` and its required
   `nix-flake-maintenance.md` workflow to Nix expressions, flake wiring, public
   libraries, modules, fixtures, and generated shell behavior.
