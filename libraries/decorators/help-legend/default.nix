@@ -86,13 +86,28 @@ let
   mkHelpSection =
     {
       closing ? [ ],
-      cmdColor,
+      theme ? null,
+      cmdColor ?
+        if theme == null then
+          throw "mkHelpSection requires cmdColor or theme"
+        else
+          theme.theme.bold.emphasis,
+      commandParts ? cmd: [
+        {
+          text = cmd;
+          color = cmdColor;
+        }
+      ],
       descFn,
       groups,
-      headerColor,
+      headerColor ?
+        if theme == null then
+          throw "mkHelpSection requires headerColor or theme"
+        else
+          theme.theme.bold.accent,
       layout ? sectionLayout { inherit groups descFn; },
       libHelpLegendRenderer ? rendererSet.posix,
-      reset,
+      reset ? if theme == null then throw "mkHelpSection requires reset or theme" else theme.mode.reset,
     }:
     let
       allCmds = builtins.concatLists (map (group: group.cmds) groups);
@@ -103,7 +118,13 @@ let
       escape = libHelpLegendRenderer.escape;
       row =
         cmd:
-        libHelpLegendRenderer.print "\\n${layout.indentText or "  "}${cmdColor}${escape cmd}${reset}${layout.padCmd cmd}${escape (descFn cmd)}";
+        let
+          parts = commandParts cmd;
+          plainCommand = builtins.concatStringsSep "" (map (part: part.text) parts);
+          styledCommand = builtins.concatStringsSep "" (map (part: "${part.color}${escape part.text}") parts);
+        in
+        assert plainCommand == cmd;
+        libHelpLegendRenderer.print "\\n${layout.indentText or "  "}${styledCommand}${reset}${layout.padCmd cmd}${escape (descFn cmd)}";
       group =
         entry:
         [ (libHelpLegendRenderer.print "\\n${headerColor}${escape entry.name}${reset}") ]
@@ -134,12 +155,14 @@ let
 
   mkCenteredTitle =
     {
-      color,
+      theme ? null,
+      color ?
+        if theme == null then throw "mkCenteredTitle requires color or theme" else theme.theme.bold.accent,
       leadingLines ? 1,
       # Exact count; the older leadingLines parameter counts additional breaks.
       leadingNewlines ? leadingLines + 1,
       libHelpLegendRenderer ? rendererSet.posix,
-      reset,
+      reset ? if theme == null then throw "mkCenteredTitle requires reset or theme" else theme.mode.reset,
       title,
       width,
     }:

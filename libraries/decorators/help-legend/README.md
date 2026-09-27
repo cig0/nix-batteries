@@ -266,9 +266,12 @@ leaves `-h` and `--help` to native custom-command help.
   to `padCmd` must belong to the groups used to compute the layout.
 - `mkHelpCheck { cmd, desc, layout, libHelpLegendRenderer, cmdColor, reset }` renders the
   per-command `-h` / `--help` guard.
-- `mkHelpSection { groups, descFn, layout, libHelpLegendRenderer, cmdColor, headerColor,
-reset, closing ? [ ] }` renders grouped rows.
-- `mkCenteredTitle { title, width, libHelpLegendRenderer, color, reset, leadingNewlines ? 2 }`
+- `mkHelpSection` renders grouped rows. Supply either a resolved `theme` or
+  explicit `cmdColor`, `headerColor`, and `reset`; explicit values take precedence.
+  Optional `commandParts` maps each plain command to ordered `{ text, color }`
+  pieces. Their text must reconstruct the command. The renderer escapes each
+  piece and measures the plain command.
+- `mkCenteredTitle { title, width, libHelpLegendRenderer, theme ?, color ?, reset ?, leadingNewlines ? 2 }`
   renders a centered heading. Wider titles receive zero padding. `leadingNewlines`
   is the exact nonnegative newline count, including zero. Legacy `leadingLines`
   remains supported as the additional count above one newline; explicit

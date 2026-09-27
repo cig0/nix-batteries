@@ -98,6 +98,51 @@ let
     }
   ) (helpLegend.libHelpLegendRenderer);
 
+  segmentedGroups = [
+    {
+      name = "Commands";
+      cmds = [ "hoagie hs" ];
+    }
+  ];
+  segmentedDescriptions = _: "Switch";
+  segmentedLayout = helpLegend.sectionLayout {
+    groups = segmentedGroups;
+    descFn = segmentedDescriptions;
+  };
+  portableColor = builtins.replaceStrings [ "\\e" ] [ "\\033" ];
+  segmentedHelp = lib.mapAttrs (
+    _: renderer:
+    helpLegend.mkHelpSection {
+      theme = theme;
+      groups = segmentedGroups;
+      descFn = segmentedDescriptions;
+      layout = segmentedLayout;
+      libHelpLegendRenderer = renderer;
+      commandParts = _: [
+        {
+          text = "hoagie";
+          color = theme.theme.bold.context;
+        }
+        {
+          text = " hs";
+          color = theme.theme.bold.accent;
+        }
+      ];
+    }
+  ) helpLegend.libHelpLegendRenderer;
+  invalidCommandParts = builtins.tryEval (
+    (helpLegend.mkHelpSection {
+      groups = segmentedGroups;
+      descFn = segmentedDescriptions;
+      commandParts = _: [
+        {
+          text = "wrong";
+          color = "";
+        }
+      ];
+    }).text
+  );
+
   gitRepoState = batteriesLib.gitRepoState;
 
   wideIndentLayout = helpLegend.sectionLayout {
@@ -252,6 +297,16 @@ let
 in
 {
   decorator-fixture =
+    assert segmentedLayout.width == 19;
+    assert segmentedHelp.posix.width == segmentedLayout.width;
+    assert lib.hasInfix (
+      "${portableColor theme.theme.bold.context}hoagie"
+      + "${portableColor theme.theme.bold.accent} hs"
+      + "${portableColor theme.mode.reset}"
+    ) segmentedHelp.posix.text;
+    assert lib.hasInfix " hs" segmentedHelp.fish.text;
+    assert lib.hasInfix " hs" segmentedHelp.nushell.text;
+    assert !invalidCommandParts.success;
     assert layout.descCol == 9;
     assert layout.maxDescLen == 17;
     assert lib.hasInfix "printf '%b'" renderedHelp.posix.section.text;
