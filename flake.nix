@@ -1,7 +1,7 @@
 /*
   nix-batteries flake entry point.
 
-  Plain outputs over a single nixpkgs input. sidecarLibs is a static
+  Plain outputs over a single nixpkgs input. batteriesLib is a static
   attribute set mapping each public export directly onto its implementation
   under libraries/; checks and formatter fan out per supported system.
 */
@@ -21,32 +21,35 @@
         "aarch64-darwin"
       ];
       forSystems = f: lib.genAttrs systems (system: f (import nixpkgs { inherit system; }));
-      mkGitRepoState = args: import ./libraries/toolbox/git-repo-state args;
-      sidecarLibs = {
-        dynamicAliases = import ./libraries/toolbox/dynamic-aliases { inherit lib; };
+      mkGitRepoState = args: import (self.outPath + "/libraries/toolbox/git-repo-state") args;
+      batteriesLib = {
+        dynamicAliases = import (self.outPath + "/libraries/toolbox/dynamic-aliases") { inherit lib; };
         flakeRoot = self.outPath;
         gitRepoState = mkGitRepoState { };
-        guardFlakeInput = import ./libraries/guard-flake-input { inherit lib; };
-        helpLegendDecorator = import ./libraries/decorators/help-legend { };
+        guardFlakeInput = import (self.outPath + "/libraries/guard-flake-input") { inherit lib; };
+        helpLegendDecorator = import (self.outPath + "/libraries/decorators/help-legend") { };
         inherit mkGitRepoState;
-        modulette = import ./libraries/auto-discover/modulette { inherit lib; };
-        modulon = collectorArgs: import ./libraries/auto-discover/modulon { inherit lib; } collectorArgs;
-        nixOptionsToMd = import ./libraries/toolbox/nix-options-to-md;
-        themes = import ./libraries/themes/resolver.nix {
+        modulette = import (self.outPath + "/libraries/auto-discover/modulette") { inherit lib; };
+        modulon =
+          collectorArgs:
+          import (self.outPath + "/libraries/auto-discover/modulon") { inherit lib; } collectorArgs;
+        nixOptionsToMd = import (self.outPath + "/libraries/toolbox/nix-options-to-md");
+        themeOptionModule = import (self.outPath + "/libraries/themes/default.nix");
+        themes = import (self.outPath + "/libraries/themes/resolver.nix") {
           flakeRoot = self.outPath;
           inherit lib;
         };
       };
     in
     {
-      inherit sidecarLibs;
+      inherit batteriesLib;
       checks = forSystems (
         pkgs:
-        import ./fixtures { inherit sidecarLibs lib pkgs; }
+        import (self.outPath + "/fixtures") { inherit batteriesLib lib pkgs; }
         // {
           consumer-fixture =
             # Exercise the consumer through the public flake output boundary.
-            assert ((import ./fixtures/consumer/flake.nix).outputs { sidecar = self; }).smoke;
+            assert ((import (self.outPath + "/fixtures/consumer/flake.nix")).outputs { sidecar = self; }).smoke;
             pkgs.runCommand "nix-batteries-consumer-fixture" { } "touch $out";
         }
       );

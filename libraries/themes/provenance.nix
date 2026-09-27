@@ -6,9 +6,9 @@
   paths from their own checkout layout.
 */
 {
-  discoveredThemes,
-  lib,
-  themeModuleSourceDirectory,
+  discoveredThemes, # resolver.nix → discovery.nix result
+  lib, # resolver.nix → nixpkgs.lib
+  themeModuleSourceDirectory, # resolver.nix → published logical path
 }:
 lib.mapAttrs (themeName: _discoveredTheme: {
   provider = "nix-batteries";

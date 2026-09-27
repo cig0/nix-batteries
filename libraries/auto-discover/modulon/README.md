@@ -15,11 +15,17 @@ and Home Manager configurations still rely on hand-maintained `imports = [ ... ]
 lists. Every new module needs a second edit somewhere else, and stale imports
 become another piece of configuration drift.
 
-Modulon removes that pain point. Point it at one or more directories and it
-auto-discovers real Nix modules by reading file content, then returns a normal
-`{ imports = [ ... ]; }` module. Add a module file and it is loaded. Add
-`@MODULON_SKIP` when a file should stay nearby without being imported, such as a
-data module, a helper module, or a module you want to keep parked for later.
+Modulon returns a normal `{ imports = [ ... ]; }` module from one or more scan
+roots. `discoveryMode = "modules"` includes regular `.nix` files after explicit
+exclusions; roots must contain modules only, and one invalid import fails module
+evaluation. `@MODULON_SKIP` excludes nearby support files.
+
+The default `"heuristic"` mode preserves mixed-tree compatibility by counting
+source-text patterns. It can miss valid plain modules and include non-modules
+whose comments match. It is an approximate classifier, not module validation.
+It remains until consumers migrate to module-only roots and a breaking release
+can remove it. Both modes match exclusions below each root, independently of
+the checkout's parent directories.
 
 ## Quick Start
 
@@ -27,19 +33,18 @@ data module, a helper module, or a module you want to keep parked for later.
 
 ```nix
 let
-  moduleImporter = inputs.nix-batteries.sidecarLibs.modulon;
+  moduleImporter = inputs.nix-batteries.batteriesLib.modulon;
 in {
   nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
     modules = [
       ./configuration.nix
-      (moduleImporter { dirs = [ ./modules ]; })
+      (moduleImporter { dirs = [ ./modules ]; discoveryMode = "modules"; })
     ];
   };
 }
 ```
 
-That's it. Modulon automatically discovers and imports valid NixOS, Home
-Manager, and shared Nix modules from `./modules`.
+The module system validates the selected NixOS, Home Manager, or shared modules.
 
 <br>
 

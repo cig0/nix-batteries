@@ -2,14 +2,15 @@
   Modulon Nix-module collector.
 
   Callers provide module directories and explicit additions; this library
-  returns an imports list. It discovers loaded Nix modules only, while
-  Modulette owns passive data-module discovery.
+  returns candidate paths without evaluating them. The module system validates
+  imports; Modulette owns passive data-module discovery.
 */
 { lib }:
 {
-  dirs ? [ ],
-  excludePaths ? [ ],
-  extraModules ? [ ],
+  dirs ? [ ], # caller args → module directories
+  excludePaths ? [ ], # caller args → relative path components to skip
+  discoveryMode ? "heuristic", # compatibility default; "modules" requires module-only roots
+  extraModules ? [ ], # caller args → explicit module additions
   ...
 }:
 let
@@ -21,7 +22,7 @@ let
     "home.nix"
   ];
 
-  # Path patterns to exclude automatically (infix match)
+  # Directory components below each scan root; ancestors never affect discovery.
   defaultExcludePaths = [
     ".git/"
     "/tests/"
@@ -43,39 +44,56 @@ let
     "options."
   ];
 
-  # Function to collect modules from a directory
+  # Normalize legacy boundary slashes, but never restore absolute substring matching.
+  exclusionComponents = map (
+    pattern:
+    let
+      components = builtins.filter (part: part != "") (lib.splitString "/" pattern);
+    in
+    if
+      components == [ ]
+      || builtins.any (
+        part:
+        builtins.elem part [
+          "."
+          ".."
+        ]
+      ) components
+    then
+      throw "Modulon: excludePaths must contain nonempty relative path components"
+    else
+      components
+  ) (defaultExcludePaths ++ excludePaths);
+
+  # A pattern matches consecutive whole components at any depth below the root.
+  containsComponents =
+    pattern: components:
+    lib.take (builtins.length pattern) components == pattern
+    || (components != [ ] && containsComponents pattern (builtins.tail components));
+
+  matchesModuleHeuristics =
+    content:
+    builtins.length (builtins.filter (pattern: lib.hasInfix pattern content) modulePatterns) >= 2;
+
   collectModules =
     {
       dir,
-      excludePaths ? [ ],
     }:
     let
-      # Combine user excludePaths with defaults
-      allExcludePaths = defaultExcludePaths ++ excludePaths;
-
-      # Check if a path contains any of the special paths that should be excluded
       isExcludedPath =
-        path:
-        let
-          strPath = toString path;
-        in
-        builtins.any (excludePath: lib.strings.hasInfix excludePath strPath) allExcludePaths;
+        components: builtins.any (pattern: containsComponents pattern components) exclusionComponents;
 
-      # Check if a file is likely a Nix module based on content patterns
-      isNixModule =
+      includeCandidate =
         file:
         let
-          # Read file content once for efficiency
           content = builtins.readFile file;
         in
-        !(lib.strings.hasInfix "@MODULON_SKIP" content) # Check if Modulon should skip the
-        &&
-          builtins.length (builtins.filter (pattern: lib.strings.hasInfix pattern content) modulePatterns)
-          >= 2; # Require 2+ patterns to reduce false positives
+        !(lib.hasInfix "@MODULON_SKIP" content)
+        && (discoveryMode == "modules" || matchesModuleHeuristics content);
 
       # Recursively collect .nix files from a directory
       collectModulesRec =
-        path:
+        path: relativeComponents:
         let
           items = builtins.readDir path; # Read the directory contents
 
@@ -83,34 +101,34 @@ let
             name: type:
             let
               fullPath = path + "/${name}";
+              components = relativeComponents ++ [ name ];
             in
-            if type == "regular" && lib.hasSuffix ".nix" name && !(lib.elem name excludeFilenames) then
-              # It's a potentially relevant .nix file
-              if isExcludedPath fullPath then
-                [ ] # Skip files in excluded paths
-              else
-                # Return path only if content matches module patterns
-                lib.optional (isNixModule fullPath) fullPath
+            if isExcludedPath components then
+              [ ]
+            else if type == "regular" && lib.hasSuffix ".nix" name && !(lib.elem name excludeFilenames) then
+              lib.optional (includeCandidate fullPath) fullPath
             else if type == "directory" then
-              # Recurse into subdirectories
-              collectModulesRec fullPath
+              collectModulesRec fullPath components
             else
               [ ]; # Ignore other file types
 
-          # Map over all items and flatten the resulting list of lists
           itemLists = lib.mapAttrsToList processItem items;
         in
-        lib.flatten itemLists; # Flatten happens here now
+        builtins.concatLists itemLists;
     in
     assert lib.assertMsg (builtins.pathExists dir)
       "Modulon: Directory '${toString dir}' does not exist";
-    collectModulesRec dir;
+    collectModulesRec dir [ ];
 in
+assert lib.assertMsg (builtins.elem discoveryMode [
+  "heuristic"
+  "modules"
+]) "Modulon: discoveryMode must be heuristic or modules";
 {
   # The final list of module paths to be imported
   imports =
     # Map over each directory and collect modules (already flattened)
-    lib.concatMap (dir: collectModules { inherit dir excludePaths; }) dirs
+    lib.concatMap (dir: collectModules { inherit dir; }) dirs
     # Append any explicitly provided extra modules
     ++ extraModules;
 }

@@ -27,7 +27,7 @@ helpCheck =
   L.mkHelpCheck {
     inherit cmd layout libHelpLegendRenderer;
     desc = legend.${cmd};
-    cmdColor = libThemes.theme.bold_zero;
+    cmdColor = libThemes.theme.bold.emphasis;
     reset = libThemes.mode.reset;
   };
 ```
@@ -44,7 +44,7 @@ Use this when a Nix module generates Fish functions.
 
 ```nix
 let
-  L = nix-batteries.sidecarLibs.helpLegendDecorator;
+  L = nix-batteries.batteriesLib.helpLegendDecorator;
   libHelpLegendRenderer = L.libHelpLegendRenderer.fish;
 in
 ...

@@ -1,0 +1,2 @@
+This directory intentionally has no host.nix so directory-mode discovery
+reports the missing target file.

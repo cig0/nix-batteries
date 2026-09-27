@@ -55,20 +55,28 @@ let
       minGap ? 2,
     }:
     let
-      allCmds = builtins.concatLists (map (g: g.cmds) groups);
+      allCmds = builtins.concatLists (map (group: group.cmds) groups);
       descCol = indent + maxCmdLen + minGap;
       maxCmdLen = maxStringLength allCmds;
       maxDescLen = maxStringLength (map descFn allCmds);
       width = descCol + maxDescLen;
     in
+    assert builtins.isInt indent && indent >= 0;
+    assert builtins.isInt minGap && minGap >= 0;
     {
       inherit descCol maxDescLen width;
+      indentText = repeat indent " ";
       padCmd = cmd: repeat (descCol - indent - builtins.stringLength cmd) " ";
     };
 
-  maxInt = builtins.foldl' (acc: w: if w > acc then w else acc) 0;
+  maxInt = builtins.foldl' (maximum: width: if width > maximum then width else maximum) 0;
 
-  centerIn = width: title: repeat ((width - builtins.stringLength title) / 2) " ";
+  centerIn =
+    width: title:
+    repeat (maxInt [
+      0
+      ((width - builtins.stringLength title) / 2)
+    ]) " ";
 
   /*
     Render a two-column help section with one or more named groups.
@@ -78,30 +86,59 @@ let
   mkHelpSection =
     {
       closing ? [ ],
-      cmdColor,
+      theme ? null,
+      cmdColor ?
+        if theme == null then
+          throw "mkHelpSection requires cmdColor or theme"
+        else
+          theme.theme.bold.emphasis,
+      commandParts ? cmd: [
+        {
+          text = cmd;
+          color = cmdColor;
+        }
+      ],
       descFn,
       groups,
-      headerColor,
+      headerColor ?
+        if theme == null then
+          throw "mkHelpSection requires headerColor or theme"
+        else
+          theme.theme.bold.accent,
       layout ? sectionLayout { inherit groups descFn; },
       libHelpLegendRenderer ? rendererSet.posix,
-      reset,
+      reset ? if theme == null then throw "mkHelpSection requires reset or theme" else theme.mode.reset,
     }:
     let
-      allCmds = builtins.concatLists (map (g: g.cmds) groups);
+      allCmds = builtins.concatLists (map (group: group.cmds) groups);
       maxDescLen = maxStringLength (map descFn allCmds);
       width = layout.descCol + maxDescLen;
+      # Command names and descriptions are caller-authored text. The renderer
+      # escapes them for its shell before they enter the printed payload.
+      escape = libHelpLegendRenderer.escape;
       row =
-        cmd: libHelpLegendRenderer.print "\\n  ${cmdColor}${cmd}${reset}${layout.padCmd cmd}${descFn cmd}";
-      group = g: [ (libHelpLegendRenderer.print "\\n${headerColor}${g.name}${reset}") ] ++ map row g.cmds;
+        cmd:
+        let
+          parts = commandParts cmd;
+          plainCommand = builtins.concatStringsSep "" (map (part: part.text) parts);
+          styledCommand = builtins.concatStringsSep "" (map (part: "${part.color}${escape part.text}") parts);
+        in
+        assert plainCommand == cmd;
+        libHelpLegendRenderer.print "\\n${layout.indentText or "  "}${styledCommand}${reset}${layout.padCmd cmd}${escape (descFn cmd)}";
+      group =
+        entry:
+        [ (libHelpLegendRenderer.print "\\n${headerColor}${escape entry.name}${reset}") ]
+        ++ map row entry.cmds;
       bodyLines =
         let
-          gs = map group groups;
+          renderedGroups = map group groups;
         in
         builtins.concatLists (
-          if builtins.length gs == 0 then
+          if builtins.length renderedGroups == 0 then
             [ ]
           else
-            [ (builtins.head gs) ] ++ map (g: [ (libHelpLegendRenderer.print "\\n") ] ++ g) (builtins.tail gs)
+            [ (builtins.head renderedGroups) ]
+            ++ map (rows: [ (libHelpLegendRenderer.print "\\n") ] ++ rows) (builtins.tail renderedGroups)
         );
     in
     {
@@ -118,18 +155,23 @@ let
 
   mkCenteredTitle =
     {
-      color,
+      theme ? null,
+      color ?
+        if theme == null then throw "mkCenteredTitle requires color or theme" else theme.theme.bold.accent,
       leadingLines ? 1,
+      # Exact count; the older leadingLines parameter counts additional breaks.
+      leadingNewlines ? leadingLines + 1,
       libHelpLegendRenderer ? rendererSet.posix,
-      reset,
+      reset ? if theme == null then throw "mkCenteredTitle requires reset or theme" else theme.mode.reset,
       title,
       width,
     }:
     let
       pad = centerIn width title;
-      leading = builtins.concatStringsSep "" (builtins.genList (_: "\\n") (leadingLines + 1));
+      leading = repeat leadingNewlines "\\n";
     in
-    libHelpLegendRenderer.print "${leading}${color}${pad}${title}${reset}";
+    assert builtins.isInt leadingNewlines && leadingNewlines >= 0;
+    libHelpLegendRenderer.print "${leading}${color}${pad}${libHelpLegendRenderer.escape title}${reset}";
 
   mkHelpCheck =
     {
@@ -148,14 +190,15 @@ let
         reset
         ;
       pad = layout.padCmd cmd;
+      indent = layout.indentText or "  ";
     };
 
-  enabledWidth = sections: maxInt (map (section: section.width) sections);
+  # Callers supply already-filtered sections; retain the public compatibility name.
+  maximumSectionWidth = sections: maxInt (map (section: section.width) sections);
 in
 {
   inherit
     centerIn
-    enabledWidth
     maxInt
     maxStringLength
     mkCenteredTitle
@@ -164,5 +207,6 @@ in
     repeat
     sectionLayout
     ;
+  enabledWidth = maximumSectionWidth;
   libHelpLegendRenderer = rendererSet;
 }

@@ -1,12 +1,17 @@
 # POSIX Help Legend Renderer
 
-Use `libHelpLegendRenderer.posix` for bash/zsh-compatible command modules.
+Use `libHelpLegendRenderer.posix` for POSIX-compatible command modules
+(`dash`, `bash`, and `zsh` all accept the generated snippets).
 
 The renderer maps the common help-legend contract to POSIX shell snippets:
 
 - `print text` emits `printf '%b' "text"`.
-- `helpCheck` checks `$1` for `-h` or `--help`, prints one aligned legend row,
-  and returns `0`.
+- `escape text` makes one literal value safe inside that payload. Expansion
+  characters are backslash-escaped and a literal backslash becomes `\0134`.
+- Theme colour and mode values are rewritten from `\e` to `\033`, because
+  dash's `printf '%b'` prints `\e` literally while `\033` is ESC everywhere.
+- `helpCheck` checks `${1-}` for `-h` or `--help`, prints one aligned legend row,
+  and returns `0`. Missing arguments are safe with unset-variable checking.
 
 Expected function shape:
 
@@ -27,7 +32,7 @@ helpCheck =
   L.mkHelpCheck {
     inherit cmd layout libHelpLegendRenderer;
     desc = legend.${cmd};
-    cmdColor = libThemes.theme.bold_zero;
+    cmdColor = libThemes.theme.bold.emphasis;
     reset = libThemes.mode.reset;
   };
 ```
@@ -40,7 +45,7 @@ ackBeforeRun =
   cmd:
   ''
     ${helpCheck cmd}
-    _ack "${libThemes.theme.bold_zero} ===> ${legend.${cmd}}${libThemes.mode.reset}" "''${x}" || return
+    _ack "${libThemes.theme.bold.emphasis}===> ${legend.${cmd}}${libThemes.mode.reset}" "''${x}" || return
   '';
 ```
 
@@ -49,13 +54,14 @@ In that pattern, `ackBeforeRun` is a Nix function returning shell code, while
 
 ## Step-by-step implementation
 
-Use this when a Nix module generates shell functions for bash or zsh.
+Use this when a Nix module generates shell functions for POSIX-compatible
+shells.
 
 ### 1. Select the renderer
 
 ```nix
 let
-  L = nix-batteries.sidecarLibs.helpLegendDecorator;
+  L = nix-batteries.batteriesLib.helpLegendDecorator;
   libHelpLegendRenderer = L.libHelpLegendRenderer.posix;
 in
 ...
@@ -109,7 +115,7 @@ in
 For `build`, the renderer emits POSIX-compatible shell code shaped like this:
 
 ```sh
-[[ "$1" == "-h" || "$1" == "--help" ]] && {
+{ [ "${1-}" = "-h" ] || [ "${1-}" = "--help" ]; } && {
   printf '%b' "\n  build  Build the project output"
   printf '%b' "\n"
   return 0
@@ -160,5 +166,5 @@ in
 helpFunction
 ```
 
-Validate the generated shell with `bash -n` and `zsh -n` when both shells are
-available.
+Validate the generated shell with `bash -n`, `zsh -n`, and `dash -n` when those
+shells are available.

@@ -6,9 +6,13 @@ single nearby file, and `excludePaths` for whole paths or recurring patterns.
 
 ## Using excludePaths
 
-Provide path fragments or patterns when calling the module importer function. This is the most flexible method.
+Provide whole relative path components when calling the module importer function.
 
-Patterns use **infix matching**, meaning `/foo/` will match anywhere in the path (e.g., `/bar/foo/baz.nix`). Using leading/trailing slashes like `/dirname/` is recommended for excluding directories reliably.
+Patterns match consecutive components at any depth below each declared root.
+`foo` and `/foo/` both match `bar/foo/baz.nix`, but never `foobar/baz.nix`.
+Excluded directories are pruned before traversal. Parent directories above the
+root never participate. Legacy boundary slashes are accepted, while absolute
+paths and partial-name fragments must be migrated to relative components.
 
 **Examples:**
 

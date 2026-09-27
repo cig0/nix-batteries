@@ -5,26 +5,15 @@
   boldFactor = 1.0;
   dimFactor = 0.55;
 
-  slots = rec {
-    zero = "#00cd00"; # Green
-    one = "#ffffff"; # White
-    two = "#0000ee"; # Blue
-    three = "#cd00cd"; # Purple
-    four = "#cdcd00"; # Yellow
-    five = "#cd0000"; # Red
-    six = "#ff87ff"; # Light purple
-    seven = "#00cdcd"; # Cyan
-
-    bold_zero = zero;
-    bold_one = one;
-    bold_two = two;
-    bold_three = three;
-    bold_four = four;
-    bold_five = five;
-    bold_six = six;
-    bold_seven = seven;
-
-    dimmed_zero = zero;
-    dimmed_one = one;
+  roles = {
+    accent = "#00cd00"; # Green
+    emphasis = "#ffffff"; # White
+    option = "#0000ee"; # Blue
+    success = "#00cd00"; # Green
+    value = "#cdcd00"; # Yellow
+    warning = "#cdcd00"; # Yellow
+    error = "#cd0000"; # Red
+    notice = "#ff87ff"; # Light purple
+    context = "#00cdcd"; # Cyan
   };
 }

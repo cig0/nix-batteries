@@ -2,7 +2,7 @@
   Color arithmetic used by ANSI presentation.
 
   This module knows how to parse and scale RGB values. It does not know about
-  theme discovery, required slots, terminal escape codes, or public outputs.
+  theme discovery, required roles, terminal escape codes, or public outputs.
 */
 let
   hexDigitToInteger =

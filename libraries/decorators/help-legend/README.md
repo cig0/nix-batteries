@@ -51,7 +51,7 @@ for generated shell functions.
 
 ```nix
 let
-  L = nix-batteries.sidecarLibs.helpLegendDecorator;
+  L = nix-batteries.batteriesLib.helpLegendDecorator;
   libHelpLegendRenderer = L.libHelpLegendRenderer.posix;
 in
 ...
@@ -261,15 +261,24 @@ leaves `-h` and `--help` to native custom-command help.
 ### API quick reference
 
 - `sectionLayout { groups, descFn, indent ? 2, minGap ? 2 }` computes shared
-  alignment data.
+  alignment data, including `indentText`. Indent and gap are nonnegative integers;
+  section rows and POSIX/Fish help guards use the same indent. Commands passed
+  to `padCmd` must belong to the groups used to compute the layout.
 - `mkHelpCheck { cmd, desc, layout, libHelpLegendRenderer, cmdColor, reset }` renders the
   per-command `-h` / `--help` guard.
-- `mkHelpSection { groups, descFn, layout, libHelpLegendRenderer, cmdColor, headerColor,
-reset, closing ? [ ] }` renders grouped rows.
-- `mkCenteredTitle { title, width, libHelpLegendRenderer, color, reset, leadingLines ? 1 }`
-  renders a centered heading.
-- `enabledWidth sections` returns the widest enabled section width when a help
-  screen is assembled conditionally.
+- `mkHelpSection` renders grouped rows. Supply either a resolved `theme` or
+  explicit `cmdColor`, `headerColor`, and `reset`; explicit values take precedence.
+  Optional `commandParts` maps each plain command to ordered `{ text, color }`
+  pieces. Their text must reconstruct the command. The renderer escapes each
+  piece and measures the plain command.
+- `mkCenteredTitle { title, width, libHelpLegendRenderer, theme ?, color ?, reset ?, leadingNewlines ? 2 }`
+  renders a centered heading. Wider titles receive zero padding. `leadingNewlines`
+  is the exact nonnegative newline count, including zero. Legacy `leadingLines`
+  remains supported as the additional count above one newline; explicit
+  `leadingNewlines` takes precedence. Removal requires a breaking release after
+  consumers migrate. Default output remains two newlines.
+- `enabledWidth sections` returns the maximum supplied width (zero for an empty
+  list); callers filter disabled sections before calling it.
 - `libHelpLegendRenderer.posix`, `libHelpLegendRenderer.fish`, and
   `libHelpLegendRenderer.nushell` adapt the shared contract to shell-native
   output.
@@ -277,7 +286,19 @@ reset, closing ? [ ] }` renders grouped rows.
 Renderer contract:
 
 - `print :: string -> string`
-- `helpCheck :: { cmd, cmdColor, desc, pad, reset } -> string`
+- `escape :: string -> string` — make one literal text value safe inside the
+  renderer's printed payload
+- `helpCheck :: { cmd, cmdColor, desc, pad, reset, indent ? "  " } -> string`
+
+POSIX guards accept calls without arguments under `set -u`. Empty section groups
+emit no content, apart from any explicitly supplied closing statements. Widths
+use Nix string lengths; they do not measure Unicode terminal display columns.
+
+`mkHelpSection`, `mkCenteredTitle`, and `mkHelpCheck` escape caller-authored
+command names, descriptions, section names, and titles with the renderer's
+`escape` before they reach `print`. Shell metacharacters (`$`, quotes, and
+backticks) and literal backslashes therefore survive into the printed output
+instead of being expanded or reinterpreted by the target shell.
 
 <br>
 

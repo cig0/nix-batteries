@@ -84,12 +84,12 @@ let
   */
   isValidHeader =
     {
-      directory,
-      entryName,
-      headerText ? null,
-      headerPrefix ? null,
-      isDirectory ? false,
-      targetFile ? "host.nix",
+      directory, # discoverModules → scan root
+      entryName, # discoverModules → file or subdirectory name
+      headerText ? null, # discoverModules → exact first-line contract
+      headerPrefix ? null, # discoverModules → first-line prefix contract
+      isDirectory ? false, # discoverModules → directory-mode flag
+      targetFile ? "host.nix", # discoverModules → directory-mode import target
     }:
     let
       filePath =
@@ -139,13 +139,13 @@ let
   */
   discoverModules =
     {
-      args ? { },
-      directory,
-      exclude ? [ ],
-      headerPrefix ? null,
-      headerText ? null,
-      mode,
-      targetFile ? "host.nix",
+      args ? { }, # caller args → forwarded module arguments
+      directory, # caller args → scan root
+      exclude ? [ ], # caller args → names to skip
+      headerPrefix ? null, # caller args → first-line prefix contract
+      headerText ? null, # caller args → exact first-line contract
+      mode, # caller args → flat or directory discovery
+      targetFile ? "host.nix", # caller args → directory-mode import target
     }:
     let
       entryTypes = builtins.readDir directory;
@@ -167,9 +167,11 @@ let
             ) candidateFiles;
             keyFromName = name: builtins.substring 0 (builtins.stringLength name - 4) name;
           in
-          builtins.foldl' (a: b: a // b) { } (
+          # readDir keys are unique; removing one fixed suffix preserves uniqueness.
+          builtins.listToAttrs (
             map (name: {
-              ${keyFromName name} = import (directory + "/${name}") args;
+              name = keyFromName name;
+              value = import (directory + "/${name}") args;
             }) validFiles
           )
 
@@ -179,6 +181,13 @@ let
             candidateDirs = builtins.filter (name: !(builtins.elem name exclude)) dirEntries;
             validDirs = builtins.filter (
               name:
+              let
+                targetPath = directory + "/${name}/${targetFile}";
+              in
+              # Fail with the missing-entry context instead of a bare import or
+              # read error when a scanned subdirectory has no target file.
+              assert lib.assertMsg (builtins.pathExists targetPath)
+                "Modulette: directory '${name}' has no '${targetFile}' to import (mode = \"directory\")";
               isValidHeader {
                 inherit
                   directory
@@ -191,11 +200,7 @@ let
               }
             ) candidateDirs;
           in
-          builtins.foldl' (a: b: a // b) { } (
-            map (name: {
-              ${name} = import (directory + "/${name}/${targetFile}") args;
-            }) validDirs
-          )
+          lib.genAttrs validDirs (name: import (directory + "/${name}/${targetFile}") args)
 
         else
           throw "Modulette: mode must be \"flat\" or \"directory\", got \"${mode}\"";

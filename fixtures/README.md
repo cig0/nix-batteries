@@ -1,7 +1,7 @@
 # Fixtures
 
 This directory contains lightweight fixture trees used by the flake checks.
-They are intentionally small, deterministic examples of public `sidecarLibs`
+They are intentionally small, deterministic examples of public `batteriesLib`
 behavior. A fixture should prove one narrow library contract without depending
 on consumer-specific configuration from another flake.
 
@@ -10,20 +10,27 @@ Current fixture directories:
 - `consumer/` is a standalone flake using only a sidecar input. It exercises
   public helper calls, theme resolution, and a direct import through `flakeRoot`.
 - `dynamic-aliases/` checks generic alias, legend, group, and name discovery.
-- `modulette/` checks header-validated data-module discovery.
-- `modulon/` checks Nix module auto-discovery, skip markers, and explicit extra
-  modules.
-- `nix-options-to-md/` checks option declarations rendered as Markdown rows.
+- `git-repo-state/` executes literal labels, clean/dirty repositories, and failed
+  lookups in Bash, Zsh, Dash, Fish, and Nushell; invalid identifiers fail at eval.
+- `modulette/` checks header-validated data-module discovery in flat and
+  directory modes, including a subdirectory that lacks the target file.
+- `modulon/` checks both discovery modes, relocation beneath `tests`, exclusions,
+  skip markers, and explicit extra modules.
+- `nix-options-to-md/` checks missing types, literal expressions, Markdown control
+  characters, and explicit rejection of unsupported defaults.
 - `renderers/` checks generic Git-state helpers and help-legend output for
-  POSIX, Fish, and Nushell.
+  POSIX, Fish, and Nushell, including runtime output for caller-authored
+  payloads containing shell metacharacters, unset positional arguments, custom
+  indentation, oversized titles, and exact leading-newline counts.
 - `themes/` checks palette entry filtering, strict `#RRGGBB` validation, and
   theme resolution through fixture-specific source trees.
 
 `fixtures/default.nix` aggregates the checks returned by focused fixture
-modules. [`flake.nix`](../flake.nix) passes `sidecarLibs`, the shared nixpkgs
+modules. [`flake.nix`](../flake.nix) passes `batteriesLib`, the shared nixpkgs
 `lib`, and each system's package set into that aggregator. The flake also
-evaluates the consumer's `smoke` output with the public flake as its input. A separate Nix invocation verifies input resolution through
-the consumer's own entry point:
+evaluates the consumer's `smoke` output with the public flake as its input. A
+separate Nix invocation verifies input resolution through the consumer's own
+entry point:
 
 ```shell
 nix eval ./fixtures/consumer#smoke --json --no-write-lock-file
@@ -41,7 +48,7 @@ Keep fixture files focused:
    `not-a-file.nix`.
 3. Avoid generated data, host paths, network access, timestamps, and other
    non-deterministic inputs.
-4. Keep fixtures tied to public `self.sidecarLibs` behavior, not private
+4. Keep fixtures tied to public `self.batteriesLib` behavior, not private
    implementation details.
 5. Run the focused flake check after changes:
 

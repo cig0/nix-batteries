@@ -1,13 +1,17 @@
 /*
   ANSI presentation for validated theme data.
 
-  normalizer.nix guarantees the input shape. This module converts each raw
-  color into its terminal escape sequence according to the slot-name contract
-  and publishes the theme-independent terminal mode codes.
+  normalizer.nix guarantees the input shape. This module renders every
+  declared role into its three presentations and publishes the
+  theme-independent terminal mode codes.
+
+  Presentations are grouped by presentation name. `base`, `bold`, and `dim`
+  each hold one entry per declared role, so a consumer reads
+  `theme.bold.context` instead of a prefixed flat key.
 */
 {
-  colorOperations,
-  lib,
+  colorOperations, # resolver.nix → colors.nix
+  lib, # resolver.nix → nixpkgs.lib
 }:
 let
   renderForegroundColor =
@@ -16,22 +20,16 @@ let
   renderBoldForegroundColor =
     rgb: "\\e[1;38;2;${toString rgb.red};${toString rgb.green};${toString rgb.blue}m";
 
-  renderThemeSlot =
-    {
-      boldFactor,
-      dimFactor,
-      hexColor,
-      slotName,
-    }:
-    let
-      sourceRgb = colorOperations.hexColorToRgb hexColor;
-    in
-    if lib.hasPrefix "bold_" slotName then
-      renderBoldForegroundColor (colorOperations.scaleRgb boldFactor sourceRgb)
-    else if lib.hasPrefix "dimmed_" slotName then
-      renderForegroundColor (colorOperations.scaleRgb dimFactor sourceRgb)
-    else
-      renderForegroundColor sourceRgb;
+  /*
+    Presentation is derived from the role's color, never from its name. A theme
+    that adds an optional role therefore gains its three presentations without
+    any edit here, and no authored name can select a different presentation.
+
+    dim scales the channels instead of emitting SGR 2, so mode.dim remains the
+    distinct terminal dim mode.
+  */
+  renderPresentation =
+    renderRgb: lib.mapAttrs (_roleName: hexColor: renderRgb (colorOperations.hexColorToRgb hexColor));
 in
 {
   terminalModes = {
@@ -44,12 +42,19 @@ in
   };
 
   renderTheme =
-    normalizedTheme:
-    lib.mapAttrs (
-      slotName: hexColor:
-      renderThemeSlot {
-        inherit (normalizedTheme) boldFactor dimFactor;
-        inherit hexColor slotName;
-      }
-    ) normalizedTheme.slots;
+    {
+      boldFactor,
+      dimFactor,
+      roles,
+      ...
+    }:
+    {
+      base = renderPresentation renderForegroundColor roles;
+      bold = renderPresentation (
+        rgb: renderBoldForegroundColor (colorOperations.scaleRgb boldFactor rgb)
+      ) roles;
+      dim = renderPresentation (
+        rgb: renderForegroundColor (colorOperations.scaleRgb dimFactor rgb)
+      ) roles;
+    };
 }

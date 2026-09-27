@@ -13,6 +13,9 @@ during Nix evaluation.
 | `dirtyStateFunction.{posix,fish,nushell}` | Define a shell-native `_gitDirtyState` helper |
 | `dirtyStateCall.{posix,fish,nushell}`     | Call `_gitDirtyState` in shell-native syntax  |
 
+The `posix` variants use POSIX shell grammar, so `dash`, `bash`, and `zsh`
+all execute them as generated.
+
 ## Parameters
 
 ```nix
@@ -37,6 +40,18 @@ only prints raw values:
 - `<short-hash>` or `unknown`
 - `dirty` or an empty string
 
+Revision lookup failure prints `unknownRevisionText`. Dirty-state lookup failure
+returns a nonzero status in POSIX/Fish or raises a Nushell error, with no clean
+result on stdout. Git diagnostics remain visible; consumers own error display.
+An unset or empty repository-path variable selects the current directory.
+
+Labels are literal text, including quotes, dollar signs, backslashes, and line
+breaks. They use shell-specific quoting for `%s`, independently of help-legend's
+`%b` escaping. Configured identifiers must match `[A-Za-z_][A-Za-z0-9_]*`;
+function names must differ and cannot be reserved words or commands used by
+these helpers. Invalid identifiers fail during Nix evaluation. Callers must
+choose names that do not collide with their other shell functions.
+
 ## REPL Example
 
 Pasteable eval that shows the exported helper names:
@@ -56,7 +71,7 @@ Print one generated POSIX function:
 ```sh
 nix eval --impure --raw --expr '
 let
-  gitRepoState = import ./toolbox/git-repo-state { };
+  gitRepoState = import ./libraries/toolbox/git-repo-state { };
 in
   gitRepoState.revisionFunction.posix
 '
@@ -69,7 +84,7 @@ the consumer owns the `git-` display prefix, colors, and separators:
 
 ```nix
 let
-  gitRepoState = _inputs.nix-batteries.sidecarLibs.gitRepoState;
+  gitRepoState = _inputs.nix-batteries.batteriesLib.gitRepoState;
 in
 ''
   ${gitRepoState.revisionFunction.posix}
@@ -79,9 +94,9 @@ in
   printf '%s' "git-"
   ${gitRepoState.revisionCall.posix}
 
-  __dirty="$(${gitRepoState.dirtyStateCall.posix})"
-  if [[ -n "$__dirty" ]]; then
-    printf '%b' "${libThemes.theme.bold_three}-"
+  __dirty="$(${gitRepoState.dirtyStateCall.posix})" || __dirty="unknown"
+  if [ -n "$__dirty" ]; then
+    printf '%b' "${libThemes.theme.bold.notice}-"
     printf '%s' "$__dirty"
   fi
   unset __dirty
@@ -100,7 +115,9 @@ tmp="$(mktemp)"
 expr="$(mktemp)"
 cat > "$expr" <<'NIX'
 let
-  gitRepoState = import ./toolbox/git-repo-state { };
+  # This expression lives in a temporary file, so resolve from the checkout.
+  root = builtins.toPath (builtins.getEnv "PWD");
+  gitRepoState = import (root + "/libraries/toolbox/git-repo-state") { };
 in
   gitRepoState.revisionFunction.posix
   + "\n"
@@ -110,15 +127,15 @@ in
     export GIT_REPO_PATH="$PWD"
     printf "revision=git-"
     ${gitRepoState.revisionCall.posix}
-    dirty="$(${gitRepoState.dirtyStateCall.posix})"
-    if [[ -n "$dirty" ]]; then
+    dirty="$(${gitRepoState.dirtyStateCall.posix})" || dirty="unknown"
+    if [ -n "$dirty" ]; then
       printf -- "-%s" "$dirty"
     fi
     printf "\n"
   ''
 NIX
 nix eval --impure --raw --file "$expr" > "$tmp"
-bash "$tmp"
+sh "$tmp"
 rm -f "$tmp" "$expr"
 ```
 

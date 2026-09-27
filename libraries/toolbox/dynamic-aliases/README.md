@@ -34,6 +34,11 @@ Consumers own:
 - `names`: list of names; every callback receives `null` as the entry value.
 - `entries`: attrset keyed by name; callbacks receive each keyed value.
 
+When both are supplied, `names` selects and orders keys from `entries`; extra
+entries are ignored and a missing selected key fails explicitly. With neither,
+evaluation fails. Entries alone use sorted attribute names; names alone pass
+`null` values. Generated alias-name collisions are always rejected.
+
 Both modes require `nameFor` and `valueFor`. `legendFor` defaults to `valueFor`,
 and `groupName` defaults to `null`. Unknown extra attributes are ignored for
 backwards compatibility with callers that carry local metadata beside the
@@ -103,7 +108,7 @@ Inside your flake or module:
 
 ```nix
 let
-  dynamicAliases = inputs.nix-batteries.sidecarLibs.dynamicAliases;
+  dynamicAliases = inputs.nix-batteries.batteriesLib.dynamicAliases;
   flakeSrcPath = "/home/me/work/my-flake";
 in
 ...
