@@ -81,3 +81,12 @@ and malformed selected records raise Nix errors.
 
 [Focused fixture](../../../fixtures/option-catalogue/default.nix) covers metadata,
 visibility, lazy selection, overlap, and failures without a consumer repository.
+
+Run the standalone fixture from the repository root:
+
+```sh
+nix eval --impure --json --file fixtures/option-catalogue/check.nix --no-write-lock-file
+```
+
+It returns `true` when every case passes and names any failing cases. CI runs
+this entry point separately from the registered flake checks.

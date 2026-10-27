@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Checks (${{ matrix.runner }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, macos-15]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31
+        with:
+          github_access_token: ${{ github.token }}
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - name: Evaluate all supported systems
+        if: matrix.runner == 'ubuntu-24.04'
+        run: nix flake check --all-systems --no-build --no-update-lock-file --no-write-lock-file
+      - name: Run native flake checks
+        run: nix flake check --no-update-lock-file --no-write-lock-file
+      - name: Check standalone consumer
+        run: nix eval ./fixtures/consumer#smoke --json --no-update-lock-file --no-write-lock-file
+      - name: Check option catalogue
+        run: nix eval --impure --json --file fixtures/option-catalogue/check.nix --no-update-lock-file --no-write-lock-file
+      - name: Check generated help example
+        run: python3 assets/tools/render-help-example.py --check

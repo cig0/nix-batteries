@@ -177,7 +177,7 @@ let
 
         else if mode == "directory" then
           let
-            dirEntries = builtins.attrNames (builtins.filterAttrs (_: type: type == "directory") entryTypes);
+            dirEntries = builtins.attrNames (lib.filterAttrs (_: type: type == "directory") entryTypes);
             candidateDirs = builtins.filter (name: !(builtins.elem name exclude)) dirEntries;
             validDirs = builtins.filter (
               name:
