@@ -3,8 +3,10 @@
 The private repository remains the development source. The public derivative
 receives selected patches; its sanitized history is never merged with private
 history. Public author identity, host names, consumer aliases, and library APIs
-remain intentional. The unfinished option-catalogue work is not part of the
-initial release baseline.
+remain intentional. The option-catalogue implementation and fixture are retained
+for direct import; their public export and check registration remain a separate
+migration phase. Review reports, assessments, and private audit artifacts are
+excluded from the public release tree.
 
 ## Transferring a change
 
@@ -53,8 +55,8 @@ They check the chosen tree, not all earlier history. Releasing history also
 requires scanning all objects reachable from the selected refs, reviewing
 commit/tag messages and image versions, and restoring the sanitized bundle.
 Adding a historical tag expands that verification boundary. Private recovery
-copies, original refs, assessment notes, and audit artifacts remain outside the
-public tree and Git object database.
+copies, original refs, assessment notes, and private audit artifacts remain
+outside the public tree and Git object database.
 
 The library lock remains fixed during cleanup. Native fixture builds may fetch
 locked dependencies; they must not update the lock. Four-platform evaluation

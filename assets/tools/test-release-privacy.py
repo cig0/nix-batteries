@@ -84,7 +84,7 @@ class PrivacyChecks(unittest.TestCase):
         self.assertNotIn('private-person', str(findings))
 
     def test_private_artifacts_remain_disallowed(self):
-        for name in ['.DS_Store', '.codegraph/cache', 'recovery-output/state', 'private.bundle', 'nix-batteries-assessment-muse.md']:
+        for name in ['.DS_Store', '.codegraph/cache', 'recovery-output/state', 'private.bundle', 'ASSESSMENT.md', 'nix-batteries-assessment-muse.md']:
             with self.subTest(name=name):
                 self.assertEqual(privacy.findings_for(name, b'{}', set())[0]['rule'], 'private-artifact')
 

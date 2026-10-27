@@ -31,7 +31,7 @@ EXAMPLE_USERS = {b"user", b"username", b"fixture", b"test", b"linuxbrew", b"me"}
 def findings_for(relative, data, forbidden_images):
     findings = []
     path = Path(relative)
-    if any(part in {'.codegraph', '.private', 'audit-output', 'recovery-output'} for part in path.parts) or path.name in {'.DS_Store', 'codegraph.db', 'nix-batteries-assessment-muse.md'} or path.suffix == '.bundle':
+    if any(part in {'.codegraph', '.private', 'audit-output', 'recovery-output'} for part in path.parts) or path.name in {'.DS_Store', 'codegraph.db', 'ASSESSMENT.md', 'nix-batteries-assessment-muse.md'} or path.suffix == '.bundle':
         findings.append({'file': relative, 'line': 1, 'rule': 'private-artifact'})
     if path.name == 'secrets.json' or path.name.startswith('secrets.local.'):
         findings.append({'file': relative, 'line': 1, 'rule': 'private-secret-file'})
