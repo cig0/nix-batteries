@@ -1,4 +1,0 @@
-title = "nix-batteries public release checks"
-
-[extend]
-useDefault = true
