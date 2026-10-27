@@ -1,0 +1,19 @@
+# Local private settings and credentials; actual examples stay visible.
+/.private/
+secrets.json
+secrets.local.*
+!secrets.example.json
+
+# Caches, OS files, and private audit/recovery output.
+.DS_Store
+.codegraph/
+__pycache__/
+/.cache/
+/audit-output/
+/recovery-output/
+*.bundle
+/nix-batteries-assessment-*.md
+
+# Local Nix build links.
+/result
+/result-*

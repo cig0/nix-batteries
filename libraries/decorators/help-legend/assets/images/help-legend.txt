@@ -1,0 +1,8 @@
+               Daily Tools
+Project
+  build    Build the project output
+  test     Run the test suite
+  lint     Run formatting and lint checks
+
+Release
+  release  Create the release artifact

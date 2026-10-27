@@ -1,0 +1,28 @@
+{
+  "forbidden_images": [
+    {
+      "git_blob": "03bce983855d2212584139cf2c30f89d1aaa929c",
+      "sha256": "1d5f5e1a9942b69f4a8e5cb20e07dda897d2abb9c18c273757596f40a30d6e98"
+    },
+    {
+      "git_blob": "2eaab76aace50abdb65fde1575ece1aca199514e",
+      "sha256": "019a524e34ceb912512146dfae249c46c656824349ae5c9bc8b939bc97dca619"
+    },
+    {
+      "git_blob": "5799afd4d0b94a86dc24c02d2e18b759ced2ab3b",
+      "sha256": "e8247910d288bd5d9eb5d40f794806f875c9c3af6e4c78860e6dc3aeaf4a1a28"
+    },
+    {
+      "git_blob": "692224e973bc4577786851a66874f6f1f48b3992",
+      "sha256": "16f74f226ec669214ac71666b7a0babb979d13f7de9085ab5d96e2c76edff929"
+    },
+    {
+      "git_blob": "71ba5787445bd43d47c21be8d31daef7b81f29d7",
+      "sha256": "cb9adc071d185b87d5e9b6f8fb0ff51d4042942b00d02d52c7fec88099575b63"
+    },
+    {
+      "git_blob": "d693de6c95d975912b9d9cce556e9edb09f0401d",
+      "sha256": "a6502221459d947905410202bac667aaa7c611679861f73a340c7e33d79c571c"
+    }
+  ]
+}

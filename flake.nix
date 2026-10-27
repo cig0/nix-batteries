@@ -6,7 +6,7 @@
   under libraries/; checks and formatter fan out per supported system.
 */
 {
-  description = "Sidecar - A Nix flake toolkit with reusable building blocks";
+  description = "nix-batteries - A Nix flake toolkit with reusable building blocks";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 

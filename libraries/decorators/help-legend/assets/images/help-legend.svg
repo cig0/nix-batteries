@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="474" height="260" viewBox="0 0 474 260" role="img" aria-labelledby="title">
+  <title id="title">Daily Tools command help</title>
+  <rect width="474" height="260" rx="12" fill="#161b22"/>
+  <g fill="#e6edf3" font-family="monospace" font-size="16">
+    <text x="32" y="42" xml:space="preserve">               Daily Tools</text>
+    <text x="32" y="68" xml:space="preserve">Project</text>
+    <text x="32" y="94" xml:space="preserve">  build    Build the project output</text>
+    <text x="32" y="120" xml:space="preserve">  test     Run the test suite</text>
+    <text x="32" y="146" xml:space="preserve">  lint     Run formatting and lint checks</text>
+    <text x="32" y="172" xml:space="preserve"></text>
+    <text x="32" y="198" xml:space="preserve">Release</text>
+    <text x="32" y="224" xml:space="preserve">  release  Create the release artifact</text>
+  </g>
+</svg>

@@ -46,7 +46,7 @@ documented arguments.
 
 ## From Zero To Flake Shell Shortcuts
 
-This walkthrough builds the same shape of data used by `nix-v8`: `nd-*`
+This walkthrough builds `nd-*`
 shortcuts for development shells and `ns-*` shortcuts for package-only shells.
 
 ### 1. Pick a layout
@@ -69,9 +69,8 @@ shells/package/cloud-infra-tools.nix
 ```
 
 Each file is a self-contained `mkShell` or `buildEnv`. The walkthrough below
-uses the directory layout for both development shells and packages — the same
-shape nix-v8 uses, since each shell gets an adjacent `README.md` and a
-stable entry point.
+uses the directory layout for both development shells and packages, so each
+shell gets an adjacent `README.md` and a stable entry point.
 
 ### 2. Create a shell file
 
@@ -109,7 +108,7 @@ Inside your flake or module:
 ```nix
 let
   dynamicAliases = inputs.nix-batteries.batteriesLib.dynamicAliases;
-  flakeSrcPath = "/home/me/work/my-flake";
+  flakeSrcPath = "/workspace/my-flake";
 in
 ...
 ```
@@ -178,8 +177,8 @@ Expected data:
 
 ```nix
 devShellDynamicAliases.aliases = {
-  nd-python = "nix develop /home/me/work/my-flake#python";
-  nd-rust = "nix develop /home/me/work/my-flake#rust";
+  nd-python = "nix develop /workspace/my-flake#python";
+  nd-rust = "nix develop /workspace/my-flake#rust";
 };
 
 devShellDynamicAliases.legend = {
@@ -215,8 +214,8 @@ Expected data:
 
 ```nix
 packageDynamicAliases.aliases = {
-  ns-cloud-infra-tools = "nix shell /home/me/work/my-flake#cloud-infra-tools";
-  ns-security = "nix shell /home/me/work/my-flake#security";
+  ns-cloud-infra-tools = "nix shell /workspace/my-flake#cloud-infra-tools";
+  ns-security = "nix shell /workspace/my-flake#security";
 };
 
 packageDynamicAliases.legend = {
