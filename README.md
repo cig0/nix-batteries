@@ -45,6 +45,3 @@ attribute-set contracts.
 
 Checks and formatters cover `x86_64-linux`, `aarch64-linux`, `x86_64-darwin`, and
 `aarch64-darwin`. [Fixtures](fixtures/README.md) documents the validation boundary.
-
-[Public backports and release privacy checks](assets/docs/PUBLIC-BACKPORTS.md)
-describes the patch-transfer and release boundaries.
