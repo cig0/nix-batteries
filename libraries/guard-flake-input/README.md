@@ -1,6 +1,6 @@
 # Guard Flake Input
 
-Conditionally enable Nix modules based on whether their corresponding flake input exists. When an input is missing, the module is silently disabled and a trace message is emitted — no build breakage, no manual comment-chasing.
+Conditionally enable Nix modules based on whether their corresponding flake input exists. When an input is missing, consumers can skip the dependent module or use a fallback. The `apply` fallback emits a trace message.
 
 ## Why
 
@@ -58,38 +58,46 @@ If `rust-overlay` is missing → overlay is skipped, trace message is emitted.
 
 ### Home Manager module with conditional imports
 
+This example uses a hypothetical `example-tool` input that exports a Home
+Manager module declaring `programs.example-tool.enable`.
+
 ```nix
 { _inputs, lib, ... }:
 
 let
-  nixvim = _inputs.nix-batteries.batteriesLib.guardFlakeInput "nixvim" _inputs;
+  tool = _inputs.nix-batteries.batteriesLib.guardFlakeInput "example-tool" _inputs;
 in
 {
-  imports = lib.optional nixvim.has [
-    nixvim.input.nixvim.homeManagerModules.nixvim
+  imports = lib.optionals tool.has [
+    tool.input.homeModules.default
+    { programs.example-tool.enable = true; }
   ];
-
-  programs.nixvim.enable = nixvim.has;
 }
 ```
 
 ### Multiple guards in one module
+
+This example also assumes an `example-service` input that exports a Home
+Manager module declaring `services.example-service.enable`.
 
 ```nix
 { _inputs, lib, ... }:
 
 let
   guard = _inputs.nix-batteries.batteriesLib.guardFlakeInput;
-  nixIndex = guard "nix-index-database" _inputs;
-  nixvim = guard "nixvim" _inputs;
+  tool = guard "example-tool" _inputs;
+  service = guard "example-service" _inputs;
 in
 {
-  imports = lib.optional nixvim.has [
-    nixvim.input.nixvim.homeManagerModules.nixvim
-  ];
-
-  programs.nixvim.enable = nixvim.has;
-  programs.nix-index.enable = nixIndex.has;
+  imports =
+    lib.optionals tool.has [
+      tool.input.homeModules.default
+      { programs.example-tool.enable = true; }
+    ]
+    ++ lib.optionals service.has [
+      service.input.homeModules.default
+      { services.example-service.enable = true; }
+    ];
 }
 ```
 
@@ -130,7 +138,19 @@ in
 
 ## Integration
 
-To make `guard-flake-input` available as a module argument, add it to `_module.args` in the same place where the inputs set is already passed:
+Arguments used to compute `imports` must be available before module
+configuration is evaluated. Pass `_inputs` and any preconfigured guard through
+`specialArgs` (NixOS or `lib.evalModules`) or `extraSpecialArgs` (Home
+Manager), or capture them in a lexical closure:
+
+```nix
+extraSpecialArgs = {
+  _inputs = inputs;
+  guard = name: inputs.nix-batteries.batteriesLib.guardFlakeInput name inputs;
+};
+```
+
+For values used only in configuration, `_module.args` is also suitable:
 
 ```nix
 _module.args = {
@@ -156,7 +176,7 @@ in
 
 ## Trace Output
 
-When an input is missing, `builtins.trace` writes to stderr during evaluation:
+When `apply` handles a missing input, `builtins.trace` writes to stderr during evaluation:
 
 ```
 [guard-flake-input] rust-overlay module disabled: flake input missing
