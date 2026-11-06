@@ -66,6 +66,32 @@ let
 
   missingInputGuard = batteriesLib.guardFlakeInput "missing-input" { };
 
+  guardedModule =
+    { _inputs, lib, ... }:
+    let
+      tool = _inputs.nix-batteries.batteriesLib.guardFlakeInput "example-tool" _inputs;
+    in
+    {
+      imports = lib.optionals tool.has [
+        tool.input.homeModules.default
+        { programs.example-tool.enable = true; }
+      ];
+    };
+  evaluateGuardedModule =
+    inputs:
+    lib.evalModules {
+      specialArgs._inputs = inputs // {
+        nix-batteries.batteriesLib = batteriesLib;
+      };
+      modules = [ guardedModule ];
+    };
+  presentGuardedModule = evaluateGuardedModule {
+    example-tool.homeModules.default = {
+      options.programs.example-tool.enable = lib.mkEnableOption "example tool";
+    };
+  };
+  absentGuardedModule = evaluateGuardedModule { };
+
   # The exported theme option module is a real module function: applied with a
   # lib, it declares the selection options consumers configure per host.
   themeOptionFixture = batteriesLib.themeOptionModule { inherit lib; };
@@ -107,6 +133,25 @@ let
         "two"
       ];
       nameFor = _: _: "dup";
+      valueFor = name: _: name;
+    }
+  );
+
+  dynamicAliasLazyValues = batteriesLib.dynamicAliases.mk {
+    names = [ "one" ];
+    nameFor = name: _: name;
+    valueFor = _: _: throw "alias value was forced";
+  };
+  dynamicAliasRepeatedNames = builtins.tryEval (
+    batteriesLib.dynamicAliases.mk {
+      names = [
+        "b"
+        "a"
+        "a"
+        "b"
+        "b"
+      ];
+      nameFor = name: _: name;
       valueFor = name: _: name;
     }
   );
@@ -197,6 +242,9 @@ in
   guard-flake-input-fixture =
     assert missingInputGuard.has == false;
     assert missingInputGuard.input == null;
+    assert presentGuardedModule.config.programs.example-tool.enable;
+    assert !(absentGuardedModule.options ? programs.example-tool);
+    assert absentGuardedModule.config == { };
     pass "nix-batteries-guard-flake-input-fixture";
 
   dynamic-aliases-fixture =
@@ -236,6 +284,8 @@ in
     assert dynamicAliasEntryTasks.group == null;
     assert dynamicAliasCompatTasks.aliases.p-docs == "just docs";
     assert dynamicAliasDuplicateCheck.success == false;
+    assert dynamicAliasLazyValues.aliasNames == [ "one" ];
+    assert dynamicAliasRepeatedNames.success == false;
     assert
       dynamicAliasSelection.names == [
         "second"

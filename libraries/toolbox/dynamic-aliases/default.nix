@@ -7,9 +7,6 @@
 */
 { lib }:
 let
-  countOccurrences =
-    target: values: builtins.length (builtins.filter (value: value == target) values);
-
   stripNixSuffix = name: builtins.substring 0 (builtins.stringLength name - 4) name;
 in
 {
@@ -67,8 +64,17 @@ in
       ) resolvedNames;
 
       aliasNames = map (row: row.aliasName) rows;
-      duplicateAliasNames = lib.unique (
-        builtins.filter (aliasName: countOccurrences aliasName aliasNames > 1) aliasNames
+      indexedAliases = lib.imap0 (index: aliasName: { inherit index aliasName; }) aliasNames;
+      aliasesByName = builtins.groupBy (row: row.aliasName) indexedAliases;
+      # Emit duplicates in first-occurrence order, as in the original diagnostic.
+      duplicateAliasNames = map (row: row.aliasName) (
+        builtins.filter (
+          row:
+          let
+            matchingAliases = aliasesByName.${row.aliasName};
+          in
+          builtins.length matchingAliases > 1 && (builtins.head matchingAliases).index == row.index
+        ) indexedAliases
       );
     in
     if duplicateAliasNames != [ ] then
