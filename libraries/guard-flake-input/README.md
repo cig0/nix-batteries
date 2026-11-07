@@ -1,22 +1,7 @@
-# Guard Flake Input
+# Guard flake input
 
-Conditionally enable Nix modules based on whether their corresponding flake input exists. When an input is missing, consumers can skip the dependent module or use a fallback. The `apply` fallback emits a trace message.
-
-## Why
-
-Flake inputs and the modules that depend on them are defined in different places. Removing an input from `flake.nix` without also disabling its module causes a build failure — and the only safeguard is typically a comment:
-
-```nix
-# If disabling or removing this input do the same with
-# ./config/home-manager/modules/development/rust-overlay.nix
-rust-overlay.url = "github:oxalica/rust-overlay";
-```
-
-This is fragile. `guard-flake-input` makes the relationship explicit in code: if the input disappears, the module gracefully degrades instead of breaking.
-
-## How It Works
-
-The guard function takes a flake input name and an inputs attrset (conventionally `_inputs` in consumers), then returns a record with:
+Use `guardFlakeInput name inputs` to look up an optional dependency by name.
+The returned record lets a module guard its imports or choose a fallback.
 
 | Field   | Type                 | Description                                                                            |
 | ------- | -------------------- | -------------------------------------------------------------------------------------- |
@@ -30,17 +15,7 @@ The lookup is by exact attribute name, so referencing `"rust-overlay"` works whe
 
 ### Overlay module
 
-Before — breaks if the input is removed:
-
-```nix
-{ _inputs, ... }:
-
-{
-  nixpkgs.overlays = [ _inputs.rust-overlay.overlays.default ];
-}
-```
-
-After — degrades gracefully:
+Use an empty overlay list when the input is absent.
 
 ```nix
 { _inputs, ... }:
@@ -52,9 +27,6 @@ in
   nixpkgs.overlays = rust.apply (input: [ input.overlays.default ]) [ ];
 }
 ```
-
-If `rust-overlay` is present → overlay is applied.  
-If `rust-overlay` is missing → overlay is skipped, trace message is emitted.
 
 ### Home Manager module with conditional imports
 
@@ -182,4 +154,4 @@ When `apply` handles a missing input, `builtins.trace` writes to stderr during e
 [guard-flake-input] rust-overlay module disabled: flake input missing
 ```
 
-This message appears in `nix build`, `nixos-rebuild`, `nh os switch`, and other Nix command output. It does not cause the build to fail — it's informational only.
+Reading `has` or `input` is silent.

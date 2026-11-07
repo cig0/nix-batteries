@@ -1,33 +1,7 @@
 /*
-  === Guard Flake Input ===
-
-  Conditionally enable Nix modules based on whether their corresponding
-  flake input exists. When an input is missing, the module is silently
-  disabled and a trace message is emitted to stderr — no build breakage,
-  no manual comment-chasing.
-
-  The guard performs an exact-name lookup in the given inputs attrset, so it
-  works uniformly for any consumer: referencing "rust-overlay" matches whenever
-  that key is present. Consumers that normalize keys across channels (for
-  example by stripping -unstable suffixes) pass the normalized set.
-
-  Exports:
-
-    guardFlakeInput — check a flake input and return a record with:
-      has    — bool, whether the input exists in _inputs
-      input  — the input value, or null if missing
-      apply  — call a function with the input if present, else return
-               a fallback value and emit a trace warning
-
-  Usage:
-
-    let
-      guard = import ./libraries/guard-flake-input { inherit lib; };
-      rust  = guard "rust-overlay" _inputs;
-    in
-    {
-      nixpkgs.overlays = rust.apply (input: [ input.overlays.default ]) [ ];
-    }
+  Look up an exact name in the supplied flake inputs. Callers use has to
+  guard imports and input to access the value. Only apply emits a trace,
+  when evaluation needs the fallback for a missing input.
 */
 { lib }:
 
