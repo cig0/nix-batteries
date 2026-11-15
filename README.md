@@ -1,4 +1,4 @@
-<img width="1346" height="1168" alt="nix-batteries-mansion-meteor" src="https://github.com/user-attachments/assets/de62e910-2efd-4881-b350-714e69255e00" />
+<img width="1346" height="1168" alt="nix-batteries-mansion-meteor" src="https://github.com/user-attachments/assets/9e1f5778-6e59-4ea1-a9dc-2ad159845255" />
 
 </br>
 
