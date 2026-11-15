@@ -2,7 +2,7 @@
 
 </br>
 
-<p align="center"><strong>Nix flake Library Toolkit</strong></p>
+<p align="center"><strong>A Nix Library Toolkit</strong></p>
 
 <p align="center"><em>scan modules -> guard inputs -> render helpers -> share themes</em></p>
 
