@@ -1,4 +1,4 @@
-<img width="1346" height="1168" alt="nix-battery-mansion-meteor" src="https://github.com/user-attachments/assets/9e1f5778-6e59-4ea1-a9dc-2ad159845255" />
+<img width="1346" height="1168" alt="nix-battery-mansion-meteor" src="./assets/images/nix-batteries-mansion.jpeg" />
 
 </br>
 
@@ -22,8 +22,8 @@ inputs.nix-battery.url = "github:cig0/nix-battery";
 
 Where your consumer has access to `inputs`, helpers are available through
 `inputs.nix-battery.batteryLib`. Existing consumers must rename the former
-`nix-batteries` input and `batteriesLib` output references when upgrading.
-For example, this builds alias data:
+`nix-batteries` input and `batteriesLib` output references when upgrading. For
+example, this builds alias data:
 
 ```nix
 let
@@ -40,23 +40,24 @@ The result includes `aliases.p-fmt = "just fmt"` and
 `aliases.p-test = "just test"`. Your consumer decides how to install those
 aliases in a shell.
 
-For automatic module imports, start with [Modulon](libraries/auto-discover/modulon/README.md).
-It returns a normal `{ imports = [ ... ]; }` module from selected directories.
-[Modulette](libraries/auto-discover/modulette/README.md) instead imports named data
-modules into an attribute set, with optional header checks.
+For automatic module imports, start with
+[Modulon](libraries/auto-discover/modulon/README.md). It returns a normal
+`{ imports = [ ... ]; }` module from selected directories.
+[Modulette](libraries/auto-discover/modulette/README.md) instead imports named
+data modules into an attribute set, with optional header checks.
 
 ### Building blocks available
 
-| Library | Use it for |
-| --- | --- |
-| [Modulon](libraries/auto-discover/modulon/README.md) | Recursive module discovery and import lists |
-| [Modulette](libraries/auto-discover/modulette/README.md) | Named data modules from files or subdirectories |
-| [Guard flake input](libraries/guard-flake-input/README.md) | Explicit fallbacks when an optional input is absent |
-| [Help legend](libraries/decorators/help-legend/README.md) | Command help for POSIX shells, Fish, and Nushell |
-| [Themes](libraries/themes/README.md) | Raw colors, ANSI styles, and a theme option module |
-| [Dynamic aliases](libraries/toolbox/dynamic-aliases/README.md) | Alias, legend, and help-group data |
-| [Git repository state](libraries/toolbox/git-repo-state/README.md) | Runtime revision and dirty-state helpers |
-| [Nix options to Markdown](libraries/toolbox/nix-options-to-md/README.md) | Markdown tables from option declarations |
+| Library                                                                  | Use it for                                          |
+| ------------------------------------------------------------------------ | --------------------------------------------------- |
+| [Modulon](libraries/auto-discover/modulon/README.md)                     | Recursive module discovery and import lists         |
+| [Modulette](libraries/auto-discover/modulette/README.md)                 | Named data modules from files or subdirectories     |
+| [Guard flake input](libraries/guard-flake-input/README.md)               | Explicit fallbacks when an optional input is absent |
+| [Help legend](libraries/decorators/help-legend/README.md)                | Command help for POSIX shells, Fish, and Nushell    |
+| [Themes](libraries/themes/README.md)                                     | Raw colors, ANSI styles, and a theme option module  |
+| [Dynamic aliases](libraries/toolbox/dynamic-aliases/README.md)           | Alias, legend, and help-group data                  |
+| [Git repository state](libraries/toolbox/git-repo-state/README.md)       | Runtime revision and dirty-state helpers            |
+| [Nix options to Markdown](libraries/toolbox/nix-options-to-md/README.md) | Markdown tables from option declarations            |
 
 [Option catalogue](libraries/toolbox/option-catalogue/README.md) is available by
 direct import for querying evaluated option metadata. It is not yet a
@@ -86,7 +87,7 @@ nix flake check --all-systems --no-build --no-write-lock-file
 nix flake check --no-write-lock-file
 ```
 
-[CI](.github/workflows/ci.yml) runs on pull requests and pushes to `main`.
-It runs native checks on Linux x86_64 and macOS ARM64; the other two systems
-receive evaluation coverage. See [fixtures](fixtures/README.md) for the consumer,
-option-catalogue, and generated-example checks.
+[CI](.github/workflows/ci.yml) runs on pull requests and pushes to `main`. It
+runs native checks on Linux x86_64 and macOS ARM64; the other two systems
+receive evaluation coverage. See [fixtures](fixtures/README.md) for the
+consumer, option-catalogue, and generated-example checks.
