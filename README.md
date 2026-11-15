@@ -1,10 +1,10 @@
-<p align="center" style="font-size: 1.5em;"><strong>nix-batteries ❤️‍🔥</strong></p>
+<img width="1346" height="1168" alt="nix-batteries-mansion-meteor" src="https://github.com/user-attachments/assets/de62e910-2efd-4881-b350-714e69255e00" />
+
+</br>
 
 <p align="center"><strong>Nix flake Library Toolkit</strong></p>
 
 <p align="center"><em>scan modules -> guard inputs -> render helpers -> share themes</em></p>
-
-<br>
 
 ### What
 
