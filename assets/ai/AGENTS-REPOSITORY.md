@@ -1,7 +1,7 @@
 # Repository Agent Guidelines
 
 This file supplements the reusable `AGENTS.md` baseline and skills with
-nix-batteries-specific architecture, compatibility, Git, and validation policy.
+nix-battery-specific architecture, compatibility, Git, and validation policy.
 
 ## Nix Ecosystem Baseline
 
@@ -22,7 +22,7 @@ nix-batteries-specific architecture, compatibility, Git, and validation policy.
 - This repository is a reusable Nix flake library toolkit. It is currently
   consumed by hoagie, but library code must remain useful outside that consumer.
 - `flake.nix` defines plain outputs over a single nixpkgs input.
-  `batteriesLib` maps each public export directly onto its implementation under
+  `batteryLib` maps each public export directly onto its implementation under
   `libraries/`; `checks` and `formatter` fan out per supported system.
   Library source lives under `libraries/` and includes Modulon, Modulette,
   guard-flake-input, help-legend decorators, themes, and small runtime helper
@@ -78,7 +78,7 @@ nix-batteries-specific architecture, compatibility, Git, and validation policy.
 - Keep library functions explicit about their inputs. Prefer arguments over
   hidden access to consumer-specific paths, option names, or repository
   layouts.
-- Keep public `self.batteriesLib` names and return contracts stable unless the user
+- Keep public `self.batteryLib` names and return contracts stable unless the user
   explicitly requests a breaking API change.
 - When adding behavior to a public helper, add or update a focused fixture under
   `fixtures/` and wire it into `checks`.
@@ -92,6 +92,6 @@ nix-batteries-specific architecture, compatibility, Git, and validation policy.
 - Run `nix flake check` after changing exported library behavior, fixtures, or
   flake outputs. Use `nix flake check --all-systems --no-build` to evaluate the
   supported system matrix from one host when practical.
-- Run focused `nix eval` smoke checks when public `self.batteriesLib` names, return
+- Run focused `nix eval` smoke checks when public `self.batteryLib` names, return
   shapes, or provider metadata change.
 - Report any supported system or generated shell that was not exercised.

@@ -1,11 +1,11 @@
 /*
-  nix-batteries public-library fixture coordinator.
+  nix-battery public-library fixture coordinator.
 
    flake.nix → this file → checks.<system>.
   It verifies public library contracts; each child fixture owns its own cases.
 */
 {
-  batteriesLib, # flake.nix → batteriesLib
+  batteryLib, # flake.nix → batteryLib
   lib, # flake.nix → nixpkgs.lib
   pkgs, # flake.nix → per-system package set
 }:
@@ -26,26 +26,24 @@ let
     "themeOptionModule"
     "themes"
   ];
-  batteriesLibNames = builtins.attrNames batteriesLib;
-  missingLibNames = builtins.filter (name: !(builtins.elem name batteriesLibNames)) expectedLibNames;
-  unexpectedLibNames = builtins.filter (
-    name: !(builtins.elem name expectedLibNames)
-  ) batteriesLibNames;
+  batteryLibNames = builtins.attrNames batteryLib;
+  missingLibNames = builtins.filter (name: !(builtins.elem name batteryLibNames)) expectedLibNames;
+  unexpectedLibNames = builtins.filter (name: !(builtins.elem name expectedLibNames)) batteryLibNames;
 
-  modulonFixture = batteriesLib.modulon {
+  modulonFixture = batteryLib.modulon {
     dirs = [ ./modulon/modules ];
     extraModules = [ ./modulon/extra-module.nix ];
   };
   modulonImports = map toString modulonFixture.imports;
 
-  moduletteFixture = batteriesLib.modulette.discoverModules {
+  moduletteFixture = batteryLib.modulette.discoverModules {
     mode = "flat";
     directory = ./modulette/modules;
     headerText = "# Modulette fixture module. Do not remove this header.";
     args.value = "loaded";
   };
 
-  moduletteDirectoryFixture = batteriesLib.modulette.discoverModules {
+  moduletteDirectoryFixture = batteryLib.modulette.discoverModules {
     mode = "directory";
     directory = ./modulette/hosts;
     targetFile = "host.nix";
@@ -56,7 +54,7 @@ let
   # A scanned subdirectory without the target file must fail with a Modulette
   # error rather than a bare import or read error.
   moduletteMissingTargetFixture = builtins.tryEval (
-    builtins.deepSeq (batteriesLib.modulette.discoverModules {
+    builtins.deepSeq (batteryLib.modulette.discoverModules {
       mode = "directory";
       directory = ./modulette/hosts-missing-target;
       targetFile = "host.nix";
@@ -64,12 +62,12 @@ let
     }) true
   );
 
-  missingInputGuard = batteriesLib.guardFlakeInput "missing-input" { };
+  missingInputGuard = batteryLib.guardFlakeInput "missing-input" { };
 
   guardedModule =
     { _inputs, lib, ... }:
     let
-      tool = _inputs.nix-batteries.batteriesLib.guardFlakeInput "example-tool" _inputs;
+      tool = _inputs.nix-battery.batteryLib.guardFlakeInput "example-tool" _inputs;
     in
     {
       imports = lib.optionals tool.has [
@@ -81,7 +79,7 @@ let
     inputs:
     lib.evalModules {
       specialArgs._inputs = inputs // {
-        nix-batteries.batteriesLib = batteriesLib;
+        nix-battery.batteryLib = batteryLib;
       };
       modules = [ guardedModule ];
     };
@@ -94,14 +92,14 @@ let
 
   # The exported theme option module is a real module function: applied with a
   # lib, it declares the selection options consumers configure per host.
-  themeOptionFixture = batteriesLib.themeOptionModule { inherit lib; };
+  themeOptionFixture = batteryLib.themeOptionModule { inherit lib; };
   themeOptionNames = builtins.attrNames themeOptionFixture.options.myOptions.hm.data.theme;
 
-  dynamicAliasNames = batteriesLib.dynamicAliases.discoverNixFileNames {
+  dynamicAliasNames = batteryLib.dynamicAliases.discoverNixFileNames {
     directory = ./dynamic-aliases/nix-files;
   };
-  dynamicAliasMkArgs = builtins.functionArgs batteriesLib.dynamicAliases.mk;
-  dynamicAliasProjectTasks = batteriesLib.dynamicAliases.mk {
+  dynamicAliasMkArgs = builtins.functionArgs batteryLib.dynamicAliases.mk;
+  dynamicAliasProjectTasks = batteryLib.dynamicAliases.mk {
     names = [
       "fmt"
       "test"
@@ -111,7 +109,7 @@ let
     legendFor = name: _: "Run project ${name}";
     groupName = "Project Tasks";
   };
-  dynamicAliasEntryTasks = batteriesLib.dynamicAliases.mk {
+  dynamicAliasEntryTasks = batteryLib.dynamicAliases.mk {
     entries.rust = {
       command = "nix develop";
       display = "nix develop .#rust";
@@ -120,14 +118,14 @@ let
     valueFor = name: entry: "${entry.command} /workspace#${name}";
     legendFor = _: entry: entry.display;
   };
-  dynamicAliasCompatTasks = batteriesLib.dynamicAliases.mk {
+  dynamicAliasCompatTasks = batteryLib.dynamicAliases.mk {
     names = [ "docs" ];
     metadata.owner = "external-caller";
     nameFor = name: _: "p-${name}";
     valueFor = name: _: "just ${name}";
   };
   dynamicAliasDuplicateCheck = builtins.tryEval (
-    batteriesLib.dynamicAliases.mk {
+    batteryLib.dynamicAliases.mk {
       names = [
         "one"
         "two"
@@ -137,13 +135,13 @@ let
     }
   );
 
-  dynamicAliasLazyValues = batteriesLib.dynamicAliases.mk {
+  dynamicAliasLazyValues = batteryLib.dynamicAliases.mk {
     names = [ "one" ];
     nameFor = name: _: name;
     valueFor = _: _: throw "alias value was forced";
   };
   dynamicAliasRepeatedNames = builtins.tryEval (
-    batteriesLib.dynamicAliases.mk {
+    batteryLib.dynamicAliases.mk {
       names = [
         "b"
         "a"
@@ -156,7 +154,7 @@ let
     }
   );
 
-  dynamicAliasSelection = batteriesLib.dynamicAliases.mk {
+  dynamicAliasSelection = batteryLib.dynamicAliases.mk {
     names = [
       "second"
       "first"
@@ -170,7 +168,7 @@ let
     valueFor = _: entry: entry;
   };
   dynamicAliasMissingEntry = builtins.tryEval (
-    builtins.deepSeq (batteriesLib.dynamicAliases.mk {
+    builtins.deepSeq (batteryLib.dynamicAliases.mk {
       names = [ "absent" ];
       entries = { };
       nameFor = name: _: name;
@@ -180,12 +178,12 @@ let
 
   nixOptionsToMdFixtureResult = import ./nix-options-to-md {
     inherit lib;
-    nixOptionsToMd = batteriesLib.nixOptionsToMd;
+    nixOptionsToMd = batteryLib.nixOptionsToMd;
   };
 
   rendererChecks = import ./renderers {
     inherit
-      batteriesLib
+      batteryLib
       lib
       pass
       pkgs
@@ -193,19 +191,19 @@ let
   };
   themeChecks = import ./themes {
     inherit
-      batteriesLib
+      batteryLib
       lib
       pass
       ;
   };
 in
 {
-  modulon-boundaries = import ./modulon { inherit batteriesLib lib pass; };
-  git-state-runtime = import ./git-repo-state { inherit batteriesLib lib pkgs; };
-  batteriesLib-surface =
+  modulon-boundaries = import ./modulon { inherit batteryLib lib pass; };
+  git-state-runtime = import ./git-repo-state { inherit batteryLib lib pkgs; };
+  batteryLib-surface =
     assert missingLibNames == [ ];
     assert unexpectedLibNames == [ ];
-    assert builtins.isFunction batteriesLib.themeOptionModule;
+    assert builtins.isFunction batteryLib.themeOptionModule;
     assert
       themeOptionNames == [
         "enableColors"
@@ -213,18 +211,18 @@ in
       ];
     assert themeOptionFixture.options.myOptions.hm.data.theme.name.default == "nushell-inspired";
     assert themeOptionFixture.options.myOptions.hm.data.theme.enableColors.default == null;
-    pass "nix-batteries-batteriesLib-surface";
+    pass "nix-battery-batteryLib-surface";
 
   modulon-fixture =
     assert builtins.elem (toString ./modulon/modules/valid.nix) modulonImports;
     assert builtins.elem (toString ./modulon/extra-module.nix) modulonImports;
     assert !(builtins.elem (toString ./modulon/modules/skipped.nix) modulonImports);
-    pass "nix-batteries-modulon-fixture";
+    pass "nix-battery-modulon-fixture";
 
   modulette-fixture =
     assert builtins.attrNames moduletteFixture == [ "alpha" ];
     assert moduletteFixture.alpha.value == "loaded";
-    pass "nix-batteries-modulette-fixture";
+    pass "nix-battery-modulette-fixture";
 
   modulette-directory-fixture =
     assert
@@ -237,7 +235,7 @@ in
     assert moduletteDirectoryFixture.beta.value == "loaded";
     assert moduletteDirectoryFixture.beta.id == "beta";
     assert moduletteMissingTargetFixture.success == false;
-    pass "nix-batteries-modulette-directory-fixture";
+    pass "nix-battery-modulette-directory-fixture";
 
   guard-flake-input-fixture =
     assert missingInputGuard.has == false;
@@ -245,7 +243,7 @@ in
     assert presentGuardedModule.config.programs.example-tool.enable;
     assert !(absentGuardedModule.options ? programs.example-tool);
     assert absentGuardedModule.config == { };
-    pass "nix-batteries-guard-flake-input-fixture";
+    pass "nix-battery-guard-flake-input-fixture";
 
   dynamic-aliases-fixture =
     assert
@@ -297,7 +295,7 @@ in
         second = "two";
       };
     assert !dynamicAliasMissingEntry.success;
-    pass "nix-batteries-dynamic-aliases-fixture";
+    pass "nix-battery-dynamic-aliases-fixture";
 
   nix-options-to-md-fixture =
     assert builtins.all (result: result) (builtins.attrValues nixOptionsToMdFixtureResult);
@@ -308,7 +306,7 @@ in
     assert nixOptionsToMdFixtureResult.hasStringDefaultRow;
     assert nixOptionsToMdFixtureResult.customNamespace;
     assert nixOptionsToMdFixtureResult.customExcludesNested;
-    pass "nix-batteries-nix-options-to-md-fixture";
+    pass "nix-battery-nix-options-to-md-fixture";
 }
 // rendererChecks
 // themeChecks

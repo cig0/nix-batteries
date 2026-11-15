@@ -42,7 +42,7 @@ The Nix side should look almost identical for every renderer:
 
 ```nix
 let
-  L = nix-batteries.batteriesLib.helpLegendDecorator;
+  L = nix-battery.batteryLib.helpLegendDecorator;
   libHelpLegendRenderer = L.libHelpLegendRenderer.posix; # or fish / nushell
 
   layout = L.sectionLayout {

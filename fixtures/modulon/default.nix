@@ -1,10 +1,10 @@
 {
-  batteriesLib,
+  batteryLib,
   lib,
   pass,
 }:
 let
-  discover = directory: extra: batteriesLib.modulon ({ dirs = [ directory ]; } // extra);
+  discover = directory: extra: batteryLib.modulon ({ dirs = [ directory ]; } // extra);
   ordinary = discover ./relocation { discoveryMode = "modules"; };
   relocated = discover ./tests/relocation { discoveryMode = "modules"; };
   basenames = result: map builtins.baseNameOf result.imports;
@@ -60,4 +60,4 @@ assert
   !(builtins.tryEval (
     builtins.deepSeq (discover ./relocation { excludePaths = [ "" ]; }).imports true
   )).success;
-pass "nix-batteries-modulon-boundaries"
+pass "nix-battery-modulon-boundaries"

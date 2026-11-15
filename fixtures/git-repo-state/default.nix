@@ -1,12 +1,12 @@
 # Runtime contracts for literal labels, clean/dirty state, and Git failures.
 {
-  batteriesLib,
+  batteryLib,
   lib,
   pkgs,
 }:
 let
   label = "cost $5 $(touch EXPANDED) `touch EXPANDED` 'quoted' \"double\" back\\slash\tend\nnext\n";
-  helpers = batteriesLib.mkGitRepoState {
+  helpers = batteryLib.mkGitRepoState {
     unknownRevisionText = label;
     dirtyStateText = label;
   };
@@ -59,9 +59,9 @@ let
   ];
 in
 assert builtins.all (
-  args: !(builtins.tryEval (batteriesLib.mkGitRepoState args)).success
+  args: !(builtins.tryEval (batteryLib.mkGitRepoState args)).success
 ) invalidArgs;
-pkgs.runCommand "nix-batteries-git-state-runtime"
+pkgs.runCommand "nix-battery-git-state-runtime"
   {
     nativeBuildInputs = [
       pkgs.git

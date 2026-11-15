@@ -12,7 +12,7 @@ __pycache__/
 /audit-output/
 /recovery-output/
 *.bundle
-/nix-batteries-assessment-*.md
+/nix-battery-assessment-*.md
 
 # Local Nix build links.
 /result

@@ -7,7 +7,7 @@ semantic role as 24-bit foreground escape codes. `resolver.nix` coordinates the
 pipeline and exposes its public API.
 
 Theme files are auto-discovered via Modulette. Add a `.nix` file with the
-required header and it becomes available through `batteriesLib.themes`.
+required header and it becomes available through `batteryLib.themes`.
 
 ## Architecture
 
@@ -29,7 +29,7 @@ graph LR
     B --> E["provenance.nix"]
     D --> F["resolver.nix"]
     E --> F
-    F --> G["batteriesLib.themes"]
+    F --> G["batteryLib.themes"]
 ```
 
 There is no shared palette or fallback color source. A theme is complete and
@@ -154,11 +154,11 @@ name and the offending keys.
 Add the flake and obtain the public theme library:
 
 ```nix
-inputs.sidecar.url = "github:your-org/nix-batteries";
+inputs.sidecar.url = "github:your-org/nix-battery";
 
 outputs = { sidecar, ... }:
 let
-  libThemes = sidecar.batteriesLib.themes;
+  libThemes = sidecar.batteryLib.themes;
 in
 {
   # ...
@@ -188,14 +188,14 @@ empty hex value.
 
 ## Home Manager integration
 
-The option module is exported as `batteriesLib.themeOptionModule`, so consumers
+The option module is exported as `batteryLib.themeOptionModule`, so consumers
 add it through `imports` or a discovery helper instead of importing a
 source-tree path:
 
 ```nix
 { inputs, ... }:
 {
-  imports = [ inputs.nix-batteries.batteriesLib.themeOptionModule ];
+  imports = [ inputs.nix-battery.batteryLib.themeOptionModule ];
 }
 ```
 

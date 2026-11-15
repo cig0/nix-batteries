@@ -2,7 +2,7 @@
 
 {
   lib, # fixtures/default.nix → nixpkgs.lib
-  nixOptionsToMd, # fixtures/default.nix → batteriesLib.nixOptionsToMd
+  nixOptionsToMd, # fixtures/default.nix → batteryLib.nixOptionsToMd
 }:
 
 let

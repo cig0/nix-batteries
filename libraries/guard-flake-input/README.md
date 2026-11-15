@@ -21,7 +21,7 @@ Use an empty overlay list when the input is absent.
 { _inputs, ... }:
 
 let
-  rust = _inputs.nix-batteries.batteriesLib.guardFlakeInput "rust-overlay" _inputs;
+  rust = _inputs.nix-battery.batteryLib.guardFlakeInput "rust-overlay" _inputs;
 in
 {
   nixpkgs.overlays = rust.apply (input: [ input.overlays.default ]) [ ];
@@ -37,7 +37,7 @@ Manager module declaring `programs.example-tool.enable`.
 { _inputs, lib, ... }:
 
 let
-  tool = _inputs.nix-batteries.batteriesLib.guardFlakeInput "example-tool" _inputs;
+  tool = _inputs.nix-battery.batteryLib.guardFlakeInput "example-tool" _inputs;
 in
 {
   imports = lib.optionals tool.has [
@@ -56,7 +56,7 @@ Manager module declaring `services.example-service.enable`.
 { _inputs, lib, ... }:
 
 let
-  guard = _inputs.nix-batteries.batteriesLib.guardFlakeInput;
+  guard = _inputs.nix-battery.batteryLib.guardFlakeInput;
   tool = guard "example-tool" _inputs;
   service = guard "example-service" _inputs;
 in
@@ -81,7 +81,7 @@ When you don't need the input value itself, just whether it exists:
 { _inputs, lib, ... }:
 
 let
-  disko = _inputs.nix-batteries.batteriesLib.guardFlakeInput "disko" _inputs;
+  disko = _inputs.nix-battery.batteryLib.guardFlakeInput "disko" _inputs;
 in
 {
   # Only show disk formatting commands if disko is available
@@ -97,7 +97,7 @@ in
 { _inputs, ... }:
 
 let
-  guard = _inputs.nix-batteries.batteriesLib.guardFlakeInput;
+  guard = _inputs.nix-battery.batteryLib.guardFlakeInput;
   rust = guard "rust-overlay" _inputs;
   lanzaboote = guard "lanzaboote" _inputs;
 in
@@ -118,7 +118,7 @@ Manager), or capture them in a lexical closure:
 ```nix
 extraSpecialArgs = {
   _inputs = inputs;
-  guard = name: inputs.nix-batteries.batteriesLib.guardFlakeInput name inputs;
+  guard = name: inputs.nix-battery.batteryLib.guardFlakeInput name inputs;
 };
 ```
 
@@ -127,7 +127,7 @@ For values used only in configuration, `_module.args` is also suitable:
 ```nix
 _module.args = {
   _inputs = inputs;
-  guard = name: inputs.nix-batteries.batteriesLib.guardFlakeInput name inputs;
+  guard = name: inputs.nix-battery.batteryLib.guardFlakeInput name inputs;
 };
 ```
 

@@ -1,12 +1,12 @@
 /*
   Theme-library fixture boundary.
 
-  The public batteriesLib.themes result and fixture-only theme directories
+  The public batteryLib.themes result and fixture-only theme directories
   enter here. This file verifies raw role colors, generated ANSI
   presentations, provenance, and rejection of invalid source contracts.
 */
 {
-  batteriesLib, # fixtures/default.nix → batteriesLib
+  batteryLib, # fixtures/default.nix → batteryLib
   lib, # fixtures/default.nix → nixpkgs.lib
   pass, # fixtures/default.nix → fixture pass command
 }:
@@ -39,28 +39,28 @@ let
       presentation: builtins.all (escapeCode: escapeCode == "") (builtins.attrValues presentation)
     ) (builtins.attrValues renderedTheme);
 
-  enabledTheme = batteriesLib.themes.resolve {
+  enabledTheme = batteryLib.themes.resolve {
     name = "nushell-inspired";
     enableColors = true;
   };
-  disabledTheme = batteriesLib.themes.resolve {
+  disabledTheme = batteryLib.themes.resolve {
     name = "nushell-inspired";
     enableColors = false;
   };
-  amberTheme = batteriesLib.themes.resolve {
+  amberTheme = batteryLib.themes.resolve {
     name = "311amber";
     enableColors = true;
   };
   unknownThemeResult = builtins.tryEval (
-    builtins.deepSeq (batteriesLib.themes.resolve {
+    builtins.deepSeq (batteryLib.themes.resolve {
       name = "no-such-theme";
       enableColors = true;
     }) true
   );
 
   allThemesForced = builtins.deepSeq [
-    batteriesLib.themes.colors
-    batteriesLib.themes.theme
+    batteryLib.themes.colors
+    batteryLib.themes.theme
   ] true;
 
   # Bundled themes declare exactly the required roles, so their generated shape
@@ -71,28 +71,28 @@ let
     && builtins.all (presentation: sortNames (builtins.attrNames presentation) == sortedRequiredRoles) (
       builtins.attrValues renderedTheme
     )
-  ) (builtins.attrValues batteriesLib.themes.theme);
+  ) (builtins.attrValues batteryLib.themes.theme);
   bundledPresentationsPrintable = builtins.all (
     renderedTheme:
     builtins.all (
       presentation:
       builtins.all (escapeCode: lib.hasPrefix "\\e[" escapeCode) (builtins.attrValues presentation)
     ) (builtins.attrValues renderedTheme)
-  ) (builtins.attrValues batteriesLib.themes.theme);
+  ) (builtins.attrValues batteryLib.themes.theme);
 
   # Raw colors publish authored role hexes only; presentations live in theme.
   bundledColorsAreRoles = builtins.all (
     themeColors:
     builtins.attrNames (builtins.removeAttrs themeColors [ "selection" ]) == sortedRequiredRoles
-  ) (builtins.attrValues batteriesLib.themes.colors);
+  ) (builtins.attrValues batteryLib.themes.colors);
   themesWithSelection = builtins.filter (
-    themeName: batteriesLib.themes.colors.${themeName} ? selection
-  ) (builtins.attrNames batteriesLib.themes.colors);
+    themeName: batteryLib.themes.colors.${themeName} ? selection
+  ) (builtins.attrNames batteryLib.themes.colors);
 
   # Bundled palette assertion only: third-party themes may reuse one hex.
   bundledSuccessDiffersFromError = builtins.all (
     themeColors: themeColors.success != themeColors.error
-  ) (builtins.attrValues batteriesLib.themes.colors);
+  ) (builtins.attrValues batteryLib.themes.colors);
 
   mkThemeFixture =
     name:
@@ -100,7 +100,7 @@ let
       fixtureRoot = ./. + "/${name}";
     in
     import ../../libraries/themes/resolver.nix {
-      flakeRoot = batteriesLib.flakeRoot;
+      flakeRoot = batteryLib.flakeRoot;
       inherit lib;
       themesDirectory = fixtureRoot + "/themes";
       themeModuleSourceDirectory = "fixtures/themes/${name}/themes";
@@ -161,11 +161,11 @@ in
     assert amberTheme.colors.success == "#00ff7f";
     assert amberTheme.colors.error == "#ff0000";
     assert
-      batteriesLib.themes.themeMetadata."311amber" == {
-        provider = "nix-batteries";
+      batteryLib.themes.themeMetadata."311amber" == {
+        provider = "nix-battery";
         source = "libraries/themes/themes/311amber.nix";
       };
-    pass "nix-batteries-themes-fixture";
+    pass "nix-battery-themes-fixture";
 
   theme-validation-fixture =
     assert builtins.attrNames validThemeFixture.theme == [ "test" ];
@@ -188,7 +188,7 @@ in
     ) (builtins.attrValues validThemeFixture.theme.test);
     assert
       validThemeFixture.themeMetadata.test == {
-        provider = "nix-batteries";
+        provider = "nix-battery";
         source = "fixtures/themes/valid/themes/test.nix";
       };
     # Zero factors scale every channel to zero; base output is unaffected.
@@ -199,5 +199,5 @@ in
     assert defaultFactorsFixture.theme.test.bold.accent == "\\e[1;38;2;32;64;96m";
     assert defaultFactorsFixture.theme.test.dim.accent == "\\e[38;2;17;35;52m";
     assert builtins.all (result: result.success == false) invalidThemeFixtures;
-    pass "nix-batteries-theme-validation-fixture";
+    pass "nix-battery-theme-validation-fixture";
 }
