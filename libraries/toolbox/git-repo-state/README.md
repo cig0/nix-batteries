@@ -84,7 +84,7 @@ the consumer owns the `git-` display prefix, colors, and separators:
 
 ```nix
 let
-  gitRepoState = _inputs.nix-batteries.batteriesLib.gitRepoState;
+  gitRepoState = _inputs.nix-battery.batteryLib.gitRepoState;
 in
 ''
   ${gitRepoState.revisionFunction.posix}

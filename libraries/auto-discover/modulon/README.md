@@ -33,7 +33,7 @@ the checkout's parent directories.
 
 ```nix
 let
-  moduleImporter = inputs.nix-batteries.batteriesLib.modulon;
+  moduleImporter = inputs.nix-battery.batteryLib.modulon;
 in {
   nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
     modules = [

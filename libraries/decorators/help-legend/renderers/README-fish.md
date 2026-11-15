@@ -44,7 +44,7 @@ Use this when a Nix module generates Fish functions.
 
 ```nix
 let
-  L = nix-batteries.batteriesLib.helpLegendDecorator;
+  L = nix-battery.batteryLib.helpLegendDecorator;
   libHelpLegendRenderer = L.libHelpLegendRenderer.fish;
 in
 ...

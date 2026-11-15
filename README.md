@@ -1,4 +1,4 @@
-<img width="1346" height="1168" alt="nix-batteries-mansion-meteor" src="https://github.com/user-attachments/assets/9e1f5778-6e59-4ea1-a9dc-2ad159845255" />
+<img width="1346" height="1168" alt="nix-battery-mansion-meteor" src="https://github.com/user-attachments/assets/9e1f5778-6e59-4ea1-a9dc-2ad159845255" />
 
 </br>
 
@@ -17,17 +17,19 @@ module system and do not require a configuration framework.
 Add the flake to your inputs:
 
 ```nix
-inputs.nix-batteries.url = "github:cig0/nix-batteries";
+inputs.nix-battery.url = "github:cig0/nix-battery";
 ```
 
 Where your consumer has access to `inputs`, helpers are available through
-`inputs.nix-batteries.batteriesLib`. For example, this builds alias data:
+`inputs.nix-battery.batteryLib`. Existing consumers must rename the former
+`nix-batteries` input and `batteriesLib` output references when upgrading.
+For example, this builds alias data:
 
 ```nix
 let
-  batteries = inputs.nix-batteries.batteriesLib;
+  battery = inputs.nix-battery.batteryLib;
 in
-batteries.dynamicAliases.mk {
+battery.dynamicAliases.mk {
   names = [ "fmt" "test" ];
   nameFor = name: _: "p-${name}";
   valueFor = name: _: "just ${name}";
@@ -58,11 +60,11 @@ modules into an attribute set, with optional header checks.
 
 [Option catalogue](libraries/toolbox/option-catalogue/README.md) is available by
 direct import for querying evaluated option metadata. It is not yet a
-`batteriesLib` export.
+`batteryLib` export.
 
 ### Flake structure
 
-`flake.nix` has one input, `nixpkgs`, and exposes `batteriesLib`, `checks`, and
+`flake.nix` has one input, `nixpkgs`, and exposes `batteryLib`, `checks`, and
 `formatter`. Each public helper points to its implementation under `libraries/`;
 its documented direct-import path also remains available.
 
@@ -71,7 +73,7 @@ Supported systems are `x86_64-linux`, `aarch64-linux`, `x86_64-darwin`, and
 
 ### Checks
 
-[![CI](https://github.com/cig0/nix-batteries/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/cig0/nix-batteries/actions/workflows/ci.yml)
+[![CI](https://github.com/cig0/nix-battery/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/cig0/nix-battery/actions/workflows/ci.yml)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 
 From the repository root:

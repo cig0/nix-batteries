@@ -64,7 +64,7 @@ graph TD
 
 ## The Discovery Process
 
-The core of Modulon is exposed as `nix-batteries.batteriesLib.modulon`. When called, this
+The core of Modulon is exposed as `nix-battery.batteryLib.modulon`. When called, this
 function:
 
 1. Recursively scans the directories specified in the `dirs` option for files ending in `.nix`

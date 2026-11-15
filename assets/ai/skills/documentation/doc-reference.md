@@ -176,8 +176,8 @@ Use when flag semantics, merge behavior, or shell-specific rendering differ:
 
 ```markdown
 Non-update commands (`hsd`, `hs`):
-`hsf --no-ack -- --override-input nix-batteries ../path`
-→ `_extra_flags` = `[--override-input, nix-batteries, ../path]`
+`hsf --no-ack -- --override-input nix-battery ../path`
+→ `_extra_flags` = `[--override-input, nix-battery, ../path]`
 → command: `nh home switch ... --no-update-lock-file -- --impure ...`
 ```
 

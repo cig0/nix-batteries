@@ -10,7 +10,7 @@
   outputs =
     { sidecar, ... }:
     let
-      helpers = sidecar.batteriesLib;
+      helpers = sidecar.batteryLib;
       guard = helpers.guardFlakeInput "example" { example.value = 42; };
       gitState = helpers.mkGitRepoState { revisionFunctionName = "consumerRevision"; };
       theme = helpers.themes.resolve {

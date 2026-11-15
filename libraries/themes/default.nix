@@ -1,7 +1,7 @@
 /*
   Theme option module — declares the per-host theme selection.
 
-  Consumed as a Nix module through `batteriesLib.themeOptionModule`, which
+  Consumed as a Nix module through `batteryLib.themeOptionModule`, which
   consumers add to `imports` or to Modulon's `extraModules`. resolver.nix owns
   theme discovery, validation, and rendering; this file only declares the
   `name` and `enableColors` options that select one resolved theme.
@@ -21,7 +21,7 @@
     name = lib.mkOption {
       type = lib.types.str;
       default = "nushell-inspired";
-      description = "Color theme name; must match a key in batteriesLib.themes.theme";
+      description = "Color theme name; must match a key in batteryLib.themes.theme";
     };
     enableColors = lib.mkOption {
       type = lib.types.nullOr lib.types.bool;

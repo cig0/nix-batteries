@@ -1,20 +1,20 @@
 /*
   Renderer fixture for the public help-legend and git-state libraries.
 
-  fixtures/default.nix supplies nixpkgs and batteriesLib. This fixture generates
+  fixtures/default.nix supplies nixpkgs and batteryLib. This fixture generates
   shell snippets and checks their rendered contracts, native shell syntax, and
   runtime output when a caller-authored payload contains shell metacharacters.
 */
 {
-  batteriesLib, # fixtures/default.nix → batteriesLib
+  batteryLib, # fixtures/default.nix → batteryLib
   lib, # fixtures/default.nix → nixpkgs.lib
   pass, # fixtures/default.nix → fixture pass command
   pkgs, # fixtures/default.nix → per-system package set
 }:
 
 let
-  helpLegend = batteriesLib.helpLegendDecorator;
-  theme = batteriesLib.themes.resolve {
+  helpLegend = batteryLib.helpLegendDecorator;
+  theme = batteryLib.themes.resolve {
     name = "nushell-inspired";
     enableColors = true;
   };
@@ -143,7 +143,7 @@ let
     }).text
   );
 
-  gitRepoState = batteriesLib.gitRepoState;
+  gitRepoState = batteryLib.gitRepoState;
 
   wideIndentLayout = helpLegend.sectionLayout {
     inherit groups descFn;
@@ -387,9 +387,9 @@ in
     assert lib.hasInfix "native -h/--help" renderedHelp.nushell.check;
     assert lib.hasInfix "\\u{1b}[" renderedHelp.nushell.section.text;
     assert !(lib.hasInfix "\\e[" renderedHelp.nushell.section.text);
-    pass "nix-batteries-decorator-fixture";
+    pass "nix-battery-decorator-fixture";
 
-  renderer-runtime-fixture = pkgs.runCommand "nix-batteries-renderer-runtime-fixture" { } ''
+  renderer-runtime-fixture = pkgs.runCommand "nix-battery-renderer-runtime-fixture" { } ''
     ${pkgs.bash}/bin/bash ${layoutSources.posix} > layout-bash.out
     ${pkgs.zsh}/bin/zsh ${layoutSources.posix} > layout-zsh.out
     ${pkgs.dash}/bin/dash ${layoutSources.posix} > layout-dash.out

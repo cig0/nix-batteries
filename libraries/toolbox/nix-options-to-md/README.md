@@ -62,7 +62,7 @@ embedded backtick run. Option trees are traversed in attribute-name order.
 
 ```nix
 let
-  nixOptionsToMd = inputs.nix-batteries.batteriesLib.nixOptionsToMd;
+  nixOptionsToMd = inputs.nix-battery.batteryLib.nixOptionsToMd;
   optionTree = {
     programs.git = {
       enable = lib.mkEnableOption "Git configuration";

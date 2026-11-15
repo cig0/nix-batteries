@@ -107,7 +107,7 @@ Inside your flake or module:
 
 ```nix
 let
-  dynamicAliases = inputs.nix-batteries.batteriesLib.dynamicAliases;
+  dynamicAliases = inputs.nix-battery.batteryLib.dynamicAliases;
   flakeSrcPath = "/workspace/my-flake";
 in
 ...

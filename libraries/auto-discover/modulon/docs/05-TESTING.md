@@ -1,6 +1,6 @@
 # Testing Modulon
 
-This `nix-batteries` tree validates Modulon through focused flake checks, fixture
+This `nix-battery` tree validates Modulon through focused flake checks, fixture
 evaluation, and direct parser checks.
 
 Start with the standard flake command:
@@ -17,7 +17,7 @@ derivations, use:
 nix flake check --all-systems --no-build
 ```
 
-Nix still reports `batteriesLib` as an unchecked flake output because custom
+Nix still reports `batteryLib` as an unchecked flake output because custom
 library outputs are not standard buildable output types. The committed `checks`
 exercise the public library surface and focused fixtures directly.
 
@@ -39,7 +39,7 @@ The check set includes a Modulon fixture that verifies:
 For a fast library-surface check:
 
 ```shell
-nix eval --no-write-lock-file --json '.#batteriesLib' --apply builtins.attrNames
+nix eval --no-write-lock-file --json '.#batteryLib' --apply builtins.attrNames
 ```
 
 Expected output includes `modulon`:

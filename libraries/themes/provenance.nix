@@ -11,6 +11,6 @@
   themeModuleSourceDirectory, # resolver.nix → published logical path
 }:
 lib.mapAttrs (themeName: _discoveredTheme: {
-  provider = "nix-batteries";
+  provider = "nix-battery";
   source = "${themeModuleSourceDirectory}/${themeName}.nix";
 }) discoveredThemes

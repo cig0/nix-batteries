@@ -1,12 +1,12 @@
 /*
-  nix-batteries flake entry point.
+  nix-battery flake entry point.
 
-  Plain outputs over a single nixpkgs input. batteriesLib is a static
+  Plain outputs over a single nixpkgs input. batteryLib is a static
   attribute set mapping each public export directly onto its implementation
   under libraries/; checks and formatter fan out per supported system.
 */
 {
-  description = "nix-batteries - A Nix flake toolkit with reusable building blocks";
+  description = "nix-battery - A Nix flake toolkit with reusable building blocks";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
@@ -22,7 +22,7 @@
       ];
       forSystems = f: lib.genAttrs systems (system: f (import nixpkgs { inherit system; }));
       mkGitRepoState = args: import (self.outPath + "/libraries/toolbox/git-repo-state") args;
-      batteriesLib = {
+      batteryLib = {
         dynamicAliases = import (self.outPath + "/libraries/toolbox/dynamic-aliases") { inherit lib; };
         flakeRoot = self.outPath;
         gitRepoState = mkGitRepoState { };
@@ -42,15 +42,15 @@
       };
     in
     {
-      inherit batteriesLib;
+      inherit batteryLib;
       checks = forSystems (
         pkgs:
-        import (self.outPath + "/fixtures") { inherit batteriesLib lib pkgs; }
+        import (self.outPath + "/fixtures") { inherit batteryLib lib pkgs; }
         // {
           consumer-fixture =
             # Exercise the consumer through the public flake output boundary.
             assert ((import (self.outPath + "/fixtures/consumer/flake.nix")).outputs { sidecar = self; }).smoke;
-            pkgs.runCommand "nix-batteries-consumer-fixture" { } "touch $out";
+            pkgs.runCommand "nix-battery-consumer-fixture" { } "touch $out";
         }
       );
       formatter = forSystems (pkgs: pkgs.nixfmt);
